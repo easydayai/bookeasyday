@@ -15,11 +15,14 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background"></div>
         <div className="relative z-10 max-w-4xl mx-auto space-y-6">
           <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-            Get approved faster. Stop paying $100+ per application.
+            Get approved fast — for just $20.
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-            Apply once with Rent EZ for just $20. Get approved and moved into an apartment within 30
+            Apply once with Rent EZ for only $20. Get approved and moved into an apartment within 30
             days or your money back.
+          </p>
+          <p className="text-sm text-muted-foreground/70 max-w-2xl mx-auto">
+            No more paying $100+ per application.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button asChild size="lg" className="text-lg h-14 px-8">
