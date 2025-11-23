@@ -2,3 +2,6 @@ project_id = "pcvdzswbsnpynchniman"
 
 [functions.create-payment]
 verify_jwt = false
+
+[functions.create-admin-user]
+verify_jwt = false
