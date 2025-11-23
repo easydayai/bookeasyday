@@ -1,28 +1,41 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Lock, Shield, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Checkout() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
 
-    setTimeout(() => {
+    try {
+      // Call the create-payment edge function
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {},
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL received");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
       setIsProcessing(false);
       toast({
-        title: "Application Submitted!",
-        description: "Thank you! Your Rent EZ application has been submitted.",
+        title: "Payment Error",
+        description: "There was an error processing your payment. Please try again.",
+        variant: "destructive",
       });
-      window.location.href = "/confirmation";
-    }, 2000);
+    }
   };
 
   return (
@@ -83,74 +96,19 @@ export default function Checkout() {
                     Secure Checkout
                   </h2>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" required />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Billing Address</Label>
-                    <Input placeholder="Street Address" required />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input id="city" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="state">State</Label>
-                      <Input id="state" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="zip">ZIP</Label>
-                      <Input id="zip" required />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input id="cardNumber" placeholder="1234 5678 9012 3456" required />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="expiry">Expiry Date</Label>
-                      <Input id="expiry" placeholder="MM/YY" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input id="cvv" placeholder="123" type="password" maxLength={3} required />
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <Checkbox id="updates" />
-                    <label htmlFor="updates" className="text-sm cursor-pointer">
-                      Send me status updates by email/text
-                    </label>
-                  </div>
+                  <p className="text-muted-foreground">
+                    You'll be redirected to our secure payment partner, Stripe, to complete your payment.
+                  </p>
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-border">
                   <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                     <Shield className="h-4 w-4" />
-                    <span>Secure payment processing</span>
+                    <span>Secure payment processing powered by Stripe</span>
                   </div>
 
                   <Button type="submit" className="w-full h-12 text-lg" disabled={isProcessing}>
-                    {isProcessing ? "Processing..." : "Complete Payment – $20"}
+                    {isProcessing ? "Redirecting to Stripe..." : "Complete Payment – $20"}
                   </Button>
 
                   <p className="text-xs text-center text-muted-foreground">
