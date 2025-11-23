@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileText, Users, Home as HomeIcon, Shield, Clock } from "lucide-react";
 import { ConsentModal } from "@/components/ConsentModal";
 import heroBg from "@/assets/hero-bg.jpg";
-import usMap from "@/assets/us-map.png";
 
 export default function Home() {
   const [consentModalOpen, setConsentModalOpen] = useState(false);
@@ -211,21 +210,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 50 States Coverage */}
-      <section className="py-20 px-4 bg-background">
-        <div className="container mx-auto max-w-7xl">
-          <div className="flex flex-col items-center justify-center">
-            <img 
-              src={usMap} 
-              alt="United States coverage map" 
-              className="w-full max-w-6xl h-auto"
-            />
-            <p className="text-sm text-muted-foreground/60 mt-6 text-center">
-              Available nationwide — Rent EZ covers all 50 states.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Final CTA */}
       <section className="py-20 px-4 bg-hero-gradient text-center">
