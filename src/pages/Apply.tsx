@@ -8,14 +8,94 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ApplicationFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  dob: string;
+  desiredCity: string;
+  desiredState: string;
+  moveInDate: string;
+  budget: string;
+  bedrooms: string;
+  bathrooms: string;
+  pets: string;
+  assistance: string;
+  employmentStatus: string;
+  employer: string;
+  jobTitle: string;
+  timeAtJob: string;
+  income: string;
+  payFrequency: string;
+  additionalIncome: string;
+  creditScore: string;
+  evictions: string;
+  criminalHistory: string;
+  ref1Name: string;
+  ref1Relationship: string;
+  ref1Phone: string;
+  ref2Name: string;
+  ref2Relationship: string;
+  ref2Phone: string;
+  confirmed: boolean;
+  agreed: boolean;
+  authorized: boolean;
+}
 
 export default function Apply() {
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const [formData, setFormData] = useState<ApplicationFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    dob: "",
+    desiredCity: "",
+    desiredState: "",
+    moveInDate: "",
+    budget: "",
+    bedrooms: "",
+    bathrooms: "",
+    pets: "",
+    assistance: "",
+    employmentStatus: "",
+    employer: "",
+    jobTitle: "",
+    timeAtJob: "",
+    income: "",
+    payFrequency: "",
+    additionalIncome: "",
+    creditScore: "",
+    evictions: "",
+    criminalHistory: "",
+    ref1Name: "",
+    ref1Relationship: "",
+    ref1Phone: "",
+    ref2Name: "",
+    ref2Relationship: "",
+    ref2Phone: "",
+    confirmed: false,
+    agreed: false,
+    authorized: false,
+  });
 
   const totalSteps = 4;
   const progress = (step / totalSteps) * 100;
@@ -26,16 +106,104 @@ export default function Apply() {
     }
   };
 
+  const updateFormData = (field: keyof ApplicationFormData, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleNext = () => {
     if (step < totalSteps) {
       setStep(step + 1);
-    } else {
-      navigate("/checkout");
     }
   };
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
+  };
+
+  const handleSubmitApplication = async () => {
+    // Validate required checkboxes
+    if (!formData.confirmed || !formData.agreed || !formData.authorized) {
+      toast({
+        title: "Please confirm all statements",
+        description: "You must check all boxes to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Save application to database
+      const { data: application, error: applicationError } = await supabase
+        .from('applications')
+        .insert({
+          applicant_name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          desired_move_in_date: formData.moveInDate,
+          monthly_income: parseFloat(formData.income) || null,
+          bedroom_count: parseInt(formData.bedrooms) || null,
+          employment_type: formData.employmentStatus,
+          status: 'pending',
+          background_info: {
+            dob: formData.dob,
+            zip: formData.zip,
+            desiredCity: formData.desiredCity,
+            desiredState: formData.desiredState,
+            budget: formData.budget,
+            bathrooms: formData.bathrooms,
+            pets: formData.pets,
+            assistance: formData.assistance,
+            employer: formData.employer,
+            jobTitle: formData.jobTitle,
+            timeAtJob: formData.timeAtJob,
+            payFrequency: formData.payFrequency,
+            additionalIncome: formData.additionalIncome,
+            creditScore: formData.creditScore,
+            evictions: formData.evictions,
+            criminalHistory: formData.criminalHistory,
+            references: [
+              {
+                name: formData.ref1Name,
+                relationship: formData.ref1Relationship,
+                phone: formData.ref1Phone,
+              },
+              {
+                name: formData.ref2Name,
+                relationship: formData.ref2Relationship,
+                phone: formData.ref2Phone,
+              },
+            ],
+          },
+        })
+        .select()
+        .single();
+
+      if (applicationError) throw applicationError;
+
+      // Store application ID in session storage for checkout
+      sessionStorage.setItem('applicationId', application.id);
+
+      toast({
+        title: "Application saved!",
+        description: "Redirecting to checkout...",
+      });
+
+      // Navigate to checkout
+      navigate("/checkout");
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      toast({
+        title: "Submission Error",
+        description: "There was an error saving your application. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -68,42 +236,91 @@ export default function Apply() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" required />
+                    <Input 
+                      id="firstName" 
+                      value={formData.firstName}
+                      onChange={(e) => updateFormData('firstName', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" required />
+                    <Input 
+                      id="lastName" 
+                      value={formData.lastName}
+                      onChange={(e) => updateFormData('lastName', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      value={formData.email}
+                      onChange={(e) => updateFormData('email', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" required />
+                    <Input 
+                      id="phone" 
+                      type="tel" 
+                      value={formData.phone}
+                      onChange={(e) => updateFormData('phone', e.target.value)}
+                      required 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address">Current Address</Label>
-                  <Input id="address" placeholder="Street Address" required />
+                  <Input 
+                    id="address" 
+                    placeholder="Street Address" 
+                    value={formData.address}
+                    onChange={(e) => updateFormData('address', e.target.value)}
+                    required 
+                  />
                 </div>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">City</Label>
-                    <Input id="city" required />
+                    <Input 
+                      id="city" 
+                      value={formData.city}
+                      onChange={(e) => updateFormData('city', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="state">State</Label>
-                    <Input id="state" required />
+                    <Input 
+                      id="state" 
+                      value={formData.state}
+                      onChange={(e) => updateFormData('state', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="zip">ZIP Code</Label>
-                    <Input id="zip" required />
+                    <Input 
+                      id="zip" 
+                      value={formData.zip}
+                      onChange={(e) => updateFormData('zip', e.target.value)}
+                      required 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="dob">Date of Birth</Label>
-                  <Input id="dob" type="date" required />
+                  <Input 
+                    id="dob" 
+                    type="date" 
+                    value={formData.dob}
+                    onChange={(e) => updateFormData('dob', e.target.value)}
+                    required 
+                  />
                 </div>
               </div>
             )}
@@ -115,23 +332,46 @@ export default function Apply() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="desiredCity">Desired City</Label>
-                    <Input id="desiredCity" required />
+                    <Input 
+                      id="desiredCity" 
+                      value={formData.desiredCity}
+                      onChange={(e) => updateFormData('desiredCity', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="desiredState">Desired State</Label>
-                    <Input id="desiredState" required />
+                    <Input 
+                      id="desiredState" 
+                      value={formData.desiredState}
+                      onChange={(e) => updateFormData('desiredState', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="moveInDate">Target Move-In Date</Label>
-                    <Input id="moveInDate" type="date" required />
+                    <Input 
+                      id="moveInDate" 
+                      type="date" 
+                      value={formData.moveInDate}
+                      onChange={(e) => updateFormData('moveInDate', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="budget">Monthly Rent Budget ($)</Label>
-                    <Input id="budget" type="number" placeholder="e.g., 1500" required />
+                    <Input 
+                      id="budget" 
+                      type="number" 
+                      placeholder="e.g., 1500" 
+                      value={formData.budget}
+                      onChange={(e) => updateFormData('budget', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="bedrooms">Bedrooms Needed</Label>
-                    <Select>
+                    <Select value={formData.bedrooms} onValueChange={(value) => updateFormData('bedrooms', value)}>
                       <SelectTrigger id="bedrooms">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -145,7 +385,7 @@ export default function Apply() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="bathrooms">Bathrooms</Label>
-                    <Select>
+                    <Select value={formData.bathrooms} onValueChange={(value) => updateFormData('bathrooms', value)}>
                       <SelectTrigger id="bathrooms">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -159,7 +399,7 @@ export default function Apply() {
                 </div>
                 <div className="space-y-2">
                   <Label>Do you have any pets?</Label>
-                  <Select>
+                  <Select value={formData.pets} onValueChange={(value) => updateFormData('pets', value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -174,6 +414,8 @@ export default function Apply() {
                   <Textarea
                     id="assistance"
                     placeholder="Describe any housing vouchers or rental assistance (or leave blank)"
+                    value={formData.assistance}
+                    onChange={(e) => updateFormData('assistance', e.target.value)}
                   />
                 </div>
               </div>
@@ -185,7 +427,7 @@ export default function Apply() {
                 <h2 className="text-xl font-semibold">Income & Employment</h2>
                 <div className="space-y-2">
                   <Label htmlFor="employmentStatus">Employment Status</Label>
-                  <Select>
+                  <Select value={formData.employmentStatus} onValueChange={(value) => updateFormData('employmentStatus', value)}>
                     <SelectTrigger id="employmentStatus">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -201,15 +443,26 @@ export default function Apply() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="employer">Employer Name</Label>
-                    <Input id="employer" placeholder="Company or self-employed" required />
+                    <Input 
+                      id="employer" 
+                      placeholder="Company or self-employed" 
+                      value={formData.employer}
+                      onChange={(e) => updateFormData('employer', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="jobTitle">Job Title</Label>
-                    <Input id="jobTitle" required />
+                    <Input 
+                      id="jobTitle" 
+                      value={formData.jobTitle}
+                      onChange={(e) => updateFormData('jobTitle', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="timeAtJob">How long at current job?</Label>
-                    <Select>
+                    <Select value={formData.timeAtJob} onValueChange={(value) => updateFormData('timeAtJob', value)}>
                       <SelectTrigger id="timeAtJob">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -223,11 +476,18 @@ export default function Apply() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="income">Monthly/Annual Income ($)</Label>
-                    <Input id="income" type="number" placeholder="e.g., 45000" required />
+                    <Input 
+                      id="income" 
+                      type="number" 
+                      placeholder="e.g., 45000" 
+                      value={formData.income}
+                      onChange={(e) => updateFormData('income', e.target.value)}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="payFrequency">Pay Frequency</Label>
-                    <Select>
+                    <Select value={formData.payFrequency} onValueChange={(value) => updateFormData('payFrequency', value)}>
                       <SelectTrigger id="payFrequency">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -244,6 +504,8 @@ export default function Apply() {
                   <Textarea
                     id="additionalIncome"
                     placeholder="Describe any other income sources (or leave blank)"
+                    value={formData.additionalIncome}
+                    onChange={(e) => updateFormData('additionalIncome', e.target.value)}
                   />
                 </div>
               </div>
@@ -255,7 +517,7 @@ export default function Apply() {
                 <h2 className="text-xl font-semibold">Credit, Background & Documents</h2>
                 <div className="space-y-2">
                   <Label htmlFor="creditScore">Estimated Credit Score Range</Label>
-                  <Select>
+                  <Select value={formData.creditScore} onValueChange={(value) => updateFormData('creditScore', value)}>
                     <SelectTrigger id="creditScore">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -269,7 +531,7 @@ export default function Apply() {
                 </div>
                 <div className="space-y-2">
                   <Label>Any past evictions?</Label>
-                  <Select>
+                  <Select value={formData.evictions} onValueChange={(value) => updateFormData('evictions', value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -281,7 +543,7 @@ export default function Apply() {
                 </div>
                 <div className="space-y-2">
                   <Label>Any criminal history?</Label>
-                  <Select>
+                  <Select value={formData.criminalHistory} onValueChange={(value) => updateFormData('criminalHistory', value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -296,38 +558,71 @@ export default function Apply() {
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="ref1Name">Reference 1 Name</Label>
-                      <Input id="ref1Name" required />
+                      <Input 
+                        id="ref1Name" 
+                        value={formData.ref1Name}
+                        onChange={(e) => updateFormData('ref1Name', e.target.value)}
+                        required 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="ref1Relationship">Relationship</Label>
-                      <Input id="ref1Relationship" placeholder="e.g., Friend" required />
+                      <Input 
+                        id="ref1Relationship" 
+                        placeholder="e.g., Friend" 
+                        value={formData.ref1Relationship}
+                        onChange={(e) => updateFormData('ref1Relationship', e.target.value)}
+                        required 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="ref1Phone">Phone</Label>
-                      <Input id="ref1Phone" type="tel" required />
+                      <Input 
+                        id="ref1Phone" 
+                        type="tel" 
+                        value={formData.ref1Phone}
+                        onChange={(e) => updateFormData('ref1Phone', e.target.value)}
+                        required 
+                      />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="ref2Name">Reference 2 Name</Label>
-                      <Input id="ref2Name" required />
+                      <Input 
+                        id="ref2Name" 
+                        value={formData.ref2Name}
+                        onChange={(e) => updateFormData('ref2Name', e.target.value)}
+                        required 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="ref2Relationship">Relationship</Label>
-                      <Input id="ref2Relationship" placeholder="e.g., Coworker" required />
+                      <Input 
+                        id="ref2Relationship" 
+                        placeholder="e.g., Coworker" 
+                        value={formData.ref2Relationship}
+                        onChange={(e) => updateFormData('ref2Relationship', e.target.value)}
+                        required 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="ref2Phone">Phone</Label>
-                      <Input id="ref2Phone" type="tel" required />
+                      <Input 
+                        id="ref2Phone" 
+                        type="tel" 
+                        value={formData.ref2Phone}
+                        onChange={(e) => updateFormData('ref2Phone', e.target.value)}
+                        required 
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4 border border-border rounded-lg p-6">
-                  <h3 className="font-semibold">Upload Documents (Required)</h3>
+                  <h3 className="font-semibold">Upload Documents (Optional)</h3>
                   <p className="text-sm text-muted-foreground">
-                    Please upload: Last 2-3 bank statements, front and back of your ID, recent pay
-                    stubs or income proof
+                    You can upload documents now or later: Last 2-3 bank statements, front and back of your ID, recent pay stubs or income proof
                   </p>
                   <label
                     htmlFor="fileUpload"
@@ -361,19 +656,31 @@ export default function Apply() {
 
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Checkbox id="confirm" />
+                    <Checkbox 
+                      id="confirm" 
+                      checked={formData.confirmed}
+                      onCheckedChange={(checked) => updateFormData('confirmed', checked as boolean)}
+                    />
                     <label htmlFor="confirm" className="text-sm cursor-pointer">
                       I confirm all information is true and correct.
                     </label>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Checkbox id="agree" />
+                    <Checkbox 
+                      id="agree" 
+                      checked={formData.agreed}
+                      onCheckedChange={(checked) => updateFormData('agreed', checked as boolean)}
+                    />
                     <label htmlFor="agree" className="text-sm cursor-pointer">
                       I agree to the Rent EZ policies, terms, and refund rules.
                     </label>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Checkbox id="authorize" />
+                    <Checkbox 
+                      id="authorize" 
+                      checked={formData.authorized}
+                      onCheckedChange={(checked) => updateFormData('authorized', checked as boolean)}
+                    />
                     <label htmlFor="authorize" className="text-sm cursor-pointer">
                       I authorize Rent EZ and its partners to review my information for housing
                       approval purposes.
@@ -385,12 +692,23 @@ export default function Apply() {
 
             {/* Navigation Buttons */}
             <div className="flex justify-between pt-6">
-              <Button variant="outline" onClick={handleBack} disabled={step === 1}>
+              <Button variant="outline" onClick={handleBack} disabled={step === 1 || isSubmitting}>
                 Back
               </Button>
-              <Button onClick={handleNext}>
-                {step === totalSteps ? "Continue to Secure Checkout – $20" : "Next"}
-              </Button>
+              {step === totalSteps ? (
+                <Button onClick={handleSubmitApplication} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving Application...
+                    </>
+                  ) : (
+                    "Continue to Secure Checkout – $20"
+                  )}
+                </Button>
+              ) : (
+                <Button onClick={handleNext}>Next</Button>
+              )}
             </div>
           </CardContent>
         </Card>

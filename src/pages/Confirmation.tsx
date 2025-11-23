@@ -1,9 +1,15 @@
+import { useEffect } from "react";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
 export default function Confirmation() {
+  useEffect(() => {
+    // Clear application ID from session storage
+    sessionStorage.removeItem('applicationId');
+  }, []);
+
   return (
     <div className="min-h-screen py-20 px-4 flex items-center justify-center">
       <Card className="max-w-2xl w-full">
