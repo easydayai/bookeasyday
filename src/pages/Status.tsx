@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CheckCircle, Clock, FileText, AlertCircle } from "lucide-react";
+import type { User } from "@supabase/supabase-js";
 
 interface Application {
   applicant_name: string;
   email: string;
   status: string;
   created_at: string;
+  user_id: string | null;
 }
 
 const statusConfig = {
@@ -51,44 +53,58 @@ const steps = [
 export default function Status() {
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const email = sessionStorage.getItem("applicant_email");
-    
-    if (!email) {
-      navigate("/login");
-      return;
-    }
-
-    fetchApplication(email);
-  }, [navigate]);
-
-  const fetchApplication = async (email: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("applications")
-        .select("*")
-        .eq("email", email)
-        .single();
-
-      if (error || !data) {
-        toast.error("Could not load your application");
+    const initializeAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Please login first");
         navigate("/login");
         return;
       }
 
-      setApplication(data);
-    } catch (error) {
-      toast.error("Something went wrong");
-      navigate("/login");
-    } finally {
-      setLoading(false);
-    }
-  };
+      setUser(session.user);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("applicant_email");
+      try {
+        const { data, error } = await supabase
+          .from("applications")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching application:", error);
+          toast.error("Failed to load application");
+          setLoading(false);
+          return;
+        }
+
+        setApplication(data);
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to load application");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        navigate("/login");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Logged out successfully");
     navigate("/login");
   };
 
@@ -101,7 +117,28 @@ export default function Status() {
   }
 
   if (!application) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+        <Card className="w-full max-w-2xl">
+          <CardHeader>
+            <CardTitle className="text-2xl">No Application Found</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              You haven't submitted a rental application yet.
+            </p>
+            <div className="flex gap-4">
+              <Button onClick={() => navigate("/apply")}>
+                Submit Application
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                Logout
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const status = application.status as keyof typeof statusConfig;
