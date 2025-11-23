@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileText, Users, Home as HomeIcon, Shield, Clock } from "lucide-react";
+import { ConsentModal } from "@/components/ConsentModal";
 import heroBg from "@/assets/hero-bg.jpg";
 import usMap from "@/assets/us-map.png";
 
 export default function Home() {
+  const [consentModalOpen, setConsentModalOpen] = useState(false);
+
   return (
     <div>
       {/* Hero Section */}
@@ -26,8 +30,12 @@ export default function Home() {
             No more paying $100+ per application.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button asChild size="lg" className="text-lg h-14 px-8">
-              <Link to="/consent">Apply Now – $20</Link>
+            <Button 
+              size="lg" 
+              className="text-lg h-14 px-8"
+              onClick={() => setConsentModalOpen(true)}
+            >
+              Apply Now – $20
             </Button>
             <Button asChild variant="outline" size="lg" className="text-lg h-14 px-8">
               <Link to="/how-it-works">How It Works</Link>
@@ -226,11 +234,17 @@ export default function Home() {
           <p className="text-xl text-muted-foreground">
             Join thousands of renters who found their home with Rent EZ
           </p>
-          <Button asChild size="lg" className="text-lg h-14 px-8">
-            <Link to="/consent">Start Application – $20</Link>
+          <Button 
+            size="lg" 
+            className="text-lg h-14 px-8"
+            onClick={() => setConsentModalOpen(true)}
+          >
+            Start Application – $20
           </Button>
         </div>
       </section>
+
+      <ConsentModal open={consentModalOpen} onOpenChange={setConsentModalOpen} />
     </div>
   );
 }

@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CartDrawer } from "./CartDrawer";
+import { ConsentModal } from "./ConsentModal";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [consentModalOpen, setConsentModalOpen] = useState(false);
 
   const navLinks = [
     { to: "/", label: "Home" },
-    { to: "/consent", label: "Apply Now" },
     { to: "/how-it-works", label: "How It Works" },
     { to: "/gallery", label: "Photos" },
     { to: "/testimonials", label: "Testimonials" },
@@ -38,8 +39,11 @@ export const Navigation = () => {
               </Link>
             ))}
             <CartDrawer />
-            <Button asChild size="sm">
-              <Link to="/consent">Apply – $20</Link>
+            <Button 
+              size="sm"
+              onClick={() => setConsentModalOpen(true)}
+            >
+              Apply – $20
             </Button>
           </div>
 
@@ -69,14 +73,21 @@ export const Navigation = () => {
                 {link.label}
               </Link>
             ))}
-            <Button asChild className="w-full mt-4" size="sm">
-              <Link to="/consent" onClick={() => setIsOpen(false)}>
-                Apply – $20
-              </Link>
+            <Button 
+              className="w-full mt-4" 
+              size="sm"
+              onClick={() => {
+                setIsOpen(false);
+                setConsentModalOpen(true);
+              }}
+            >
+              Apply – $20
             </Button>
           </div>
         )}
       </div>
+
+      <ConsentModal open={consentModalOpen} onOpenChange={setConsentModalOpen} />
     </nav>
   );
 };
