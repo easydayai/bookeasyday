@@ -34,34 +34,33 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/apply" element={<Apply />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/confirmation" element={<Confirmation />} />
-            <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/policies" element={<Policies />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/product/:handle" element={<Product />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin/setup" element={<AdminSetup />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/applications" element={<AdminApplications />} />
-            <Route path="/admin/applications/:id" element={<ApplicationDetail />} />
-            <Route path="/admin/payments" element={<AdminPayments />} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/team" element={<AdminTeam />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          {/* Public Routes with Layout */}
+          <Route path="/" element={<Layout><Home /></Layout>} />
+          <Route path="/apply" element={<Layout><Apply /></Layout>} />
+          <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
+          <Route path="/confirmation" element={<Layout><Confirmation /></Layout>} />
+          <Route path="/testimonials" element={<Layout><Testimonials /></Layout>} />
+          <Route path="/gallery" element={<Layout><Gallery /></Layout>} />
+          <Route path="/policies" element={<Layout><Policies /></Layout>} />
+          <Route path="/faq" element={<Layout><FAQ /></Layout>} />
+          <Route path="/contact" element={<Layout><Contact /></Layout>} />
+          <Route path="/how-it-works" element={<Layout><HowItWorks /></Layout>} />
+          <Route path="/product/:handle" element={<Layout><Product /></Layout>} />
+          
+          {/* Admin Routes (No main Layout) */}
+          <Route path="/admin/setup" element={<AdminSetup />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/applications" element={<AdminApplications />} />
+          <Route path="/admin/applications/:id" element={<ApplicationDetail />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/team" element={<AdminTeam />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+          
+          <Route path="*" element={<Layout><NotFound /></Layout>} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
