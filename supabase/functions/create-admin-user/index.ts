@@ -33,6 +33,22 @@ serve(async (req) => {
       }
     );
 
+    // Security: Check if any owner accounts already exist
+    const { data: existingOwners, error: checkError } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("role", "owner")
+      .limit(1);
+
+    if (checkError) {
+      console.error("Error checking for existing owners:", checkError);
+      throw new Error("Failed to verify setup status");
+    }
+
+    if (existingOwners && existingOwners.length > 0) {
+      throw new Error("Admin setup has already been completed. Please contact an existing administrator for access.");
+    }
+
     // Create the user
     const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
