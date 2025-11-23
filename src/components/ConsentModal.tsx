@@ -1,8 +1,5 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { X } from "lucide-react";
 
 interface ConsentModalProps {
   open: boolean;
@@ -19,36 +15,14 @@ interface ConsentModalProps {
 
 export function ConsentModal({ open, onOpenChange }: ConsentModalProps) {
   const navigate = useNavigate();
-  const [consents, setConsents] = useState({
-    informationCollection: false,
-    thirdPartySharing: false,
-    applicationFee: false,
-    refundPolicy: false,
-    noGuarantee: false,
-  });
-
-  const allChecked = Object.values(consents).every((value) => value);
-
-  const handleCheckboxChange = (key: keyof typeof consents) => {
-    setConsents((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
 
   const handleAgree = () => {
-    if (allChecked) {
-      onOpenChange(false);
-      navigate("/apply");
-    }
+    onOpenChange(false);
+    navigate("/apply");
   };
 
   const handleCancel = () => {
     onOpenChange(false);
-    setConsents({
-      informationCollection: false,
-      thirdPartySharing: false,
-      applicationFee: false,
-      refundPolicy: false,
-      noGuarantee: false,
-    });
   };
 
   return (
@@ -204,69 +178,8 @@ export function ConsentModal({ open, onOpenChange }: ConsentModalProps) {
           </div>
         </div>
 
-        {/* Fixed footer with checkboxes and buttons */}
-        <div className="px-6 py-4 border-t bg-background flex-shrink-0 space-y-4">
-          <div className="space-y-3">
-            <p className="font-semibold text-sm">Please confirm your agreement to all terms:</p>
-
-            <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="informationCollection"
-                  checked={consents.informationCollection}
-                  onCheckedChange={() => handleCheckboxChange("informationCollection")}
-                />
-                <Label htmlFor="informationCollection" className="text-xs font-normal cursor-pointer leading-relaxed">
-                  I agree to the collection, storage, and use of my information by Rent EZ for rental application and verification purposes.
-                </Label>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="thirdPartySharing"
-                  checked={consents.thirdPartySharing}
-                  onCheckedChange={() => handleCheckboxChange("thirdPartySharing")}
-                />
-                <Label htmlFor="thirdPartySharing" className="text-xs font-normal cursor-pointer leading-relaxed">
-                  I authorize Rent EZ to share my information with rental specialists, landlords, property managers, and verification services for the purpose of evaluating my rental eligibility.
-                </Label>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="applicationFee"
-                  checked={consents.applicationFee}
-                  onCheckedChange={() => handleCheckboxChange("applicationFee")}
-                />
-                <Label htmlFor="applicationFee" className="text-xs font-normal cursor-pointer leading-relaxed">
-                  I understand the $20 fee is an application/service fee, not rent or a security deposit, and that approval is not guaranteed.
-                </Label>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="refundPolicy"
-                  checked={consents.refundPolicy}
-                  onCheckedChange={() => handleCheckboxChange("refundPolicy")}
-                />
-                <Label htmlFor="refundPolicy" className="text-xs font-normal cursor-pointer leading-relaxed">
-                  I understand the 30-day move-in or money-back policy and that refunds depend on my cooperation and meeting basic requirements.
-                </Label>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="noGuarantee"
-                  checked={consents.noGuarantee}
-                  onCheckedChange={() => handleCheckboxChange("noGuarantee")}
-                />
-                <Label htmlFor="noGuarantee" className="text-xs font-normal cursor-pointer leading-relaxed">
-                  I agree that final approval decisions are made by landlords or property managers, not by Rent EZ, and I release Rent EZ from responsibility for those decisions.
-                </Label>
-              </div>
-            </div>
-          </div>
-
+        {/* Fixed footer with button */}
+        <div className="px-6 py-4 border-t bg-background flex-shrink-0">
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               variant="outline"
@@ -277,18 +190,11 @@ export function ConsentModal({ open, onOpenChange }: ConsentModalProps) {
             </Button>
             <Button
               className="flex-1"
-              disabled={!allChecked}
               onClick={handleAgree}
             >
-              I Agree & Continue
+              I Agree & Apply
             </Button>
           </div>
-
-          {!allChecked && (
-            <p className="text-xs text-muted-foreground text-center">
-              You must check all boxes above to continue
-            </p>
-          )}
         </div>
       </DialogContent>
     </Dialog>
