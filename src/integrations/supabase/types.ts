@@ -14,16 +14,234 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      applications: {
+        Row: {
+          address: string | null
+          applicant_name: string
+          applicant_notes: string | null
+          approved_at: string | null
+          approved_by: string | null
+          background_info: Json | null
+          bedroom_count: number | null
+          city: string
+          created_at: string | null
+          decline_reason: string | null
+          declined_at: string | null
+          declined_by: string | null
+          desired_move_in_date: string | null
+          email: string
+          employment_type: string | null
+          id: string
+          income_range: string | null
+          internal_notes: string | null
+          monthly_income: number | null
+          phone: string
+          source: string | null
+          state: string
+          status: string
+          unit_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          applicant_name: string
+          applicant_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          background_info?: Json | null
+          bedroom_count?: number | null
+          city: string
+          created_at?: string | null
+          decline_reason?: string | null
+          declined_at?: string | null
+          declined_by?: string | null
+          desired_move_in_date?: string | null
+          email: string
+          employment_type?: string | null
+          id?: string
+          income_range?: string | null
+          internal_notes?: string | null
+          monthly_income?: number | null
+          phone: string
+          source?: string | null
+          state: string
+          status?: string
+          unit_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          applicant_name?: string
+          applicant_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          background_info?: Json | null
+          bedroom_count?: number | null
+          city?: string
+          created_at?: string | null
+          decline_reason?: string | null
+          declined_at?: string | null
+          declined_by?: string | null
+          desired_move_in_date?: string | null
+          email?: string
+          employment_type?: string | null
+          id?: string
+          income_range?: string | null
+          internal_notes?: string | null
+          monthly_income?: number | null
+          phone?: string
+          source?: string | null
+          state?: string
+          status?: string
+          unit_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          application_id: string | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          payment_method: string | null
+          refund_reason: string | null
+          refunded_at: string | null
+          refunded_by: string | null
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+        }
+        Insert: {
+          amount: number
+          application_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          payment_method?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          refunded_by?: string | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+        }
+        Update: {
+          amount?: number
+          application_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          payment_method?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          refunded_by?: string | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "owner" | "admin" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +368,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["owner", "admin", "staff"],
+    },
   },
 } as const
