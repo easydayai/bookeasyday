@@ -27,7 +27,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button asChild size="lg" className="text-lg h-14 px-8">
-              <Link to="/apply">Apply Now – $20</Link>
+              <Link to="/consent">Apply Now – $20</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="text-lg h-14 px-8">
               <Link to="/how-it-works">How It Works</Link>
@@ -227,7 +227,7 @@ export default function Home() {
             Join thousands of renters who found their home with Rent EZ
           </p>
           <Button asChild size="lg" className="text-lg h-14 px-8">
-            <Link to="/apply">Start Application – $20</Link>
+            <Link to="/consent">Start Application – $20</Link>
           </Button>
         </div>
       </section>

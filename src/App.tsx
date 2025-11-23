@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import Home from "./pages/Home";
+import Consent from "./pages/Consent";
 import Apply from "./pages/Apply";
 import Checkout from "./pages/Checkout";
 import Confirmation from "./pages/Confirmation";
@@ -37,6 +38,7 @@ const App = () => (
         <Routes>
           {/* Public Routes with Layout */}
           <Route path="/" element={<Layout><Home /></Layout>} />
+          <Route path="/consent" element={<Layout><Consent /></Layout>} />
           <Route path="/apply" element={<Layout><Apply /></Layout>} />
           <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
           <Route path="/confirmation" element={<Layout><Confirmation /></Layout>} />
