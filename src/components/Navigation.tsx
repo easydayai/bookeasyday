@@ -9,7 +9,7 @@ export const Navigation = () => {
 
   const navLinks = [
     { to: "/", label: "Home" },
-    { to: "/apply", label: "Apply Now" },
+    { to: "/consent", label: "Apply Now" },
     { to: "/how-it-works", label: "How It Works" },
     { to: "/gallery", label: "Photos" },
     { to: "/testimonials", label: "Testimonials" },
@@ -39,7 +39,7 @@ export const Navigation = () => {
             ))}
             <CartDrawer />
             <Button asChild size="sm">
-              <Link to="/apply">Apply – $20</Link>
+              <Link to="/consent">Apply – $20</Link>
             </Button>
           </div>
 
@@ -70,7 +70,7 @@ export const Navigation = () => {
               </Link>
             ))}
             <Button asChild className="w-full mt-4" size="sm">
-              <Link to="/apply" onClick={() => setIsOpen(false)}>
+              <Link to="/consent" onClick={() => setIsOpen(false)}>
                 Apply – $20
               </Link>
             </Button>
