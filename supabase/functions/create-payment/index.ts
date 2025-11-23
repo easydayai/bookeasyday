@@ -16,6 +16,10 @@ serve(async (req) => {
   try {
     console.log("[CREATE-PAYMENT] Starting payment session creation");
 
+    // Get application ID from request body
+    const { applicationId } = await req.json().catch(() => ({}));
+    console.log("[CREATE-PAYMENT] Application ID:", applicationId);
+
     // Initialize Stripe with the secret key
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -66,8 +70,11 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${origin}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${origin}/confirmation`,
       cancel_url: `${origin}/checkout`,
+      metadata: {
+        application_id: applicationId || "",
+      },
     });
 
     console.log("[CREATE-PAYMENT] Checkout session created:", session.id);

@@ -14,9 +14,12 @@ export default function Checkout() {
     setIsProcessing(true);
 
     try {
+      // Get application ID from session storage
+      const applicationId = sessionStorage.getItem('applicationId');
+
       // Call the create-payment edge function
       const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {},
+        body: { applicationId },
       });
 
       if (error) throw error;
