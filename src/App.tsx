@@ -25,6 +25,8 @@ import AdminPayments from "./pages/admin/Payments";
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminTeam from "./pages/admin/Team";
 import AdminSettings from "./pages/admin/Settings";
+import Login from "./pages/Login";
+import Status from "./pages/Status";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,10 @@ const App = () => (
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/how-it-works" element={<Layout><HowItWorks /></Layout>} />
           <Route path="/product/:handle" element={<Layout><Product /></Layout>} />
+          
+          {/* Applicant Login & Status */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/status" element={<Status />} />
           
           {/* Admin Routes (No main Layout) */}
           <Route path="/admin/setup" element={<AdminSetup />} />
