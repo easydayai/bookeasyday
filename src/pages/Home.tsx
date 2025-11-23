@@ -1,17 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, FileText, Users, Home as HomeIcon, Shield, Clock, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchProducts } from "@/lib/shopify";
+import { CheckCircle, FileText, Users, Home as HomeIcon, Shield, Clock } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import usMap from "@/assets/us-map.png";
 
 export default function Home() {
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => fetchProducts(12),
-  });
-
   return (
     <div>
       {/* Hero Section */}
@@ -209,47 +203,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Products Section */}
-      <section className="py-20 px-4">
+      {/* 50 States Coverage */}
+      <section className="py-20 px-4 bg-background">
         <div className="container mx-auto max-w-7xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Available Products</h2>
-          
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((product) => (
-                <div key={product.node.id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                  {product.node.images?.edges?.[0]?.node && (
-                    <img
-                      src={product.node.images.edges[0].node.url}
-                      alt={product.node.title}
-                      className="w-full h-64 object-cover"
-                    />
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">{product.node.title}</h3>
-                    <p className="text-muted-foreground mb-4 line-clamp-2">{product.node.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold">
-                        {product.node.priceRange.minVariantPrice.currencyCode} {parseFloat(product.node.priceRange.minVariantPrice.amount).toFixed(2)}
-                      </span>
-                      <Button asChild>
-                        <Link to={`/product/${product.node.handle}`}>View Details</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-xl text-muted-foreground mb-4">No products found</p>
-              <p className="text-muted-foreground">Start by telling me what products you'd like to sell!</p>
-            </div>
-          )}
+          <div className="flex flex-col items-center justify-center">
+            <img 
+              src={usMap} 
+              alt="United States coverage map" 
+              className="w-full max-w-6xl h-auto"
+            />
+            <p className="text-sm text-muted-foreground/60 mt-6 text-center">
+              Available nationwide — Rent EZ covers all 50 states.
+            </p>
+          </div>
         </div>
       </section>
 
