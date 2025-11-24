@@ -59,18 +59,17 @@ export default function Apply() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Detect in-app browser on mount
+  // Detect in-app browser on mount (for informational purposes only)
   useEffect(() => {
     const inAppBrowser = /Instagram|FBAN|FBAV|Twitter|LinkedIn/.test(navigator.userAgent);
     setIsInAppBrowser(inAppBrowser);
     
-    // Auto-show a persistent warning for in-app browsers
+    // Show informational banner for in-app browsers (no longer blocks submission)
     if (inAppBrowser) {
       toast({
-        title: "⚠️ Please Open in Safari",
-        description: "Instagram/Facebook browsers can't submit applications. Tap the menu (•••) and select 'Open in Safari' or 'Open in Browser'.",
-        variant: "destructive",
-        duration: Infinity, // Stay visible
+        title: "ℹ️ Opening in Browser Recommended",
+        description: "For the best experience, consider opening in Safari or your default browser.",
+        duration: 8000,
       });
     }
   }, [toast]);
@@ -141,91 +140,32 @@ export default function Apply() {
     setIsSubmitting(true);
 
     try {
-      // Block submission from in-app browsers
-      if (isInAppBrowser) {
-        toast({
-          title: "Can't Submit from This Browser",
-          description: "Please open this page in Safari or your default browser. Tap the menu (•••) and select 'Open in Safari'.",
-          variant: "destructive",
-          duration: 10000,
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
       // Get authenticated user (optional - for linking to account if logged in)
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Validate minimum required fields for database
-      const requiredFields = {
-        firstName: formData.firstName || 'Not',
-        lastName: formData.lastName || 'Provided',
-        email: formData.email || 'noemail@example.com',
-        phone: formData.phone || '0000000000',
-        city: formData.city || 'Not Provided',
-        state: formData.state || 'N/A'
-      };
+      // Get Supabase URL from environment
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
-      // Save application to database
-      const { data: application, error: applicationError } = await supabase
-        .from('applications')
-        .insert({
-          user_id: user?.id || null,
-          applicant_name: `${requiredFields.firstName} ${requiredFields.lastName}`,
-          email: requiredFields.email,
-          phone: requiredFields.phone,
-          address: formData.address || null,
-          city: requiredFields.city,
-          state: requiredFields.state,
-          desired_move_in_date: formData.moveInDate || null,
-          monthly_income: parseFloat(formData.income) || null,
-          bedroom_count: formData.bedrooms ? parseInt(formData.bedrooms) : null,
-          employment_type: formData.employmentStatus || null,
-          status: 'pending',
-          background_info: {
-            dob: formData.dob,
-            zip: formData.zip,
-            desiredCity: formData.desiredCity,
-            desiredState: formData.desiredState,
-            budget: formData.budget,
-            bathrooms: formData.bathrooms,
-            pets: formData.pets,
-            assistance: formData.assistance,
-            employer: formData.employer,
-            jobTitle: formData.jobTitle,
-            timeAtJob: formData.timeAtJob,
-            payFrequency: formData.payFrequency,
-            additionalIncome: formData.additionalIncome,
-            creditScore: formData.creditScore,
-            evictions: formData.evictions,
-            criminalHistory: formData.criminalHistory,
-            references: [
-              {
-                name: formData.ref1Name,
-                relationship: formData.ref1Relationship,
-                phone: formData.ref1Phone,
-              },
-              {
-                name: formData.ref2Name,
-                relationship: formData.ref2Relationship,
-                phone: formData.ref2Phone,
-              },
-            ],
-          },
-        })
-        .select()
-        .single();
+      // Call edge function to submit application (works in all browsers including in-app)
+      const response = await fetch(`${supabaseUrl}/functions/v1/submit-application`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.id || null,
+          ...formData
+        }),
+      });
 
-      if (applicationError) {
-        // Provide helpful error message for restricted browsers
-        if (/Instagram|FBAN|FBAV/.test(navigator.userAgent)) {
-          throw new Error("Unable to submit from in-app browser. Please open this page in Safari or your default browser by tapping the '...' menu and selecting 'Open in Safari' or 'Open in Browser'.");
-        }
-        throw applicationError;
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to submit application');
       }
 
       // Store application ID in session storage for checkout
-      sessionStorage.setItem('applicationId', application.id);
+      sessionStorage.setItem('applicationId', result.applicationId);
 
       toast({
         title: "Application saved!",
@@ -260,32 +200,18 @@ export default function Apply() {
         <Card>
           <CardContent className="pt-6 space-y-6">
             {isInAppBrowser && (
-              <div className="bg-destructive text-destructive-foreground rounded-lg p-6 space-y-4">
+              <div className="bg-muted border border-border rounded-lg p-4 space-y-2">
                 <div className="flex items-start gap-3">
-                  <span className="text-3xl">⚠️</span>
-                  <div className="space-y-2">
-                    <h3 className="font-bold text-lg">Can't Submit from Instagram/Facebook</h3>
-                    <p className="text-sm">
-                      These apps block application submissions for security.
+                  <span className="text-xl">ℹ️</span>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">
+                      Viewing in Instagram/Facebook browser
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      For the best experience, open in Safari or your default browser using the menu (•••).
                     </p>
                   </div>
                 </div>
-                <div className="bg-background/10 rounded p-4 space-y-2">
-                  <p className="font-semibold text-sm">To continue:</p>
-                  <ol className="text-sm space-y-1 list-decimal list-inside">
-                    <li>Tap the menu button (•••) at the top or bottom of your screen</li>
-                    <li>Select <strong>"Open in Safari"</strong> or <strong>"Open in Browser"</strong></li>
-                    <li>Complete your application there</li>
-                  </ol>
-                </div>
-                <a 
-                  href={window.location.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full bg-background text-foreground font-bold py-3 px-4 rounded-lg text-center hover:bg-background/90"
-                >
-                  Open in Browser →
-                </a>
               </div>
             )}
             <div className="space-y-4">
