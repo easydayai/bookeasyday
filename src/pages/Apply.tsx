@@ -121,16 +121,6 @@ export default function Apply() {
   };
 
   const handleSubmitApplication = async () => {
-    // Validate required checkboxes
-    if (!formData.confirmed || !formData.agreed || !formData.authorized) {
-      toast({
-        title: "Please confirm all statements",
-        description: "You must check all boxes to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -240,7 +230,6 @@ export default function Apply() {
                       id="firstName" 
                       value={formData.firstName}
                       onChange={(e) => updateFormData('firstName', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -249,7 +238,6 @@ export default function Apply() {
                       id="lastName" 
                       value={formData.lastName}
                       onChange={(e) => updateFormData('lastName', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -259,7 +247,6 @@ export default function Apply() {
                       type="email" 
                       value={formData.email}
                       onChange={(e) => updateFormData('email', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -269,7 +256,6 @@ export default function Apply() {
                       type="tel" 
                       value={formData.phone}
                       onChange={(e) => updateFormData('phone', e.target.value)}
-                      required 
                     />
                   </div>
                 </div>
@@ -280,7 +266,6 @@ export default function Apply() {
                     placeholder="Street Address" 
                     value={formData.address}
                     onChange={(e) => updateFormData('address', e.target.value)}
-                    required 
                   />
                 </div>
                 <div className="grid md:grid-cols-3 gap-4">
@@ -290,7 +275,6 @@ export default function Apply() {
                       id="city" 
                       value={formData.city}
                       onChange={(e) => updateFormData('city', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -299,7 +283,6 @@ export default function Apply() {
                       id="state" 
                       value={formData.state}
                       onChange={(e) => updateFormData('state', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -308,7 +291,6 @@ export default function Apply() {
                       id="zip" 
                       value={formData.zip}
                       onChange={(e) => updateFormData('zip', e.target.value)}
-                      required 
                     />
                   </div>
                 </div>
@@ -319,7 +301,6 @@ export default function Apply() {
                     type="date" 
                     value={formData.dob}
                     onChange={(e) => updateFormData('dob', e.target.value)}
-                    required 
                   />
                 </div>
               </div>
@@ -336,7 +317,6 @@ export default function Apply() {
                       id="desiredCity" 
                       value={formData.desiredCity}
                       onChange={(e) => updateFormData('desiredCity', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -345,7 +325,6 @@ export default function Apply() {
                       id="desiredState" 
                       value={formData.desiredState}
                       onChange={(e) => updateFormData('desiredState', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -355,7 +334,6 @@ export default function Apply() {
                       type="date" 
                       value={formData.moveInDate}
                       onChange={(e) => updateFormData('moveInDate', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -366,7 +344,6 @@ export default function Apply() {
                       placeholder="e.g., 1500" 
                       value={formData.budget}
                       onChange={(e) => updateFormData('budget', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -448,7 +425,6 @@ export default function Apply() {
                       placeholder="Company or self-employed" 
                       value={formData.employer}
                       onChange={(e) => updateFormData('employer', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -457,7 +433,6 @@ export default function Apply() {
                       id="jobTitle" 
                       value={formData.jobTitle}
                       onChange={(e) => updateFormData('jobTitle', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -482,7 +457,6 @@ export default function Apply() {
                       placeholder="e.g., 45000" 
                       value={formData.income}
                       onChange={(e) => updateFormData('income', e.target.value)}
-                      required 
                     />
                   </div>
                   <div className="space-y-2">
@@ -562,7 +536,6 @@ export default function Apply() {
                         id="ref1Name" 
                         value={formData.ref1Name}
                         onChange={(e) => updateFormData('ref1Name', e.target.value)}
-                        required 
                       />
                     </div>
                     <div className="space-y-2">
@@ -572,7 +545,6 @@ export default function Apply() {
                         placeholder="e.g., Friend" 
                         value={formData.ref1Relationship}
                         onChange={(e) => updateFormData('ref1Relationship', e.target.value)}
-                        required 
                       />
                     </div>
                     <div className="space-y-2">
@@ -582,7 +554,6 @@ export default function Apply() {
                         type="tel" 
                         value={formData.ref1Phone}
                         onChange={(e) => updateFormData('ref1Phone', e.target.value)}
-                        required 
                       />
                     </div>
                   </div>
@@ -593,7 +564,6 @@ export default function Apply() {
                         id="ref2Name" 
                         value={formData.ref2Name}
                         onChange={(e) => updateFormData('ref2Name', e.target.value)}
-                        required 
                       />
                     </div>
                     <div className="space-y-2">
@@ -603,7 +573,6 @@ export default function Apply() {
                         placeholder="e.g., Coworker" 
                         value={formData.ref2Relationship}
                         onChange={(e) => updateFormData('ref2Relationship', e.target.value)}
-                        required 
                       />
                     </div>
                     <div className="space-y-2">
@@ -613,7 +582,6 @@ export default function Apply() {
                         type="tel" 
                         value={formData.ref2Phone}
                         onChange={(e) => updateFormData('ref2Phone', e.target.value)}
-                        required 
                       />
                     </div>
                   </div>
