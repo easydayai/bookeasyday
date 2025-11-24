@@ -124,10 +124,25 @@ export default function Apply() {
     setIsSubmitting(true);
 
     try {
+      // Get authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to submit your application.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        navigate("/login");
+        return;
+      }
+
       // Save application to database
       const { data: application, error: applicationError } = await supabase
         .from('applications')
         .insert({
+          user_id: user.id,
           applicant_name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
           phone: formData.phone,
