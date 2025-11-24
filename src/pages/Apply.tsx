@@ -63,7 +63,17 @@ export default function Apply() {
   useEffect(() => {
     const inAppBrowser = /Instagram|FBAN|FBAV|Twitter|LinkedIn/.test(navigator.userAgent);
     setIsInAppBrowser(inAppBrowser);
-  }, []);
+    
+    // Auto-show a persistent warning for in-app browsers
+    if (inAppBrowser) {
+      toast({
+        title: "⚠️ Please Open in Safari",
+        description: "Instagram/Facebook browsers can't submit applications. Tap the menu (•••) and select 'Open in Safari' or 'Open in Browser'.",
+        variant: "destructive",
+        duration: Infinity, // Stay visible
+      });
+    }
+  }, [toast]);
 
   const [formData, setFormData] = useState<ApplicationFormData>({
     firstName: "",
@@ -131,16 +141,16 @@ export default function Apply() {
     setIsSubmitting(true);
 
     try {
-      // Detect in-app browsers (Instagram, Facebook, etc.)
-      const isInAppBrowser = /Instagram|FBAN|FBAV/.test(navigator.userAgent);
-      
+      // Block submission from in-app browsers
       if (isInAppBrowser) {
         toast({
-          title: "Please open in browser",
-          description: "For best results, tap the '...' menu and select 'Open in Safari' or 'Open in Browser'",
+          title: "Can't Submit from This Browser",
+          description: "Please open this page in Safari or your default browser. Tap the menu (•••) and select 'Open in Safari'.",
           variant: "destructive",
-          duration: 8000,
+          duration: 10000,
         });
+        setIsSubmitting(false);
+        return;
       }
 
       // Get authenticated user (optional - for linking to account if logged in)
@@ -250,12 +260,32 @@ export default function Apply() {
         <Card>
           <CardContent className="pt-6 space-y-6">
             {isInAppBrowser && (
-              <div className="bg-destructive/10 border border-destructive/50 rounded-lg p-4">
-                <h3 className="font-semibold text-destructive mb-2">⚠️ Open in Browser for Best Experience</h3>
-                <p className="text-sm text-muted-foreground">
-                  You're viewing this in an in-app browser (Instagram/Facebook). For successful submission, 
-                  please tap the menu (•••) and select "Open in Safari" or "Open in Browser".
-                </p>
+              <div className="bg-destructive text-destructive-foreground rounded-lg p-6 space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-3xl">⚠️</span>
+                  <div className="space-y-2">
+                    <h3 className="font-bold text-lg">Can't Submit from Instagram/Facebook</h3>
+                    <p className="text-sm">
+                      These apps block application submissions for security.
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-background/10 rounded p-4 space-y-2">
+                  <p className="font-semibold text-sm">To continue:</p>
+                  <ol className="text-sm space-y-1 list-decimal list-inside">
+                    <li>Tap the menu button (•••) at the top or bottom of your screen</li>
+                    <li>Select <strong>"Open in Safari"</strong> or <strong>"Open in Browser"</strong></li>
+                    <li>Complete your application there</li>
+                  </ol>
+                </div>
+                <a 
+                  href={window.location.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full bg-background text-foreground font-bold py-3 px-4 rounded-lg text-center hover:bg-background/90"
+                >
+                  Open in Browser →
+                </a>
               </div>
             )}
             <div className="space-y-4">
