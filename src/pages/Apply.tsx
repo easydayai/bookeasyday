@@ -156,21 +156,31 @@ export default function Apply() {
         return;
       }
 
+      // Validate minimum required fields for database
+      const requiredFields = {
+        firstName: formData.firstName || 'Not',
+        lastName: formData.lastName || 'Provided',
+        email: formData.email || user.email || 'noemail@example.com',
+        phone: formData.phone || '0000000000',
+        city: formData.city || 'Not Provided',
+        state: formData.state || 'N/A'
+      };
+
       // Save application to database
       const { data: application, error: applicationError } = await supabase
         .from('applications')
         .insert({
           user_id: user.id,
-          applicant_name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          desired_move_in_date: formData.moveInDate,
+          applicant_name: `${requiredFields.firstName} ${requiredFields.lastName}`,
+          email: requiredFields.email,
+          phone: requiredFields.phone,
+          address: formData.address || null,
+          city: requiredFields.city,
+          state: requiredFields.state,
+          desired_move_in_date: formData.moveInDate || null,
           monthly_income: parseFloat(formData.income) || null,
-          bedroom_count: parseInt(formData.bedrooms) || null,
-          employment_type: formData.employmentStatus,
+          bedroom_count: formData.bedrooms ? parseInt(formData.bedrooms) : null,
+          employment_type: formData.employmentStatus || null,
           status: 'pending',
           background_info: {
             dob: formData.dob,
