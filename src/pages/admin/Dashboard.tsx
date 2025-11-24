@@ -34,11 +34,25 @@ export default function AdminDashboard() {
         .gte("created_at", thirtyDaysAgo.toISOString())
         .order("created_at", { ascending: false });
 
+      // Get actual payments from last 30 days
+      const { data: payments } = await supabase
+        .from("payments")
+        .select("*")
+        .gte("created_at", thirtyDaysAgo.toISOString());
+
       if (applications) {
         const approved = applications.filter((a) => a.status === "approved").length;
         const declined = applications.filter((a) => a.status === "declined").length;
         const pending = applications.filter((a) => a.status === "pending").length;
         const conversionRate = applications.length > 0 ? (approved / applications.length) * 100 : 0;
+
+        // Calculate real revenue from actual paid payments
+        const paidPayments = payments?.filter((p) => p.status === "paid") || [];
+        const totalRevenue = paidPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+        
+        // Calculate real refunds from refunded payments
+        const refundedPayments = payments?.filter((p) => p.status === "refunded") || [];
+        const totalRefunds = refundedPayments.reduce((sum, p) => sum + Number(p.amount), 0);
 
         setStats({
           totalApplications: applications.length,
@@ -46,8 +60,8 @@ export default function AdminDashboard() {
           declined,
           pending,
           conversionRate,
-          totalRevenue: applications.length * 20,
-          refunds: applications.filter((a) => a.status === "refunded").length * 20,
+          totalRevenue,
+          refunds: totalRefunds,
         });
 
         // Recent activity (last 10)
