@@ -55,26 +55,8 @@ export default function Apply() {
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Check if user is authenticated on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Login Required",
-          description: "Please log in to submit an application.",
-          variant: "destructive",
-        });
-        navigate("/login");
-      }
-      setIsCheckingAuth(false);
-    };
-    checkAuth();
-  }, [navigate, toast]);
 
   const [formData, setFormData] = useState<ApplicationFormData>({
     firstName: "",
@@ -142,25 +124,14 @@ export default function Apply() {
     setIsSubmitting(true);
 
     try {
-      // Get authenticated user
+      // Get authenticated user (optional - for linking to account if logged in)
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to submit your application.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        navigate("/login");
-        return;
-      }
 
       // Validate minimum required fields for database
       const requiredFields = {
         firstName: formData.firstName || 'Not',
         lastName: formData.lastName || 'Provided',
-        email: formData.email || user.email || 'noemail@example.com',
+        email: formData.email || 'noemail@example.com',
         phone: formData.phone || '0000000000',
         city: formData.city || 'Not Provided',
         state: formData.state || 'N/A'
@@ -170,7 +141,7 @@ export default function Apply() {
       const { data: application, error: applicationError } = await supabase
         .from('applications')
         .insert({
-          user_id: user.id,
+          user_id: user?.id || null,
           applicant_name: `${requiredFields.firstName} ${requiredFields.lastName}`,
           email: requiredFields.email,
           phone: requiredFields.phone,
@@ -247,14 +218,6 @@ export default function Apply() {
       setIsSubmitting(false);
     }
   };
-
-  if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen py-12 px-4">
