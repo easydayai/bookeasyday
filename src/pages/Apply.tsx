@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,8 +55,26 @@ export default function Apply() {
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if user is authenticated on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to submit an application.",
+          variant: "destructive",
+        });
+        navigate("/login");
+      }
+      setIsCheckingAuth(false);
+    };
+    checkAuth();
+  }, [navigate, toast]);
 
   const [formData, setFormData] = useState<ApplicationFormData>({
     firstName: "",
@@ -200,16 +218,33 @@ export default function Apply() {
 
       // Navigate to checkout
       navigate("/checkout");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting application:", error);
+      
+      const errorMessage = error?.message || "There was an error saving your application. Please try again.";
+      console.error("Detailed error:", {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      });
+      
       toast({
         title: "Submission Error",
-        description: "There was an error saving your application. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
       setIsSubmitting(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-12 px-4">
