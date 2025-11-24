@@ -55,8 +55,15 @@ export default function Apply() {
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Detect in-app browser on mount
+  useEffect(() => {
+    const inAppBrowser = /Instagram|FBAN|FBAV|Twitter|LinkedIn/.test(navigator.userAgent);
+    setIsInAppBrowser(inAppBrowser);
+  }, []);
 
   const [formData, setFormData] = useState<ApplicationFormData>({
     firstName: "",
@@ -124,6 +131,18 @@ export default function Apply() {
     setIsSubmitting(true);
 
     try {
+      // Detect in-app browsers (Instagram, Facebook, etc.)
+      const isInAppBrowser = /Instagram|FBAN|FBAV/.test(navigator.userAgent);
+      
+      if (isInAppBrowser) {
+        toast({
+          title: "Please open in browser",
+          description: "For best results, tap the '...' menu and select 'Open in Safari' or 'Open in Browser'",
+          variant: "destructive",
+          duration: 8000,
+        });
+      }
+
       // Get authenticated user (optional - for linking to account if logged in)
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -187,7 +206,13 @@ export default function Apply() {
         .select()
         .single();
 
-      if (applicationError) throw applicationError;
+      if (applicationError) {
+        // Provide helpful error message for restricted browsers
+        if (/Instagram|FBAN|FBAV/.test(navigator.userAgent)) {
+          throw new Error("Unable to submit from in-app browser. Please open this page in Safari or your default browser by tapping the '...' menu and selecting 'Open in Safari' or 'Open in Browser'.");
+        }
+        throw applicationError;
+      }
 
       // Store application ID in session storage for checkout
       sessionStorage.setItem('applicationId', application.id);
@@ -224,6 +249,15 @@ export default function Apply() {
       <div className="container mx-auto max-w-3xl">
         <Card>
           <CardContent className="pt-6 space-y-6">
+            {isInAppBrowser && (
+              <div className="bg-destructive/10 border border-destructive/50 rounded-lg p-4">
+                <h3 className="font-semibold text-destructive mb-2">⚠️ Open in Browser for Best Experience</h3>
+                <p className="text-sm text-muted-foreground">
+                  You're viewing this in an in-app browser (Instagram/Facebook). For successful submission, 
+                  please tap the menu (•••) and select "Open in Safari" or "Open in Browser".
+                </p>
+              </div>
+            )}
             <div className="space-y-4">
               <div className="text-center space-y-2">
                 <h1 className="text-3xl font-bold">Rent EZ Application</h1>
