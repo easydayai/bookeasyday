@@ -4,10 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileText, Users, Home as HomeIcon, Shield, Clock } from "lucide-react";
 import { ConsentModal } from "@/components/ConsentModal";
+import { usePWAMode } from "@/hooks/use-pwa-mode";
+import HomeMobile from "./HomeMobile";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export default function Home() {
   const [consentModalOpen, setConsentModalOpen] = useState(false);
+  const { isPWAMobile } = usePWAMode();
+
+  // Show mobile PWA layout if in PWA mode on mobile
+  if (isPWAMobile) {
+    return <HomeMobile />;
+  }
 
   return (
     <div>

@@ -53,3 +53,19 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* PWA Mobile Layout - Fixed 9:16 aspect ratio */
+.pwa-mobile-layout {
+  @apply bg-background text-foreground;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pwa-mobile-main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
