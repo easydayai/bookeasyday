@@ -8,6 +8,17 @@ export default function Confirmation() {
   useEffect(() => {
     // Clear application ID from session storage
     sessionStorage.removeItem('applicationId');
+    
+    // Track Tapfiliate conversion
+    const tap = (window as any).tap;
+    if (tap) {
+      tap('conversion', {
+        amount: 20.00,
+        external_id: sessionStorage.getItem('applicationId') || undefined,
+        currency: 'USD'
+      });
+      console.log('Tapfiliate conversion tracked: $20');
+    }
   }, []);
 
   return (
