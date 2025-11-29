@@ -20,38 +20,22 @@ export default function Home() {
 
   return (
     <div>
-      {/* Hero Section */}
+      {/* Hero Section with Chat */}
       <section
         className="relative min-h-[700px] flex items-center justify-center text-center px-4 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroBg})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background"></div>
-        <div className="relative z-10 max-w-4xl mx-auto space-y-6">
-          <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-            Get approved fast — for just $20.
+        <div className="relative z-10 max-w-4xl mx-auto space-y-6 py-8">
+          <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+            Find Your NYC Apartment
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-            Apply once with Rent EZ for only $20. Get approved and moved into an apartment within 30
-            days or your money back.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Apply once for $20. Get approved within 30 days or your money back.
           </p>
-          <p className="text-sm text-muted-foreground/70 max-w-2xl mx-auto">
-            No more paying $100+ per application.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button 
-              size="lg" 
-              className="text-lg h-14 px-8"
-              onClick={() => setConsentModalOpen(true)}
-            >
-              Apply Now – $20
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg h-14 px-8">
-              <Link to="/how-it-works">How It Works</Link>
-            </Button>
-          </div>
           
-          {/* AI Chat Bar */}
-          <div className="pt-6">
+          {/* Main Chat Panel */}
+          <div className="pt-4">
             <HeroChatBar />
           </div>
         </div>
