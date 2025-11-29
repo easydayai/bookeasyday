@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileText, Users, Home as HomeIcon, Shield, Clock } from "lucide-react";
 import { ConsentModal } from "@/components/ConsentModal";
 import { usePWAMode } from "@/hooks/use-pwa-mode";
+import { HeroChatBar } from "@/components/HeroChatBar";
 import HomeMobile from "./HomeMobile";
 import heroBg from "@/assets/hero-bg.jpg";
 
@@ -21,7 +22,7 @@ export default function Home() {
     <div>
       {/* Hero Section */}
       <section
-        className="relative min-h-[600px] flex items-center justify-center text-center px-4 bg-cover bg-center"
+        className="relative min-h-[700px] flex items-center justify-center text-center px-4 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroBg})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background"></div>
@@ -47,6 +48,11 @@ export default function Home() {
             <Button asChild variant="outline" size="lg" className="text-lg h-14 px-8">
               <Link to="/how-it-works">How It Works</Link>
             </Button>
+          </div>
+          
+          {/* AI Chat Bar */}
+          <div className="pt-6">
+            <HeroChatBar />
           </div>
         </div>
       </section>
