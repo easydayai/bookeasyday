@@ -11,11 +11,10 @@ export const Navigation = () => {
 
   const navLinks = [
     { to: "/", label: "Home" },
+    { to: "/listings", label: "Apartments & Rooms" },
     { to: "/how-it-works", label: "How It Works" },
-    { to: "/gallery", label: "Photos" },
     { to: "/testimonials", label: "Testimonials" },
     { to: "/faq", label: "FAQs" },
-    { to: "/policies", label: "Policies" },
     { to: "/contact", label: "Contact" },
     { to: "/login", label: "Check Status" },
   ];
