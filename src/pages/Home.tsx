@@ -28,10 +28,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background"></div>
         <div className="relative z-10 max-w-4xl mx-auto space-y-6 py-8">
           <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-            Find Your NYC Apartment
+            Apply Once. Access Multiple Apartments.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Apply once for $20. Get approved within 30 days or your money back.
+            Apply one time. Browse multiple listings. Move in fast. RentEZ makes finding a place simple without the runaround.
           </p>
           
           {/* Main Chat Panel */}
