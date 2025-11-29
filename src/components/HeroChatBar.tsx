@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { MessageCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +20,6 @@ const faqResponses: Record<string, string> = {
 };
 
 export function HeroChatBar() {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const navigate = useNavigate();
@@ -34,25 +33,37 @@ export function HeroChatBar() {
     setMessages((prev) => [...prev, { sender: "bot", text, buttons }]);
   };
 
-  const handleExpand = () => {
-    setIsExpanded(true);
+  // Show welcome message on mount
+  useEffect(() => {
     if (messages.length === 0) {
       addBotMessage(
-        "Hi! I'm the RentEZ assistant. Tell me what you're looking for or give me a listing number (e.g., #101) and I'll help you apply.",
+        "Hi! I'm the RentEZ assistant. Tell me what you're looking for or give me a listing number (like #101), and I'll help you apply for $20.",
         [
-          { label: "Browse Listings", action: "browse" },
-          { label: "How does it work?", action: "how" },
-          { label: "Apply Now", action: "apply" },
+          { label: "View Available Listings", action: "browse" },
+          { label: "Apply for $20", action: "apply" },
+          { label: "I have a listing number", action: "listing_prompt" },
         ]
       );
     }
-  };
+  }, []);
 
   const handleButtonAction = (action: string) => {
     if (action === "browse") {
       navigate("/listings");
     } else if (action === "apply") {
+      addBotMessage(
+        "Great! Our $20 application fee lets you apply once and get matched with landlords who fit your profile. You'll be approved and moved in within 30 days—or your money back!",
+        [
+          { label: "Start Application Now", action: "start_apply" },
+          { label: "View Listings First", action: "browse" },
+        ]
+      );
+    } else if (action === "start_apply") {
       navigate("/apply");
+    } else if (action === "listing_prompt") {
+      addBotMessage(
+        "Sure! Just type the listing number (like #101 or 101) and I'll show you the details.",
+      );
     } else if (action === "how") {
       addBotMessage(
         "It's easy! Pay just $20, fill out one application, and we match you with landlords. If you're not approved in 30 days, you get a refund!",
@@ -158,86 +169,77 @@ export function HeroChatBar() {
     );
   };
 
-  if (!isExpanded) {
-    return (
-      <button
-        onClick={handleExpand}
-        className="w-full max-w-md mx-auto flex items-center gap-3 px-4 py-3 bg-card/80 backdrop-blur-sm border border-border/50 rounded-full hover:bg-card transition-colors cursor-text"
-      >
-        <MessageCircle className="h-5 w-5 text-primary flex-shrink-0" />
-        <span className="text-muted-foreground text-sm text-left flex-1">
-          Chat with RentEZ AI — Ask about listings or type a listing # (e.g., #101)
-        </span>
-      </button>
-    );
-  }
-
   return (
-    <div className="w-full max-w-md mx-auto bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden shadow-xl">
+    <div className="w-full max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-primary/10 border-b border-border/30">
-        <div className="flex items-center gap-2">
+      <div className="text-center mb-4">
+        <h2 className="text-xl font-semibold text-foreground">Chat with RentEZ</h2>
+        <p className="text-sm text-muted-foreground">Tell us what you're looking for and we'll guide you.</p>
+      </div>
+      
+      {/* Chat Panel */}
+      <div className="bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden shadow-2xl">
+        {/* Chat Header */}
+        <div className="flex items-center gap-2 px-4 py-3 bg-primary/10 border-b border-border/30">
           <MessageCircle className="h-5 w-5 text-primary" />
-          <span className="font-medium text-sm">RentEZ AI Assistant</span>
+          <span className="font-medium text-sm">RentEZ Assistant</span>
+          <span className="ml-auto flex items-center gap-1 text-xs text-green-500">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            Online
+          </span>
         </div>
-        <button
-          onClick={() => setIsExpanded(false)}
-          className="p-1 hover:bg-background/50 rounded-full transition-colors"
-        >
-          <X className="h-4 w-4 text-muted-foreground" />
-        </button>
-      </div>
 
-      {/* Messages */}
-      <div className="h-48 overflow-y-auto p-3 space-y-3">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[85%] px-3 py-2 rounded-xl text-sm whitespace-pre-line ${
-                msg.sender === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-foreground"
-              }`}
-            >
-              {msg.text}
-              {msg.buttons && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {msg.buttons.map((btn, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleButtonAction(btn.action)}
-                      className="px-2 py-1 text-xs bg-primary/20 hover:bg-primary/30 text-primary rounded-md transition-colors"
-                    >
-                      {btn.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+        {/* Messages */}
+        <div className="h-64 overflow-y-auto p-4 space-y-3">
+          {messages.map((msg, idx) => (
+            <div key={idx} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-line ${
+                  msg.sender === "user"
+                    ? "bg-primary text-primary-foreground rounded-br-md"
+                    : "bg-muted text-foreground rounded-bl-md"
+                }`}
+              >
+                {msg.text}
+                {msg.buttons && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {msg.buttons.map((btn, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleButtonAction(btn.action)}
+                        className="px-3 py-1.5 text-xs font-medium bg-primary/20 hover:bg-primary/30 text-primary rounded-full transition-colors border border-primary/30"
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
 
-      {/* Input */}
-      <div className="p-3 border-t border-border/30">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-          className="flex gap-2"
-        >
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a listing # or ask a question..."
-            className="flex-1 h-9 text-sm"
-          />
-          <Button type="submit" size="sm" className="h-9 px-3">
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
+        {/* Input */}
+        <div className="p-4 border-t border-border/30 bg-background/50">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="flex gap-2"
+          >
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a listing # or ask a question..."
+              className="flex-1 h-10"
+            />
+            <Button type="submit" size="sm" className="h-10 px-4">
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );
