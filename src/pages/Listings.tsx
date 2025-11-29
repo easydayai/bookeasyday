@@ -1,20 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, MapPin, DollarSign, Home, Calendar, Wifi, Snowflake, Car, PawPrint } from "lucide-react";
+import { Search, MapPin, DollarSign, Home, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ConsentModal } from "@/components/ConsentModal";
 
 // Import listing images
 import listing1Bedroom from "@/assets/listing-1-bedroom.jpg";
-import listing1Kitchen from "@/assets/listing-1-kitchen.jpg";
 import listing2Bedroom from "@/assets/listing-2-bedroom.jpg";
 import listing3Living from "@/assets/listing-3-living.jpg";
 import listing4Living from "@/assets/listing-4-living.jpg";
-import listing5Studio from "@/assets/listing-5-studio.jpg";
+import listing5Main from "@/assets/listing-5-main.jpg";
 
 interface Listing {
   id: number;
@@ -36,7 +34,7 @@ const listings: Listing[] = [
     price: 850,
     location: "Brooklyn",
     neighborhood: "Bushwick",
-    images: [listing1Bedroom, listing1Kitchen],
+    images: [listing1Bedroom],
     amenities: ["Wifi Included", "Heat & Hot Water", "Near L Train"],
     available: true,
   },
@@ -80,14 +78,13 @@ const listings: Listing[] = [
     price: 1200,
     location: "New York City",
     neighborhood: "New York City",
-    images: [listing5Studio],
+    images: [listing5Main],
     amenities: ["All Utilities", "Furnished Option", "Flexible Lease"],
     available: true,
   },
 ];
 
 const Listings = () => {
-  const [consentModalOpen, setConsentModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
@@ -225,78 +222,61 @@ const Listings = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredListings.map((listing) => (
               <article key={listing.id} className="group">
-                <Card className="overflow-hidden border-border hover:border-primary/50 transition-colors">
-                  {/* Image */}
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      src={listing.images[0]}
-                      alt={`${listing.bedrooms} in ${listing.neighborhood} - Affordable housing New York`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">
-                      {listing.available ? "Available" : "Pending"}
-                    </Badge>
-                  </div>
-
-                  <CardContent className="p-4">
-                    {/* Price and Type */}
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="text-2xl font-bold text-foreground">
-                          ${listing.price}<span className="text-sm font-normal text-muted-foreground">/mo</span>
-                        </p>
-                        <p className="text-sm text-muted-foreground">{listing.bedrooms}</p>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">
-                        {listing.type}
+                <Link to={`/listings/${listing.id}`}>
+                  <Card className="overflow-hidden border-border hover:border-primary/50 transition-colors cursor-pointer">
+                    {/* Image */}
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <img
+                        src={listing.images[0]}
+                        alt={`${listing.bedrooms} in ${listing.neighborhood} - Affordable housing New York`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">
+                        {listing.available ? "Available" : "Pending"}
                       </Badge>
                     </div>
 
-                    {/* Location */}
-                    <div className="flex items-center gap-1 text-muted-foreground mb-3">
-                      <MapPin className="h-4 w-4" />
-                      <span className="text-sm">{listing.neighborhood}, {listing.location}</span>
-                    </div>
+                    <CardContent className="p-4">
+                      {/* Price and Type */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="text-2xl font-bold text-foreground">
+                            ${listing.price}<span className="text-sm font-normal text-muted-foreground">/mo</span>
+                          </p>
+                          <p className="text-sm text-muted-foreground">{listing.bedrooms}</p>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {listing.type}
+                        </Badge>
+                      </div>
 
-                    {/* Amenities */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {listing.amenities.slice(0, 3).map((amenity, idx) => (
-                        <span key={idx} className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
-                          {amenity}
-                        </span>
-                      ))}
-                    </div>
+                      {/* Location */}
+                      <div className="flex items-center gap-1 text-muted-foreground mb-3">
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-sm">{listing.neighborhood}, {listing.location}</span>
+                      </div>
 
-                    {/* Application Info */}
-                    <p className="text-xs text-muted-foreground mb-4">
-                      <span className="text-primary font-medium">$20 Application</span> – Apply once, access multiple listings
-                    </p>
+                      {/* Amenities */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {listing.amenities.slice(0, 3).map((amenity, idx) => (
+                          <span key={idx} className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
+                            {amenity}
+                          </span>
+                        ))}
+                      </div>
 
-                    {/* CTAs */}
-                    <div className="flex gap-2">
-                      <Button 
-                        className="flex-1" 
-                        onClick={() => setConsentModalOpen(true)}
-                      >
-                        Apply for $20
+                      {/* Application Info */}
+                      <p className="text-xs text-muted-foreground mb-4">
+                        <span className="text-primary font-medium">$20 Application</span> – Apply once, access multiple listings
+                      </p>
+
+                      {/* CTA */}
+                      <Button className="w-full">
+                        View Unit Details
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        className="flex-1"
-                        onClick={() => {
-                          setUnitFilter(
-                            listing.type === "Private Room" ? "room" :
-                            listing.type === "Studio" ? "studio" :
-                            listing.type === "2 Bedroom" ? "2br" : "3br"
-                          );
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                      >
-                        View Similar Units
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               </article>
             ))}
           </div>
@@ -331,8 +311,6 @@ const Listings = () => {
           </div>
         </div>
       </footer>
-
-      <ConsentModal open={consentModalOpen} onOpenChange={setConsentModalOpen} />
     </div>
   );
 };
