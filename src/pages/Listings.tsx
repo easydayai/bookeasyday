@@ -6,83 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-// Import listing images
-import listing1Bedroom from "@/assets/listing-1-bedroom.jpg";
-import listing2Bedroom from "@/assets/listing-2-bedroom.jpg";
-import listing3Living from "@/assets/listing-3-living.jpg";
-import listing4Living from "@/assets/listing-4-living.jpg";
-import listing5Main from "@/assets/listing-5-main.jpg";
-
-interface Listing {
-  id: number;
-  type: string;
-  price: number;
-  location: string;
-  neighborhood: string;
-  images: string[];
-  amenities: string[];
-  available: boolean;
-  bedrooms: string;
-}
-
-const listings: Listing[] = [
-  {
-    id: 1,
-    type: "Private Room",
-    bedrooms: "Room in 2BR",
-    price: 850,
-    location: "Brooklyn",
-    neighborhood: "Bushwick",
-    images: [listing1Bedroom],
-    amenities: ["Wifi Included", "Heat & Hot Water", "Near L Train"],
-    available: true,
-  },
-  {
-    id: 2,
-    type: "Private Room",
-    bedrooms: "Room in 3BR",
-    price: 900,
-    location: "Brooklyn",
-    neighborhood: "Brooklyn",
-    images: [listing2Bedroom],
-    amenities: ["Laundry in Building", "Exposed Brick", "Natural Light"],
-    available: true,
-  },
-  {
-    id: 3,
-    type: "2 Bedroom",
-    bedrooms: "2BR Apartment",
-    price: 1000,
-    location: "Brooklyn",
-    neighborhood: "Bed-Stuy",
-    images: [listing3Living],
-    amenities: ["Hardwood Floors", "Large Windows", "Pet Friendly"],
-    available: true,
-  },
-  {
-    id: 4,
-    type: "3 Bedroom",
-    bedrooms: "3BR Apartment",
-    price: 1150,
-    location: "Bronx",
-    neighborhood: "Bronx",
-    images: [listing4Living],
-    amenities: ["Spacious Layout", "Near Transit", "Heat Included"],
-    available: true,
-  },
-  {
-    id: 5,
-    type: "Studio",
-    bedrooms: "Studio",
-    price: 1200,
-    location: "New York City",
-    neighborhood: "New York City",
-    images: [listing5Main],
-    amenities: ["All Utilities", "Furnished Option", "Flexible Lease"],
-    available: true,
-  },
-];
+import { listings } from "@/data/listings";
 
 const Listings = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -93,7 +17,8 @@ const Listings = () => {
 
   const filteredListings = listings.filter((listing) => {
     const matchesSearch = listing.neighborhood.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing.type.toLowerCase().includes(searchQuery.toLowerCase());
+      listing.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      listing.listingNumber.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesLocation = locationFilter === "all" || 
       listing.location.toLowerCase().includes(locationFilter.toLowerCase());
@@ -148,7 +73,7 @@ const Listings = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search by neighborhood or unit type..."
+                  placeholder="Search by neighborhood, unit type, or listing # ..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -227,12 +152,16 @@ const Listings = () => {
                     {/* Image */}
                     <div className="relative aspect-[4/3] overflow-hidden">
                       <img
-                        src={listing.images[0]}
+                        src={listing.thumbnailImage}
                         alt={`${listing.bedrooms} in ${listing.neighborhood} - Affordable housing New York`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">
                         {listing.available ? "Available" : "Pending"}
+                      </Badge>
+                      {/* Listing Number Badge */}
+                      <Badge variant="secondary" className="absolute top-3 right-3 bg-background/90 text-foreground font-bold">
+                        Listing {listing.listingNumber}
                       </Badge>
                     </div>
 
