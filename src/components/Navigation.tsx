@@ -1,17 +1,18 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CartDrawer } from "./CartDrawer";
 import { ConsentModal } from "./ConsentModal";
+import { cn } from "@/lib/utils";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [consentModalOpen, setConsentModalOpen] = useState(false);
+  const location = useLocation();
 
   const navLinks = [
     { to: "/", label: "Home" },
-    { to: "/listings", label: "Apartments & Rooms" },
     { to: "/how-it-works", label: "How It Works" },
     { to: "/testimonials", label: "Testimonials" },
     { to: "/faq", label: "FAQs" },
@@ -33,12 +34,28 @@ export const Navigation = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={cn(
+                  "text-sm transition-colors",
+                  location.pathname === link.to
+                    ? "text-foreground font-medium"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
                 {link.label}
               </Link>
             ))}
             <CartDrawer />
+            {/* Priority: Available Listings button next to Apply */}
+            <Button 
+              variant="outline"
+              size="sm"
+              asChild
+              className={cn(
+                location.pathname === "/listings" && "border-primary text-primary"
+              )}
+            >
+              <Link to="/listings">Available Listings</Link>
+            </Button>
             <Button 
               size="sm"
               onClick={() => setConsentModalOpen(true)}
@@ -67,12 +84,30 @@ export const Navigation = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className="block py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={cn(
+                  "block py-2 text-sm transition-colors",
+                  location.pathname === link.to
+                    ? "text-foreground font-medium"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
+            {/* Priority: Available Listings */}
+            <Link
+              to="/listings"
+              className={cn(
+                "block py-2 text-sm font-medium transition-colors",
+                location.pathname === "/listings"
+                  ? "text-primary"
+                  : "text-foreground hover:text-primary"
+              )}
+              onClick={() => setIsOpen(false)}
+            >
+              ★ Available Listings
+            </Link>
             <Button 
               className="w-full mt-4" 
               size="sm"
