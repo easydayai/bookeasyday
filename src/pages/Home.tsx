@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileText, Users, Home as HomeIcon, Shield, Clock } from "lucide-react";
 import { ConsentModal } from "@/components/ConsentModal";
 import { usePWAMode } from "@/hooks/use-pwa-mode";
-import { HeroChatBar } from "@/components/HeroChatBar";
 import HomeMobile from "./HomeMobile";
 import heroBg from "@/assets/hero-bg.jpg";
 
@@ -20,23 +19,30 @@ export default function Home() {
 
   return (
     <div>
-      {/* Hero Section with Chat */}
+      {/* Hero Section */}
       <section
-        className="relative min-h-[700px] flex items-center justify-center text-center px-4 bg-cover bg-center"
+        className="relative min-h-[600px] flex items-center justify-center text-center px-4 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroBg})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background"></div>
         <div className="relative z-10 max-w-4xl mx-auto space-y-6 py-8">
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-            Apply Once. Access Multiple Apartments.
+          <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+            Get approved fast — for just <span className="text-primary">$20</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Apply one time. Browse multiple listings. Move in fast. RentEZ makes finding a place simple without the runaround.
+            Skip the $100+ application fees. Apply once and get matched with landlords ready to rent to you.
           </p>
-          
-          {/* Main Chat Panel */}
-          <div className="pt-4">
-            <HeroChatBar />
+          <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              className="text-lg h-14 px-8"
+              onClick={() => setConsentModalOpen(true)}
+            >
+              Apply Now – $20
+            </Button>
+            <Button asChild size="lg" variant="outline" className="text-lg h-14 px-8">
+              <Link to="/listings">Browse Listings</Link>
+            </Button>
           </div>
         </div>
       </section>
