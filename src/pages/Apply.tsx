@@ -118,8 +118,13 @@ export default function Apply() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+      // Add new files to existing files instead of replacing
+      setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
     }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const updateFormData = (field: keyof ApplicationFormData, value: string | boolean) => {
@@ -625,10 +630,19 @@ export default function Apply() {
                   </label>
                   {files.length > 0 && (
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Uploaded files:</p>
+                      <p className="text-sm font-medium">Uploaded files ({files.length}):</p>
                       <ul className="text-sm text-muted-foreground space-y-1">
                         {files.map((file, idx) => (
-                          <li key={idx}>• {file.name}</li>
+                          <li key={idx} className="flex items-center justify-between">
+                            <span>• {file.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(idx)}
+                              className="text-destructive hover:underline text-xs ml-2"
+                            >
+                              Remove
+                            </button>
+                          </li>
                         ))}
                       </ul>
                     </div>
