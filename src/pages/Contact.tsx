@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Clock } from "lucide-react";
+import { Mail, Clock, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Contact() {
@@ -82,7 +82,15 @@ export default function Contact() {
 
           <div className="space-y-6">
             <Card>
-              <CardContent className="pt-6 space-y-4">
+            <CardContent className="pt-6 space-y-4">
+                <div className="flex items-start gap-3">
+                  <Phone className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold mb-1">Call Us</h3>
+                    <p className="text-muted-foreground">(929) 794-7240</p>
+                  </div>
+                </div>
+
                 <div className="flex items-start gap-3">
                   <Mail className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                   <div>
