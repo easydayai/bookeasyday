@@ -23,19 +23,13 @@ export default function Confirmation() {
     }
     
     // Track GoAffPro conversion
-    const goaffpro = (window as any).goaffpro;
-    if (goaffpro) {
-      goaffpro('conversion', {
-        order_id: applicationId || `app_${Date.now()}`,
-        total_price: 20.00
-      });
+    (window as any).goaffpro_order = {
+      number: applicationId || `#${Date.now()}`,
+      total: 20
+    };
+    if (typeof (window as any).goaffproTrackConversion !== 'undefined') {
+      (window as any).goaffproTrackConversion((window as any).goaffpro_order);
       console.log('GoAffPro conversion tracked: $20');
-    } else if (typeof (window as any).goaffproTrackConversion !== 'undefined') {
-      (window as any).goaffproTrackConversion({
-        number: applicationId || `app_${Date.now()}`,
-        total_price: 20.00
-      });
-      console.log('GoAffPro conversion tracked via legacy method: $20');
     }
   }, []);
 
