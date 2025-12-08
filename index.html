@@ -29,6 +29,15 @@
       tap('create', 'YOUR_ACCOUNT_ID', { integration: "javascript" });
       tap('detect');
     </script>
+    
+    <!-- GoAffPro Tracking Script -->
+    <script type="text/javascript">
+      (function(w,d,t,g,a,p){
+        w['GoAffProObject']=g;w[g]=w[g]||function(){(w[g].q=w[g].q||[]).push(arguments)};
+        a=d.createElement(t);a.async=1;a.src='https://api.goaffpro.com/loader.js?shop=YOUR_GOAFFPRO_SHOP_ID';
+        p=d.getElementsByTagName(t)[0];p.parentNode.insertBefore(a,p);
+      })(window,document,'script','goaffpro');
+    </script>
   </head>
 
   <body>

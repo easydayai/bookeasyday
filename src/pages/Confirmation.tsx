@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 
 export default function Confirmation() {
   useEffect(() => {
+    const applicationId = sessionStorage.getItem('applicationId');
+    
     // Clear application ID from session storage
     sessionStorage.removeItem('applicationId');
     
@@ -14,10 +16,26 @@ export default function Confirmation() {
     if (tap) {
       tap('conversion', {
         amount: 20.00,
-        external_id: sessionStorage.getItem('applicationId') || undefined,
+        external_id: applicationId || undefined,
         currency: 'USD'
       });
       console.log('Tapfiliate conversion tracked: $20');
+    }
+    
+    // Track GoAffPro conversion
+    const goaffpro = (window as any).goaffpro;
+    if (goaffpro) {
+      goaffpro('conversion', {
+        order_id: applicationId || `app_${Date.now()}`,
+        total_price: 20.00
+      });
+      console.log('GoAffPro conversion tracked: $20');
+    } else if (typeof (window as any).goaffproTrackConversion !== 'undefined') {
+      (window as any).goaffproTrackConversion({
+        number: applicationId || `app_${Date.now()}`,
+        total_price: 20.00
+      });
+      console.log('GoAffPro conversion tracked via legacy method: $20');
     }
   }, []);
 
