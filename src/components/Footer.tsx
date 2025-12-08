@@ -26,7 +26,7 @@ export const Footer = () => {
               Policies
             </Link>
             <a 
-              href="https://rentez.goaffpro.com" 
+              href="https://rentezofficial.goaffpro.com/create-account" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"

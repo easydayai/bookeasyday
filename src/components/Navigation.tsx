@@ -20,6 +20,8 @@ export const Navigation = () => {
     { to: "/login", label: "Check Status" },
   ];
 
+  const affiliateLink = "https://rentezofficial.goaffpro.com/create-account";
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
@@ -44,6 +46,14 @@ export const Navigation = () => {
                 {link.label}
               </Link>
             ))}
+            <a
+              href={affiliateLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Affiliates
+            </a>
             <CartDrawer />
             {/* Priority: Available Listings button next to Apply */}
             <Button 
@@ -108,6 +118,15 @@ export const Navigation = () => {
             >
               ★ Available Listings
             </Link>
+            <a
+              href={affiliateLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              Affiliates
+            </a>
             <Button 
               className="w-full mt-4" 
               size="sm"
