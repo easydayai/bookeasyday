@@ -54,6 +54,17 @@ export const Navigation = () => {
             >
               Affiliates
             </a>
+            <Link
+              to="/affiliate-legal"
+              className={cn(
+                "text-sm transition-colors",
+                location.pathname === "/affiliate-legal"
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Affiliate Info
+            </Link>
             <CartDrawer />
             {/* Priority: Available Listings button next to Apply */}
             <Button 
@@ -127,6 +138,18 @@ export const Navigation = () => {
             >
               Affiliates
             </a>
+            <Link
+              to="/affiliate-legal"
+              className={cn(
+                "block py-2 text-sm transition-colors",
+                location.pathname === "/affiliate-legal"
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              onClick={() => setIsOpen(false)}
+            >
+              Affiliate Info
+            </Link>
             <Button 
               className="w-full mt-4" 
               size="sm"
