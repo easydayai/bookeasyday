@@ -29,6 +29,7 @@ import AdminTeam from "./pages/admin/Team";
 import AdminSettings from "./pages/admin/Settings";
 import Login from "./pages/Login";
 import Status from "./pages/Status";
+import AffiliateLegal from "./pages/AffiliateLegal";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/how-it-works" element={<Layout><HowItWorks /></Layout>} />
           <Route path="/product/:handle" element={<Layout><Product /></Layout>} />
+          <Route path="/affiliate-legal" element={<Layout><AffiliateLegal /></Layout>} />
           
           {/* Applicant Login & Status */}
           <Route path="/login" element={<Login />} />
