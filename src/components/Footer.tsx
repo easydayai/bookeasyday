@@ -25,6 +25,9 @@ export const Footer = () => {
             <Link to="/policies" className="text-muted-foreground hover:text-primary transition-colors">
               Policies
             </Link>
+            <Link to="/affiliate-legal" className="text-muted-foreground hover:text-primary transition-colors">
+              Affiliate Program Info
+            </Link>
             <a 
               href="https://rentezofficial.goaffpro.com/create-account" 
               target="_blank" 
