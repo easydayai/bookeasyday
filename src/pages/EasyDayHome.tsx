@@ -137,7 +137,7 @@ export default function EasyDayHome() {
         </div>
 
         {/* "AI" - Mid Right - Symmetrical to Easy Day */}
-        <div className="absolute top-[40%] right-[15%] md:right-[18%] z-20">
+        <div className="absolute top-[40%] right-[22%] md:right-[25%] z-20">
           <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
             AI
           </span>
