@@ -50,21 +50,23 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        neon: {
-          green: "hsl(150 100% 45%)",
-        },
         electric: {
           blue: "hsl(var(--electric-blue))",
         },
+        cyan: "hsl(var(--cyan))",
         teal: "hsl(var(--teal))",
         magenta: "hsl(var(--magenta))",
+        orange: "hsl(var(--orange))",
+        yellow: "hsl(var(--yellow))",
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
         'gradient-accent': 'var(--gradient-accent)',
+        'gradient-cool': 'var(--gradient-cool)',
       },
       boxShadow: {
         'glow': 'var(--purple-glow)',
+        'rainbow-glow': 'var(--rainbow-glow)',
         'card': 'var(--card-shadow)',
       },
       borderRadius: {
