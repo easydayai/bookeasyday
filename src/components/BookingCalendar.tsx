@@ -150,14 +150,18 @@ export default function BookingCalendar({
 
       console.log("Booking response:", data);
       
-      if (data?.status === "success" || data?.data) {
+      // v1 returns a booking object at the top level (e.g. { id, uid, ... })
+      const bookingId = (data as any)?.id ?? (data as any)?.booking?.id;
+      const bookingUid = (data as any)?.uid ?? (data as any)?.booking?.uid;
+
+      if (bookingId || bookingUid || (data as any)?.status === "success" || (data as any)?.data) {
         setIsBooked(true);
         toast({
           title: "Booking Confirmed!",
           description: "Check your email for confirmation details.",
         });
       } else {
-        throw new Error(data?.error || "Booking failed");
+        throw new Error((data as any)?.error || "Booking failed");
       }
     } catch (err: any) {
       console.error("Booking error:", err);
