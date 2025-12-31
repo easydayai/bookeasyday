@@ -4,7 +4,7 @@ export const AbstractHead = () => {
   return (
     <div 
       className="relative w-full flex items-center justify-center overflow-visible"
-      style={{ height: "90vh", marginTop: "-10vh" }}
+      style={{ height: "100vh", marginTop: "-10vh" }}
     >
       {/* Space ripple effect */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
