@@ -126,18 +126,25 @@ export default function EasyDayHome() {
     <div className="min-h-screen bg-background">
       {/* SECTION 1: Hero - HEAD ONLY (Above the Fold) */}
       <section 
-        className="relative overflow-visible bg-background flex items-center justify-center"
+        className="relative overflow-visible bg-background"
         style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* Abstract Head with Brand Mark */}
-        <div className="relative z-10 w-full h-[90vh] flex flex-col items-center justify-center px-0">
-          {/* Brand Mark */}
-          <div className="flex items-center justify-center mb-6 md:mb-8">
-            <span className="text-4xl md:text-5xl lg:text-6xl font-medium text-foreground tracking-tight font-sans">Easy Day</span>
-            <span className="text-4xl md:text-5xl lg:text-6xl font-semibold ml-3 bg-gradient-to-r from-primary via-electric-blue to-cyan bg-clip-text text-transparent tracking-tight font-sans">AI</span>
-          </div>
-          
-          {/* Abstract Head */}
+        {/* "Easy Day" - Mid Top Left */}
+        <div className="absolute top-[18%] left-[8%] md:left-[12%] z-20">
+          <span className="text-4xl md:text-5xl lg:text-7xl font-medium text-foreground tracking-tight font-sans">
+            Easy Day
+          </span>
+        </div>
+
+        {/* "AI" - Mid Bottom Right */}
+        <div className="absolute bottom-[18%] right-[8%] md:right-[12%] z-20">
+          <span className="text-4xl md:text-5xl lg:text-7xl font-semibold bg-gradient-to-r from-primary via-electric-blue to-cyan bg-clip-text text-transparent tracking-tight font-sans">
+            AI
+          </span>
+        </div>
+
+        {/* Abstract Head - Centered */}
+        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center">
           <AbstractHead />
         </div>
       </section>
