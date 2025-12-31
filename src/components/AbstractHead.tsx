@@ -28,9 +28,9 @@ export const AbstractHead = () => {
           alt="Easy Day AI - Abstract head representing intelligent automation"
           className="animate-head-breathe"
           style={{ 
-            height: "85vh",
+            height: "100vh",
             width: "auto",
-            transform: "scale(1.5)",
+            transform: "scale(1.4)",
             transformOrigin: "center center",
             maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)"
