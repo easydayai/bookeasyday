@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/easy-day-ai-logo-new.png";
+import logo from "@/assets/easy-day-ai-logo-transparent.png";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
