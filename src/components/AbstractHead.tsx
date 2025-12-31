@@ -21,13 +21,18 @@ export const AbstractHead = () => {
         <div className="animate-particle-float-2 absolute top-[22%] left-[20%] w-2 h-2 rounded-full bg-orange/60 blur-[1px]" />
       </div>
 
-      {/* Abstract Head Image */}
-      <img
-        src={abstractHeadImage}
-        alt="Easy Day AI - Abstract head representing intelligent automation"
-        className="relative z-10 w-auto animate-head-breathe border-0 outline-none"
-        style={{ height: "100%", maxHeight: "580px", border: "none", outline: "none" }}
-      />
+      {/* Abstract Head Image with edge fade */}
+      <div className="relative z-10" style={{ height: "100%", maxHeight: "580px" }}>
+        <img
+          src={abstractHeadImage}
+          alt="Easy Day AI - Abstract head representing intelligent automation"
+          className="w-auto h-full animate-head-breathe"
+          style={{ 
+            maskImage: "radial-gradient(ellipse 85% 85% at center, black 60%, transparent 100%)",
+            WebkitMaskImage: "radial-gradient(ellipse 85% 85% at center, black 60%, transparent 100%)"
+          }}
+        />
+      </div>
     </div>
   );
 };
