@@ -2,13 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Easy Day AI Design System
+   Colors: White background, black text, deep purple accent, neon green highlights
+   All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 4%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
+
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 5%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
+
+    --primary: 270 70% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 120 100% 45%;
+    --accent-foreground: 0 0% 5%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 270 70% 50%;
+
+    --radius: 1rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(270 70% 50%) 0%, hsl(270 80% 65%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(270 70% 50%) 0%, hsl(120 100% 45%) 100%);
+    --purple-glow: 0 8px 32px hsl(270 70% 50% / 0.2);
+    --card-shadow: 0 4px 24px hsl(0 0% 0% / 0.06);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 0 0% 5%;
     --foreground: 0 0% 98%;
 
     --card: 0 0% 8%;
@@ -17,7 +56,7 @@ All colors MUST be HSL.
     --popover: 0 0% 6%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 270 80% 65%;
+    --primary: 270 70% 60%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 12%;
@@ -26,21 +65,15 @@ All colors MUST be HSL.
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 270 80% 65%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 120 100% 50%;
+    --accent-foreground: 0 0% 5%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;
-    --ring: 270 80% 65%;
-
-    --radius: 0.75rem;
-
-    --hero-gradient: linear-gradient(135deg, hsl(270 80% 25%) 0%, hsl(0 0% 4%) 100%);
-    --purple-glow: 0 0 40px hsl(270 80% 65% / 0.3);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --ring: 270 70% 60%;
   }
 }
 
@@ -50,7 +83,60 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+
+  .bg-gradient-accent {
+    background-image: var(--gradient-accent);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--purple-glow);
+  }
+
+  .shadow-card {
+    box-shadow: var(--card-shadow);
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out forwards;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
