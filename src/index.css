@@ -166,38 +166,106 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-10px);
   }
 }
 
 @keyframes gradient-flow {
   0%, 100% {
-    filter: hue-rotate(0deg);
+    filter: hue-rotate(0deg) saturate(1);
   }
   50% {
-    filter: hue-rotate(15deg);
+    filter: hue-rotate(10deg) saturate(1.1);
   }
 }
 
 @keyframes neural-pulse {
   0%, 100% {
-    opacity: 0.7;
+    opacity: 0.8;
     transform: scale(1);
   }
   50% {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes neural-pulse-delayed {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
   }
 }
 
 @keyframes space-ripple {
   0%, 100% {
     transform: scale(1);
-    opacity: 0.5;
+    opacity: 0.3;
   }
   50% {
-    transform: scale(1.08);
+    transform: scale(1.15);
+    opacity: 0.5;
+  }
+}
+
+@keyframes particle-float-1 {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(8px, -12px);
     opacity: 0.8;
+  }
+  50% {
+    transform: translate(-5px, -20px);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(12px, -8px);
+    opacity: 0.9;
+  }
+}
+
+@keyframes particle-float-2 {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.6;
+  }
+  33% {
+    transform: translate(-10px, -15px);
+    opacity: 0.9;
+  }
+  66% {
+    transform: translate(6px, -25px);
+    opacity: 0.5;
+  }
+}
+
+@keyframes particle-float-3 {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(15px, -18px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes ribbon-shimmer {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
   }
 }
 
@@ -215,19 +283,39 @@
 }
 
 .animate-neural-pulse {
-  animation: neural-pulse 3s ease-in-out infinite;
+  animation: neural-pulse 4s ease-in-out infinite;
 }
 
 .animate-neural-pulse-delayed {
-  animation: neural-pulse 3s ease-in-out infinite 1.5s;
+  animation: neural-pulse-delayed 4s ease-in-out infinite;
+  animation-delay: 1s;
 }
 
 .animate-space-ripple {
-  animation: space-ripple 8s ease-in-out infinite;
+  animation: space-ripple 10s ease-in-out infinite;
 }
 
 .animate-space-ripple-delayed {
-  animation: space-ripple 8s ease-in-out infinite 4s;
+  animation: space-ripple 12s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.animate-particle-float-1 {
+  animation: particle-float-1 8s ease-in-out infinite;
+}
+
+.animate-particle-float-2 {
+  animation: particle-float-2 10s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-particle-float-3 {
+  animation: particle-float-3 7s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-ribbon-shimmer {
+  animation: ribbon-shimmer 8s ease-in-out infinite;
 }
 
 /* Radial gradient utility */
