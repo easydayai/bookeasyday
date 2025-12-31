@@ -20,7 +20,7 @@ import {
   Users,
   TrendingUp,
 } from "lucide-react";
-import heroLogo from "@/assets/easy-day-ai-logo-new.png";
+import heroLogo from "@/assets/easy-day-ai-logo-transparent.png";
 
 const features = [
   {
