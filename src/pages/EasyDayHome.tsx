@@ -15,12 +15,9 @@ import {
   Dumbbell,
   Home,
   ArrowRight,
-  CheckCircle2,
   Clock,
-  Users,
-  TrendingUp,
 } from "lucide-react";
-import heroLogo from "@/assets/easy-day-ai-logo-transparent.png";
+import { AbstractHead } from "@/components/AbstractHead";
 
 const features = [
   {
@@ -126,29 +123,23 @@ const metrics = [
 
 export default function EasyDayHome() {
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative pt-28 pb-20 md:pt-36 md:pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-teal/3" />
+    <div className="min-h-screen bg-background">
+      {/* Hero Section - Abstract Head Visual */}
+      <section className="relative pt-20 pb-12 md:pt-24 md:pb-16 overflow-visible">
         <div className="container mx-auto px-4 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Hero Logo */}
-            <div className="mb-8 animate-fade-up">
-              <img 
-                src={heroLogo} 
-                alt="Easy Day AI" 
-                className="mx-auto h-40 md:h-56 lg:h-64 w-auto animate-logo-float"
-              />
-            </div>
-            
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
+          {/* Abstract Head Component */}
+          <AbstractHead />
+          
+          {/* Hero Text Content - overlapping lower portion of head */}
+          <div className="relative z-20 max-w-4xl mx-auto text-center -mt-20 md:-mt-32">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-up">
               Automate your business.{" "}
               <span className="text-gradient">Make every day an easy day.</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.2s" }}>
-              Easy Day AI installs AI agents that handle calls, texts, booking, and follow-ups automatically — so you can focus on running your business.
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.1s" }}>
+              Easy Day AI installs AI agents that handle calls, texts, booking, and follow-ups automatically — so you don't have to.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6 animate-fade-up" style={{ animationDelay: "0.2s" }}>
               <Button size="lg" className="text-lg px-8 shadow-glow" asChild>
                 <Link to="/contact">Book an Appointment</Link>
               </Button>
@@ -156,7 +147,7 @@ export default function EasyDayHome() {
                 <Link to="/demo">See Live Demo</Link>
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: "0.4s" }}>
+            <p className="text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: "0.3s" }}>
               Works with your existing phone & calendar • No apps required • Setup in days
             </p>
           </div>
