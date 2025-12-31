@@ -27,8 +27,13 @@ export const Navigation = () => {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center">
-            {/* Logo text removed */}
+          <Link to="/" className="flex items-center gap-1">
+            <span className="text-lg md:text-xl font-black text-foreground/90 tracking-[0.2em]" style={{ fontFamily: "'Nunito', sans-serif" }}>
+              Easy
+            </span>
+            <span className="text-lg md:text-xl font-black tracking-[0.2em] animate-rainbow-text" style={{ fontFamily: "'Nunito', sans-serif" }}>
+              Day
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
