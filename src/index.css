@@ -363,6 +363,37 @@
   animation: color-cycle 6s ease-in-out infinite;
 }
 
+/* Animated rainbow gradient for text */
+@keyframes rainbow-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-rainbow-text {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)),
+    hsl(var(--electric-blue)),
+    hsl(var(--cyan)),
+    hsl(var(--teal)),
+    hsl(var(--magenta)),
+    hsl(var(--orange)),
+    hsl(var(--primary))
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow-shift 4s ease-in-out infinite;
+}
+
 /* Radial gradient utility */
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));
