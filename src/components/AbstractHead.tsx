@@ -22,7 +22,8 @@ export const AbstractHead = () => {
       <img
         src={abstractHeadImage}
         alt="Easy Day AI - Abstract head representing intelligent automation"
-        className="animate-head-breathe relative z-10 w-full h-auto max-h-[80vh] object-contain"
+        className="animate-head-breathe relative z-10 w-full h-auto object-contain"
+        style={{ maxHeight: "95vh", minHeight: "70vh" }}
       />
     </div>
   );

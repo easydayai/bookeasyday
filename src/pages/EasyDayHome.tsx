@@ -130,7 +130,7 @@ export default function EasyDayHome() {
         style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
         {/* Abstract Head - Centered and Dominant */}
-        <div className="relative z-10 w-[85%] max-w-4xl flex items-center justify-center">
+        <div className="relative z-10 w-[95%] max-w-6xl h-[90vh] flex items-center justify-center">
           <AbstractHead />
         </div>
       </section>
