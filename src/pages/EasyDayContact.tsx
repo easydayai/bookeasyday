@@ -1,229 +1,50 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import Cal, { getCalApi } from "@calcom/embed-react";
+import { useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Mail, Phone, Clock } from "lucide-react";
 
-const industries = [
-  "HVAC / Plumbing / Electrical",
-  "Medical / Dental / Medspa",
-  "Auto Repair / Body Shop",
-  "Legal / Professional Services",
-  "Gym / Fitness / Coaching",
-  "Home Services / Cleaning",
-  "Other",
-];
-
-const automationOptions = [
-  { id: "calls", label: "Phone Calls" },
-  { id: "sms", label: "SMS / Text Messages" },
-  { id: "booking", label: "Appointment Booking" },
-  { id: "followups", label: "Follow-ups & Reminders" },
-  { id: "other", label: "Other" },
-];
-
-const calendarSystems = [
-  "Google Calendar",
-  "Cal.com",
-  "Calendly",
-  "Acuity",
-  "Microsoft Outlook",
-  "Other / None",
-];
-
 export default function EasyDayContact() {
-  const { toast } = useToast();
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [selectedAutomations, setSelectedAutomations] = useState<string[]>([]);
-
-  const handleAutomationChange = (id: string, checked: boolean) => {
-    setSelectedAutomations((prev) =>
-      checked ? [...prev, id] : prev.filter((item) => item !== id)
-    );
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitted(true);
-    toast({
-      title: "Request Received",
-      description: "We'll reach out within 24 hours to schedule your automation call.",
-    });
-  };
-
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen pt-24">
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <Card className="max-w-xl mx-auto bg-card border-border/50 shadow-card">
-              <CardContent className="p-12 text-center">
-                <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-10 h-10 text-accent" />
-                </div>
-                <h1 className="text-3xl font-bold mb-4">Thanks for reaching out!</h1>
-                <p className="text-muted-foreground mb-8">
-                  We'll reach out within 24 hours to schedule your automation call.
-                </p>
-                <Button variant="outline" asChild>
-                  <a href="/">Return to Home</a>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-      </div>
-    );
-  }
+  useEffect(() => {
+    (async function () {
+      const cal = await getCalApi();
+      cal("ui", {
+        theme: "light",
+        styles: { branding: { brandColor: "#7c3aed" } },
+        hideEventTypeDetails: false,
+      });
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen pt-24">
       {/* Hero */}
-      <section className="py-16 md:py-20">
+      <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Let's Automate{" "}
-              <span className="text-gradient">Your Business</span>
+              Book Your{" "}
+              <span className="text-gradient">Automation Call</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              Fill out the form below and we'll schedule a call to discuss how Easy Day AI can save you time and capture more revenue.
+              Select a time that works for you and let's discuss how Easy Day AI can automate your business.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Form Section */}
+      {/* Calendar Section */}
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Form */}
+            {/* Cal.com Embed */}
             <div className="lg:col-span-2">
-              <Card className="bg-card border-border/50 shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Book an Appointment</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="businessName">Business Name *</Label>
-                        <Input
-                          id="businessName"
-                          placeholder="Your Business Name"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="industry">Industry *</Label>
-                        <Select required>
-                          <SelectTrigger id="industry">
-                            <SelectValue placeholder="Select your industry" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {industries.map((industry) => (
-                              <SelectItem key={industry} value={industry.toLowerCase()}>
-                                {industry}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="ownerName">Owner Name *</Label>
-                        <Input
-                          id="ownerName"
-                          placeholder="Your Name"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone *</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="(555) 555-5555"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="you@business.com"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label>What do you want to automate?</Label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {automationOptions.map((option) => (
-                          <div key={option.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={option.id}
-                              checked={selectedAutomations.includes(option.id)}
-                              onCheckedChange={(checked) =>
-                                handleAutomationChange(option.id, checked as boolean)
-                              }
-                            />
-                            <Label
-                              htmlFor={option.id}
-                              className="text-sm font-normal cursor-pointer"
-                            >
-                              {option.label}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="calendar">Current Calendar System</Label>
-                      <Select>
-                        <SelectTrigger id="calendar">
-                          <SelectValue placeholder="Select your calendar system" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {calendarSystems.map((system) => (
-                            <SelectItem key={system} value={system.toLowerCase()}>
-                              {system}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="notes">Additional Notes</Label>
-                      <Textarea
-                        id="notes"
-                        placeholder="Tell us about your current challenges or what you're looking to achieve..."
-                        rows={4}
-                      />
-                    </div>
-
-                    <Button type="submit" size="lg" className="w-full shadow-glow">
-                      Book an Appointment
-                    </Button>
-                  </form>
+              <Card className="bg-card border-border/50 shadow-card overflow-hidden">
+                <CardContent className="p-0">
+                  <Cal
+                    calLink="jeremy-rivera-n6ukhk/retell-ai-agent"
+                    style={{ width: "100%", height: "100%", overflow: "scroll" }}
+                    config={{ layout: "month_view" }}
+                  />
                 </CardContent>
               </Card>
             </div>
