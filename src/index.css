@@ -323,6 +323,20 @@
   animation: ribbon-shimmer 8s ease-in-out infinite;
 }
 
+/* AI Glow pulse animation */
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px hsl(var(--primary) / 0.6)) drop-shadow(0 0 40px hsl(var(--cyan) / 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px hsl(var(--primary) / 0.8)) drop-shadow(0 0 60px hsl(var(--cyan) / 0.6)) drop-shadow(0 0 80px hsl(var(--electric-blue) / 0.3));
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
 /* Radial gradient utility */
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));
