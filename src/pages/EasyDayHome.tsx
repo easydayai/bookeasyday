@@ -131,15 +131,15 @@ export default function EasyDayHome() {
       >
         {/* "Easy Day" - Mid Top Left */}
         <div className="absolute top-[38%] left-[8%] md:left-[12%] z-20">
-          <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+          <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
             Easy Day
           </span>
         </div>
 
         {/* "AI" - Mid Right - Symmetrical to Easy Day */}
         <div className="absolute bottom-[42%] right-[8%] md:right-[12%] z-20">
-          <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
-            Ai
+          <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+            AI
           </span>
         </div>
 
