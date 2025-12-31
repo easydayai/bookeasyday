@@ -8,6 +8,7 @@ import logo from "@/assets/easy-day-ai-logo-transparent.png";
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const isHome = location.pathname === "/";
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -18,7 +19,12 @@ export const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm">
+    <nav
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 backdrop-blur-sm",
+        isHome ? "bg-background/30" : "bg-background/95",
+      )}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
