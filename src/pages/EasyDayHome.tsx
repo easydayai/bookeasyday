@@ -146,7 +146,7 @@ export default function EasyDayHome() {
               backgroundImage: "linear-gradient(90deg, hsl(210 100% 55%) 0%, hsl(45 100% 55%) 33%, hsl(320 85% 55%) 66%, hsl(0 85% 55%) 100%)"
             }}
           >
-            AI
+            Ai
           </span>
         </div>
 
