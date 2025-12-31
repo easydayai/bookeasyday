@@ -131,7 +131,7 @@ export default function EasyDayHome() {
           <AbstractHead />
           
           {/* Hero Text Content - overlapping lower portion of head */}
-          <div className="relative z-20 max-w-4xl mx-auto text-center -mt-8 md:-mt-16">
+          <div className="relative z-20 max-w-4xl mx-auto text-center mt-8 md:mt-12">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-up">
               Automate your business.{" "}
               <span className="text-gradient">Make every day an easy day.</span>
