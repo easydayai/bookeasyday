@@ -129,16 +129,16 @@ export default function EasyDayHome() {
         className="relative overflow-visible bg-background"
         style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* "Easy Day" - Left of Head */}
-        <div className="absolute top-1/2 left-[8%] md:left-[12%] -translate-y-1/2 z-20">
-          <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+        {/* "Easy Day" - Left of Head, slightly above center */}
+        <div className="absolute top-[42%] left-[5%] md:left-[8%] lg:left-[12%] z-20">
+          <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground/90 tracking-wide" style={{ fontFamily: "'Nunito', sans-serif" }}>
             Easy Day
           </span>
         </div>
 
-        {/* "AI" - Right of Head */}
-        <div className="absolute top-1/2 right-[8%] md:right-[12%] -translate-y-1/2 z-20">
-          <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+        {/* "AI" - Right of Head, slightly below center for visual balance */}
+        <div className="absolute top-[52%] right-[5%] md:right-[8%] lg:right-[12%] z-20">
+          <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary tracking-wider" style={{ fontFamily: "'Nunito', sans-serif" }}>
             AI
           </span>
         </div>
