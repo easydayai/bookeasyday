@@ -139,11 +139,8 @@ export default function EasyDayHome() {
         {/* "AI" - Right of Head, slightly below center for visual balance */}
         <div className="absolute top-[52%] right-[5%] md:right-[8%] lg:right-[12%] z-20">
           <span 
-            className="text-5xl md:text-6xl lg:text-7xl font-bold text-gradient tracking-wider drop-shadow-lg" 
-            style={{ 
-              fontFamily: "'Nunito', sans-serif",
-              filter: 'drop-shadow(0 0 20px hsl(var(--primary) / 0.6)) drop-shadow(0 0 40px hsl(var(--cyan) / 0.4))'
-            }}
+            className="text-5xl md:text-6xl lg:text-7xl font-bold text-gradient tracking-wider animate-glow-pulse" 
+            style={{ fontFamily: "'Nunito', sans-serif" }}
           >
             AI
           </span>
