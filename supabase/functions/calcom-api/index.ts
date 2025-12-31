@@ -67,32 +67,36 @@ serve(async (req) => {
       }
 
       case "createBooking": {
-        // Create a new booking using v2 API
-        const { eventTypeId, start, attendee, timeZone, metadata } = params;
+        // Create a new booking using v1 API
+        const { eventTypeId, start, attendee, timeZone, metadata, eventTypeSlug, username } = params;
 
-        const headers = {
-          "Authorization": `Bearer ${CALCOM_API_KEY}`,
-          "Content-Type": "application/json",
-          "cal-api-version": "2024-09-04",
-        };
+        // Calculate end time (30 minutes after start by default)
+        const startDate = new Date(start);
+        const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
 
         const bookingData = {
           eventTypeId: Number(eventTypeId),
           start,
-          attendee: {
+          end: endDate.toISOString(),
+          responses: {
             name: attendee.name,
             email: attendee.email,
-            timeZone: timeZone || "America/New_York",
-            language: "en",
+            location: {
+              value: "phone",
+              optionValue: metadata?.phone || ""
+            }
           },
+          timeZone: timeZone || "America/New_York",
+          language: "en",
           metadata: metadata || {},
         };
 
-        console.log("Creating booking:", JSON.stringify(bookingData));
+        console.log("Creating booking with v1 API:", JSON.stringify(bookingData));
 
-        response = await fetch(`${CALCOM_API_V2}/bookings`, {
+        const url = `${CALCOM_API_V1}/bookings?apiKey=${CALCOM_API_KEY}`;
+        response = await fetch(url, {
           method: "POST",
-          headers,
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(bookingData),
         });
         break;
