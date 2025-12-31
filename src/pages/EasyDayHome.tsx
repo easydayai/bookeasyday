@@ -124,42 +124,42 @@ const metrics = [
 export default function EasyDayHome() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section - Abstract Head Visual - Full Viewport Dominance */}
+      {/* SECTION 1: Hero - HEAD ONLY (Above the Fold) */}
       <section 
-        className="relative overflow-visible bg-background"
-        style={{ minHeight: "85vh", paddingTop: "160px", paddingBottom: "120px" }}
+        className="relative overflow-hidden bg-background flex items-center justify-center"
+        style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* Abstract Head - Takes full hero space */}
-        <div className="absolute inset-0 z-0">
+        {/* Abstract Head - Centered and Dominant */}
+        <div className="relative z-10 w-[85%] max-w-4xl flex items-center justify-center">
           <AbstractHead />
         </div>
-        
-        {/* Hero Text Content */}
-        <div 
-          className="relative z-20 flex flex-col justify-end"
-          style={{ marginTop: "120px" }}
-        >
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-up">
-                Automate your business.{" "}
-                <span className="text-gradient">Make every day an easy day.</span>
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.1s" }}>
-                Easy Day AI installs AI agents that handle calls, texts, booking, and follow-ups automatically — so you don't have to.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-                <Button size="lg" className="text-lg px-8 shadow-glow" asChild>
-                  <Link to="/contact">Book an Appointment</Link>
-                </Button>
-                <Button size="lg" variant="outline" className="text-lg px-8" asChild>
-                  <Link to="/demo">See Live Demo</Link>
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: "0.3s" }}>
-                Works with your existing phone & calendar • No apps required • Setup in days
-              </p>
+      </section>
+
+      {/* SECTION 2: Text + CTAs (Below the Fold) */}
+      <section 
+        className="relative bg-background"
+        style={{ paddingTop: "100px", paddingBottom: "100px" }}
+      >
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-up">
+              Automate your business.{" "}
+              <span className="text-gradient">Make every day an easy day.</span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.1s" }}>
+              Easy Day AI installs AI agents that handle calls, texts, booking, and follow-ups automatically — so you don't have to.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6 animate-fade-up" style={{ animationDelay: "0.2s" }}>
+              <Button size="lg" className="text-lg px-8 shadow-glow" asChild>
+                <Link to="/contact">Book an Appointment</Link>
+              </Button>
+              <Button size="lg" variant="outline" className="text-lg px-8" asChild>
+                <Link to="/demo">See Live Demo</Link>
+              </Button>
             </div>
+            <p className="text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: "0.3s" }}>
+              Works with your existing phone & calendar • No apps required • Setup in days
+            </p>
           </div>
         </div>
       </section>
