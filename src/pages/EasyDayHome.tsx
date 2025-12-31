@@ -126,11 +126,11 @@ export default function EasyDayHome() {
     <div className="min-h-screen bg-background">
       {/* SECTION 1: Hero - HEAD ONLY (Above the Fold) */}
       <section 
-        className="relative overflow-hidden bg-background flex items-center justify-center"
+        className="relative overflow-visible bg-background flex items-center justify-center"
         style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* Abstract Head - Centered and Dominant */}
-        <div className="relative z-10 w-[95%] max-w-6xl h-[90vh] flex items-center justify-center">
+        {/* Abstract Head - Centered and Dominant, no container borders */}
+        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center px-0">
           <AbstractHead />
         </div>
       </section>
