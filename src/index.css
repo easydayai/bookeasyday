@@ -337,6 +337,32 @@
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
+/* Color cycling animation for text */
+@keyframes color-cycle {
+  0% {
+    color: hsl(var(--primary));
+  }
+  20% {
+    color: hsl(var(--electric-blue));
+  }
+  40% {
+    color: hsl(var(--cyan));
+  }
+  60% {
+    color: hsl(var(--teal));
+  }
+  80% {
+    color: hsl(var(--magenta));
+  }
+  100% {
+    color: hsl(var(--primary));
+  }
+}
+
+.animate-color-cycle {
+  animation: color-cycle 6s ease-in-out infinite;
+}
+
 /* Radial gradient utility */
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));

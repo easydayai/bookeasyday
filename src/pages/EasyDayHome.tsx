@@ -139,7 +139,7 @@ export default function EasyDayHome() {
         {/* "AI" - Right of Head, slightly below center for visual balance */}
         <div className="absolute top-[52%] right-[5%] md:right-[8%] lg:right-[12%] z-20">
           <span 
-            className="text-5xl md:text-6xl lg:text-7xl font-bold text-gradient tracking-wider animate-head-breathe" 
+            className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-wider animate-head-breathe animate-color-cycle" 
             style={{ fontFamily: "'Nunito', sans-serif" }}
           >
             AI
