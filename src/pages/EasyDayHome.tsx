@@ -129,8 +129,15 @@ export default function EasyDayHome() {
         className="relative overflow-visible bg-background flex items-center justify-center"
         style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* Abstract Head - Centered and Dominant, no container borders */}
-        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center px-0">
+        {/* Abstract Head with Brand Mark */}
+        <div className="relative z-10 w-full h-[90vh] flex flex-col items-center justify-center px-0">
+          {/* Brand Mark */}
+          <div className="flex items-center justify-center mb-6 md:mb-8">
+            <span className="text-4xl md:text-5xl lg:text-6xl font-medium text-foreground tracking-tight font-sans">Easy Day</span>
+            <span className="text-4xl md:text-5xl lg:text-6xl font-semibold ml-3 bg-gradient-to-r from-primary via-electric-blue to-cyan bg-clip-text text-transparent tracking-tight font-sans">AI</span>
+          </div>
+          
+          {/* Abstract Head */}
           <AbstractHead />
         </div>
       </section>
