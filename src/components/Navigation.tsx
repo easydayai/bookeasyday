@@ -27,11 +27,11 @@ export const Navigation = () => {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-xl md:text-2xl font-semibold text-foreground tracking-wide">
+          <Link to="/" className="flex items-center gap-1">
+            <span className="text-xl md:text-2xl font-bold text-foreground tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Easy
             </span>
-            <span className="text-xl md:text-2xl font-semibold tracking-wide animate-rainbow-text">
+            <span className="text-xl md:text-2xl font-bold tracking-tight animate-rainbow-text" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Day
             </span>
           </Link>
