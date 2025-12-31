@@ -131,14 +131,14 @@ export default function EasyDayHome() {
       >
         {/* "Easy Day" - Mid Top Left */}
         <div className="absolute top-[18%] left-[8%] md:left-[12%] z-20">
-          <span className="text-5xl md:text-6xl lg:text-8xl font-medium text-foreground tracking-tight font-sans">
+          <span className="text-3xl md:text-4xl lg:text-5xl font-light text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Inter', sans-serif" }}>
             Easy Day
           </span>
         </div>
 
         {/* "AI" - Mid Right - Symmetrical to Easy Day */}
         <div className="absolute bottom-[42%] right-[8%] md:right-[12%] z-20">
-          <span className="text-5xl md:text-6xl lg:text-8xl font-semibold bg-gradient-to-r from-primary via-electric-blue to-cyan bg-clip-text text-transparent tracking-tight font-sans">
+          <span className="text-5xl md:text-6xl lg:text-8xl font-semibold bg-gradient-to-r from-primary via-electric-blue to-cyan bg-clip-text text-transparent tracking-tight animate-head-breathe" style={{ fontFamily: "'Inter', sans-serif" }}>
             AI
           </span>
         </div>
