@@ -125,14 +125,20 @@ export default function EasyDayHome() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section - Abstract Head Visual - Full Viewport Dominance */}
-      <section className="relative min-h-screen overflow-visible bg-background">
+      <section 
+        className="relative overflow-visible bg-background"
+        style={{ minHeight: "85vh", paddingTop: "160px", paddingBottom: "120px" }}
+      >
         {/* Abstract Head - Takes full hero space */}
         <div className="absolute inset-0 z-0">
           <AbstractHead />
         </div>
         
-        {/* Hero Text Content - positioned at bottom of viewport */}
-        <div className="relative z-20 min-h-screen flex flex-col justify-end pb-16 md:pb-24">
+        {/* Hero Text Content */}
+        <div 
+          className="relative z-20 flex flex-col justify-end"
+          style={{ marginTop: "120px" }}
+        >
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-up">
