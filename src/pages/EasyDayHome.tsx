@@ -144,7 +144,7 @@ export default function EasyDayHome() {
         </div>
 
         {/* Abstract Head - Centered */}
-        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center">
+        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center overflow-visible">
           <AbstractHead />
         </div>
       </section>
