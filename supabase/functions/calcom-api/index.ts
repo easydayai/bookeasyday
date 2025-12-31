@@ -6,7 +6,8 @@ const corsHeaders = {
 };
 
 const CALCOM_API_KEY = Deno.env.get("CALCOM_API_KEY");
-const CALCOM_API_URL = "https://api.cal.com/v2";
+const CALCOM_API_V1 = "https://api.cal.com/v1";
+const CALCOM_API_V2 = "https://api.cal.com/v2";
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -22,47 +23,58 @@ serve(async (req) => {
       throw new Error("CALCOM_API_KEY is not configured");
     }
 
-    const headers = {
-      "Authorization": `Bearer ${CALCOM_API_KEY}`,
-      "Content-Type": "application/json",
-      "cal-api-version": "2024-09-04",
-    };
-
     let response;
 
     switch (action) {
       case "getEventTypes": {
-        // Get user's event types
-        response = await fetch(`${CALCOM_API_URL}/event-types`, {
+        // Get event types using v1 API
+        const url = `${CALCOM_API_V1}/event-types?apiKey=${CALCOM_API_KEY}`;
+        console.log(`Fetching event types from v1 API`);
+        
+        response = await fetch(url, {
           method: "GET",
-          headers,
+          headers: { "Content-Type": "application/json" },
         });
         break;
       }
 
       case "getSlots": {
-        // Get available slots for an event type
-        const { eventTypeId, startTime, endTime, eventTypeSlug, username } = params;
+        // Get available slots using v1 API
+        const { eventTypeId, eventTypeSlug, username, startTime, endTime, timeZone } = params;
         
         const queryParams = new URLSearchParams();
-        if (eventTypeId) queryParams.append("eventTypeId", eventTypeId);
-        if (eventTypeSlug) queryParams.append("eventTypeSlug", eventTypeSlug);
-        if (username) queryParams.append("username", username);
+        queryParams.append("apiKey", CALCOM_API_KEY);
+        
+        if (eventTypeId) {
+          queryParams.append("eventTypeId", eventTypeId.toString());
+        } else if (eventTypeSlug && username) {
+          queryParams.append("eventTypeSlug", eventTypeSlug);
+          queryParams.append("usernameList", username);
+        }
+        
         if (startTime) queryParams.append("startTime", startTime);
         if (endTime) queryParams.append("endTime", endTime);
+        if (timeZone) queryParams.append("timeZone", timeZone);
 
-        console.log(`Fetching slots: ${CALCOM_API_URL}/slots?${queryParams.toString()}`);
+        const url = `${CALCOM_API_V1}/slots?${queryParams.toString()}`;
+        console.log(`Fetching slots from: ${url.replace(CALCOM_API_KEY, "***")}`);
         
-        response = await fetch(`${CALCOM_API_URL}/slots?${queryParams.toString()}`, {
+        response = await fetch(url, {
           method: "GET",
-          headers,
+          headers: { "Content-Type": "application/json" },
         });
         break;
       }
 
       case "createBooking": {
-        // Create a new booking
+        // Create a new booking using v2 API
         const { eventTypeId, start, attendee, timeZone, metadata } = params;
+
+        const headers = {
+          "Authorization": `Bearer ${CALCOM_API_KEY}`,
+          "Content-Type": "application/json",
+          "cal-api-version": "2024-09-04",
+        };
 
         const bookingData = {
           eventTypeId: Number(eventTypeId),
@@ -78,7 +90,7 @@ serve(async (req) => {
 
         console.log("Creating booking:", JSON.stringify(bookingData));
 
-        response = await fetch(`${CALCOM_API_URL}/bookings`, {
+        response = await fetch(`${CALCOM_API_V2}/bookings`, {
           method: "POST",
           headers,
           body: JSON.stringify(bookingData),
@@ -101,6 +113,19 @@ serve(async (req) => {
         JSON.stringify({ error: data.message || "Cal.com API error", details: data }),
         { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Normalize v1 slots response to match expected format
+    if (action === "getSlots" && data.slots) {
+      // v1 API returns { slots: { "date": [{ time: "..." }] } }
+      // Normalize to { data: { "date": [{ start: "..." }] } }
+      const normalizedSlots: Record<string, { start: string }[]> = {};
+      for (const [date, times] of Object.entries(data.slots)) {
+        normalizedSlots[date] = (times as { time: string }[]).map(t => ({ start: t.time }));
+      }
+      return new Response(JSON.stringify({ status: "success", data: normalizedSlots }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(JSON.stringify(data), {
