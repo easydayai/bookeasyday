@@ -139,8 +139,8 @@ export default function EasyDayHome() {
         {/* "AI" - Mid Right - Symmetrical to Easy Day */}
         <div className="absolute bottom-[42%] right-[8%] md:right-[12%] z-20">
           <span 
-            className="text-5xl md:text-6xl lg:text-8xl font-black bg-gradient-to-br from-magenta via-primary to-neon-green bg-clip-text text-transparent tracking-tighter animate-head-breathe drop-shadow-lg" 
-            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif", letterSpacing: "-0.05em" }}
+            className="text-5xl md:text-6xl lg:text-8xl font-black bg-gradient-to-r from-yellow via-orange to-magenta bg-clip-text text-transparent tracking-tighter animate-head-breathe" 
+            style={{ fontFamily: "'Sora', 'Inter', sans-serif", letterSpacing: "-0.03em" }}
           >
             AI
           </span>
