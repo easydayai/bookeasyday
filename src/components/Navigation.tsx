@@ -21,8 +21,9 @@ export const Navigation = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-foreground">Easy Day AI</span>
+          <Link to="/" className="flex items-center">
+            <span className="text-xl font-medium text-foreground tracking-tight">Easy Day</span>
+            <span className="text-xl font-semibold ml-1.5 bg-gradient-to-r from-primary via-electric-blue to-cyan bg-clip-text text-transparent tracking-tight">AI</span>
           </Link>
 
           {/* Desktop Navigation */}
