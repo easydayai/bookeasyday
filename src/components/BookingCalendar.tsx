@@ -20,7 +20,7 @@ interface BookingCalendarProps {
 }
 
 export default function BookingCalendar({ 
-  eventTypeSlug = "retell-ai-agent", 
+  eventTypeSlug = "bookings", 
   username = "jeremy-rivera-n6ukhk",
   eventTypeId
 }: BookingCalendarProps) {
@@ -49,11 +49,10 @@ export default function BookingCalendar({
     }
   }, [eventTypeId]);
 
-  // Fetch slots when date range changes
+  // Fetch slots when date range changes (can work with or without eventTypeId)
   useEffect(() => {
-    if (resolvedEventTypeId) {
-      fetchSlots();
-    }
+    // Allow fetching with either eventTypeId or username/slug
+    fetchSlots();
   }, [currentDate, resolvedEventTypeId]);
 
   const fetchEventTypeId = async () => {
@@ -67,7 +66,7 @@ export default function BookingCalendar({
       console.log("Event types:", data);
       
       // Find the matching event type by slug
-      const eventTypes = data?.data?.eventTypes || data?.data || [];
+      const eventTypes = data?.event_types || data?.data?.eventTypes || data?.data || [];
       const matchingEvent = eventTypes.find((et: any) => et.slug === eventTypeSlug);
       
       if (matchingEvent) {
@@ -76,9 +75,13 @@ export default function BookingCalendar({
       } else if (eventTypes.length > 0) {
         setResolvedEventTypeId(eventTypes[0].id);
         console.log("Using first event type ID:", eventTypes[0].id);
+      } else {
+        // If no event types found, still try to fetch slots with username/slug
+        console.log("No event types found, will use username/slug for slots");
       }
     } catch (err) {
       console.error("Error fetching event types:", err);
+      // Still allow slot fetching even if event types fail
     }
   };
 
