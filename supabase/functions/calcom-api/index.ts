@@ -82,7 +82,7 @@ serve(async (req) => {
             name: attendee.name,
             email: attendee.email,
             location: {
-              value: "phone",
+              value: "userPhone",
               optionValue: metadata?.phone || ""
             }
           },
