@@ -130,16 +130,16 @@ export default function EasyDayHome() {
         style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
         {/* "Easy" - Left of Head */}
-        <div className="absolute top-[42%] left-[5%] md:left-[8%] lg:left-[12%] z-20">
-          <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground/90 tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+        <div className="absolute top-[35%] left-[2%] md:left-[5%] lg:left-[8%] z-20">
+          <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground/90 tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
             Easy
           </span>
         </div>
 
         {/* "Day" - Right of Head */}
-        <div className="absolute top-[42%] right-[5%] md:right-[8%] lg:right-[12%] z-20">
+        <div className="absolute top-[35%] right-[2%] md:right-[5%] lg:right-[8%] z-20">
           <span 
-            className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider animate-head-breathe animate-rainbow-text" 
+            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider animate-head-breathe animate-rainbow-text" 
             style={{ fontFamily: "'Nunito', sans-serif" }}
           >
             Day
