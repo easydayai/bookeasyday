@@ -10,39 +10,50 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 5%;
+    --foreground: 0 0% 15%;
 
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 5%;
+    --card: 0 0% 99%;
+    --card-foreground: 0 0% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
+    --popover-foreground: 0 0% 15%;
 
-    --primary: 270 70% 50%;
+    /* Deep purple from logo */
+    --primary: 270 85% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 0 0% 97%;
+    --secondary-foreground: 0 0% 15%;
 
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 120 100% 45%;
+    /* Neon green accent from logo */
+    --accent: 150 100% 45%;
     --accent-foreground: 0 0% 5%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 270 70% 50%;
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
+    --ring: 270 85% 45%;
 
     --radius: 1rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(270 70% 50%) 0%, hsl(270 80% 65%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(270 70% 50%) 0%, hsl(120 100% 45%) 100%);
-    --purple-glow: 0 8px 32px hsl(270 70% 50% / 0.2);
-    --card-shadow: 0 4px 24px hsl(0 0% 0% / 0.06);
+    /* Logo gradient colors: purple → blue → teal */
+    --gradient-primary: linear-gradient(135deg, hsl(280 80% 50%) 0%, hsl(200 90% 50%) 50%, hsl(175 80% 45%) 100%);
+    /* Accent gradient: purple → magenta → warm orange */
+    --gradient-accent: linear-gradient(135deg, hsl(280 80% 50%) 0%, hsl(320 80% 55%) 50%, hsl(30 90% 55%) 100%);
+    /* Electric blue highlight */
+    --electric-blue: 200 90% 50%;
+    /* Teal highlight */
+    --teal: 175 80% 45%;
+    /* Warm magenta */
+    --magenta: 320 80% 55%;
+    
+    --purple-glow: 0 8px 40px hsl(270 85% 45% / 0.25);
+    --card-shadow: 0 4px 24px hsl(0 0% 0% / 0.04);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -56,7 +67,7 @@
     --popover: 0 0% 6%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 270 70% 60%;
+    --primary: 270 85% 55%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 12%;
@@ -65,7 +76,7 @@
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 120 100% 50%;
+    --accent: 150 100% 50%;
     --accent-foreground: 0 0% 5%;
 
     --destructive: 0 84% 60%;
@@ -73,7 +84,7 @@
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;
-    --ring: 270 70% 60%;
+    --ring: 270 85% 55%;
   }
 }
 
@@ -138,6 +149,29 @@
   to {
     opacity: 1;
   }
+}
+
+/* Logo floating animation */
+@keyframes logo-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes logo-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px hsl(270 85% 45% / 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px hsl(200 90% 50% / 0.4));
+  }
+}
+
+.animate-logo-float {
+  animation: logo-float 4s ease-in-out infinite, logo-glow 3s ease-in-out infinite;
 }
 
 /* PWA Mobile Layout - Fixed 9:16 aspect ratio */
