@@ -28,8 +28,8 @@ export const AbstractHead = () => {
           alt="Easy Day AI - Abstract head representing intelligent automation"
           className="w-auto h-full animate-head-breathe"
           style={{ 
-            maskImage: "radial-gradient(ellipse 85% 85% at center, black 60%, transparent 100%)",
-            WebkitMaskImage: "radial-gradient(ellipse 85% 85% at center, black 60%, transparent 100%)"
+            maskImage: "radial-gradient(ellipse 95% 95% at center, black 75%, transparent 100%)",
+            WebkitMaskImage: "radial-gradient(ellipse 95% 95% at center, black 75%, transparent 100%)"
           }}
         />
       </div>
