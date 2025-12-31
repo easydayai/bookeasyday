@@ -22,7 +22,7 @@ export const AbstractHead = () => {
       </div>
 
       {/* Abstract Head Image with edge fade */}
-      <div className="relative z-10" style={{ height: "100%", maxHeight: "720px" }}>
+      <div className="relative z-10" style={{ height: "100%", maxHeight: "900px" }}>
         <img
           src={abstractHeadImage}
           alt="Easy Day AI - Abstract head representing intelligent automation"
