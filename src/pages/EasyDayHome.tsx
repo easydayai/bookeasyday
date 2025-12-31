@@ -137,7 +137,7 @@ export default function EasyDayHome() {
         </div>
 
         {/* "AI" - Mid Bottom Right */}
-        <div className="absolute bottom-[18%] right-[8%] md:right-[12%] z-20">
+        <div className="absolute bottom-[32%] right-[8%] md:right-[12%] z-20">
           <span className="text-4xl md:text-5xl lg:text-7xl font-semibold bg-gradient-to-r from-primary via-electric-blue to-cyan bg-clip-text text-transparent tracking-tight font-sans">
             AI
           </span>
