@@ -30,7 +30,7 @@ export const AbstractHead = () => {
           style={{ 
             height: "85vh",
             width: "auto",
-            transform: "scale(1.3)",
+            transform: "scale(1.5)",
             transformOrigin: "center center",
             maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)"
