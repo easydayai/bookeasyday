@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import abstractHeadImage from "@/assets/abstract-head.png";
 import {
   MessageSquare,
   Phone,
@@ -124,28 +125,44 @@ const metrics = [
 export default function EasyDayHome() {
   return (
     <div className="min-h-screen bg-background">
-      {/* SECTION 1: Hero - HEAD ONLY (Above the Fold) */}
+      {/* SECTION 1: Hero - Unified Brand Lockup */}
       <section 
-        className="relative overflow-visible bg-background"
-        style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
+        className="relative overflow-visible bg-background flex items-center justify-center"
+        style={{ minHeight: "100vh" }}
       >
-        {/* "Easy Day" - Mid Top Left */}
-        <div className="absolute top-[38%] left-[8%] md:left-[12%] z-20">
-          <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+        {/* Brand Lockup - Single Horizontal Container */}
+        <div className="flex items-center justify-center gap-6 md:gap-8 z-20">
+          {/* Easy Day */}
+          <span 
+            className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-foreground tracking-tight animate-head-breathe"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
             Easy Day
           </span>
-        </div>
-
-        {/* "AI" - Mid Right - Symmetrical to Easy Day */}
-        <div className="absolute top-[40%] right-[22%] md:right-[25%] z-20">
-          <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+          
+          {/* Head Symbol - Sized to match text height */}
+          <div className="relative flex items-center justify-center">
+            {/* Subtle glow behind head */}
+            <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+              <div className="animate-space-ripple absolute w-[200%] aspect-square rounded-full bg-gradient-radial from-primary/10 via-cyan/5 to-transparent blur-2xl" />
+            </div>
+            <img
+              src={abstractHeadImage}
+              alt="Easy Day AI"
+              className="animate-head-breathe relative z-10 h-14 md:h-16 lg:h-[62px] w-auto object-contain"
+            />
+          </div>
+          
+          {/* AI - with gradient */}
+          <span 
+            className="text-4xl md:text-5xl lg:text-[56px] font-bold bg-clip-text text-transparent animate-head-breathe"
+            style={{ 
+              fontFamily: "'Inter', sans-serif",
+              backgroundImage: "linear-gradient(90deg, hsl(210 100% 55%) 0%, hsl(280 85% 55%) 50%, hsl(320 85% 55%) 100%)"
+            }}
+          >
             AI
           </span>
-        </div>
-
-        {/* Abstract Head - Centered */}
-        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center overflow-visible">
-          <AbstractHead />
         </div>
       </section>
 
