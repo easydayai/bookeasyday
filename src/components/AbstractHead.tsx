@@ -22,12 +22,15 @@ export const AbstractHead = () => {
       </div>
 
       {/* Abstract Head Image with edge fade */}
-      <div className="relative z-10" style={{ height: "100%", maxHeight: "1100px" }}>
+      <div className="relative z-10 h-full flex items-center justify-center">
         <img
           src={abstractHeadImage}
           alt="Easy Day AI - Abstract head representing intelligent automation"
-          className="w-auto h-full animate-head-breathe"
+          className="animate-head-breathe"
           style={{ 
+            height: "100vh",
+            maxHeight: "1100px",
+            width: "auto",
             maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)"
           }}
