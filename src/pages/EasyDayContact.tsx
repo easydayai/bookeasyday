@@ -1,20 +1,8 @@
-import Cal, { getCalApi } from "@calcom/embed-react";
-import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Mail, Phone, Clock } from "lucide-react";
+import BookingCalendar from "@/components/BookingCalendar";
 
 export default function EasyDayContact() {
-  useEffect(() => {
-    (async function () {
-      const cal = await getCalApi();
-      cal("ui", {
-        theme: "light",
-        styles: { branding: { brandColor: "#7c3aed" } },
-        hideEventTypeDetails: false,
-      });
-    })();
-  }, []);
-
   return (
     <div className="min-h-screen pt-24">
       {/* Hero */}
@@ -36,17 +24,9 @@ export default function EasyDayContact() {
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Cal.com Embed */}
+            {/* Custom Booking Calendar */}
             <div className="lg:col-span-2">
-              <Card className="bg-card border-border/50 shadow-card overflow-hidden">
-                <CardContent className="p-0">
-                  <Cal
-                    calLink="jeremy-rivera-n6ukhk/retell-ai-agent"
-                    style={{ width: "100%", height: "100%", overflow: "scroll" }}
-                    config={{ layout: "month_view" }}
-                  />
-                </CardContent>
-              </Card>
+              <BookingCalendar />
             </div>
 
             {/* Contact Info */}
