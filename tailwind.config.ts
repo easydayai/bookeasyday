@@ -51,8 +51,13 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         neon: {
-          green: "hsl(120 100% 45%)",
+          green: "hsl(150 100% 45%)",
         },
+        electric: {
+          blue: "hsl(var(--electric-blue))",
+        },
+        teal: "hsl(var(--teal))",
+        magenta: "hsl(var(--magenta))",
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
