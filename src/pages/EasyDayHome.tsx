@@ -129,15 +129,11 @@ export default function EasyDayHome() {
         className="relative overflow-visible bg-background"
         style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* "Easy Day" - Mid Top Left */}
-        <div className="absolute top-[38%] left-[8%] md:left-[12%] z-20">
+        {/* "Easy Day" and "AI" - Centered Symmetrically */}
+        <div className="absolute top-[38%] left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 md:gap-6">
           <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
             Easy Day
           </span>
-        </div>
-
-        {/* "AI" - Mid Right - Symmetrical to Easy Day */}
-        <div className="absolute top-[40%] right-[22%] md:right-[25%] z-20">
           <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
             AI
           </span>
