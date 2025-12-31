@@ -139,7 +139,7 @@ export default function EasyDayHome() {
         {/* "AI" - Mid Right - Symmetrical to Easy Day */}
         <div className="absolute bottom-[42%] right-[8%] md:right-[12%] z-20">
           <span 
-            className="text-5xl md:text-6xl lg:text-8xl font-black bg-clip-text text-transparent animate-head-breathe" 
+            className="text-3xl md:text-4xl lg:text-5xl font-black bg-clip-text text-transparent animate-head-breathe" 
             style={{ 
               fontFamily: "Outfit, sans-serif", 
               fontWeight: 900,
