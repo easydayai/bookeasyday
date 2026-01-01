@@ -124,7 +124,7 @@ export default function BookingCalendar({
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedTime || !name || !email) {
+    if (!selectedTime || !name || !email || !phone) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -357,13 +357,14 @@ export default function BookingCalendar({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone (optional)</Label>
+              <Label htmlFor="phone">Phone *</Label>
               <Input
                 id="phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="(555) 555-5555"
+                required
               />
             </div>
 
