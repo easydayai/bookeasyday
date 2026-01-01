@@ -209,18 +209,31 @@ export default function BookingCalendar({
             {selectedTime && format(parseISO(selectedTime), "EEEE, MMMM d 'at' h:mm a")}
           </p>
           <p className="text-sm text-muted-foreground mb-8">
-            A confirmation email has been sent to {email}
+            A confirmation email has been sent to {email} with options to reschedule or cancel.
           </p>
-          <Button variant="outline" onClick={() => {
-            setIsBooked(false);
-            setSelectedDate(null);
-            setSelectedTime(null);
-            setName("");
-            setEmail("");
-            setPhone("");
-          }}>
-            Book Another Appointment
-          </Button>
+          
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsBooked(false);
+                setSelectedDate(null);
+                setSelectedTime(null);
+                setName("");
+                setEmail("");
+                setPhone("");
+              }}
+            >
+              Book Another Appointment
+            </Button>
+          </div>
+          
+          <p className="text-xs text-muted-foreground">
+            Need to cancel or reschedule? Check your confirmation email or contact us at{" "}
+            <a href="mailto:support@easyday.ai" className="text-primary hover:underline">
+              support@easyday.ai
+            </a>
+          </p>
         </CardContent>
       </Card>
     );
