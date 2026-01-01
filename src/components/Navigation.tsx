@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/easy-day-ai-logo-transparent.png";
+import LogoInsignia from "@/components/LogoInsignia";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,7 +28,7 @@ export const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
-            {/* Logo text removed */}
+            <LogoInsignia className="h-8 w-8" />
           </Link>
 
           {/* Desktop Navigation */}
