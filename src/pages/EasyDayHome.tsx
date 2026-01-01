@@ -124,48 +124,12 @@ const metrics = [
 
 export default function EasyDayHome() {
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       {/* SECTION 1: Hero - HEAD ONLY (Above the Fold) */}
       <section 
-        className="relative overflow-hidden bg-background"
+        className="relative overflow-visible bg-background"
         style={{ minHeight: "85vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* Corner Particles - Top Left */}
-        <div className="absolute top-0 left-0 w-48 h-48 z-30 pointer-events-none">
-          <div className="animate-particle-float-1 absolute top-4 left-4 w-1 h-1 rounded-full bg-primary/50 blur-[0.3px]" />
-          <div className="animate-particle-float-2 absolute top-8 left-12 w-1.5 h-1.5 rounded-full bg-cyan/40 blur-[0.5px]" />
-          <div className="animate-particle-float-3 absolute top-16 left-6 w-1 h-1 rounded-full bg-magenta/50 blur-[0.3px]" />
-          <div className="animate-particle-float-1 absolute top-12 left-20 w-1.5 h-1.5 rounded-full bg-electric-blue/40 blur-[0.5px]" />
-          <div className="animate-particle-float-2 absolute top-24 left-16 w-1 h-1 rounded-full bg-orange/40 blur-[0.3px]" />
-        </div>
-
-        {/* Corner Particles - Top Right */}
-        <div className="absolute top-0 right-0 w-48 h-48 z-30 pointer-events-none">
-          <div className="animate-particle-float-2 absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-cyan/50 blur-[0.3px]" />
-          <div className="animate-particle-float-1 absolute top-10 right-14 w-1 h-1 rounded-full bg-primary/40 blur-[0.5px]" />
-          <div className="animate-particle-float-3 absolute top-18 right-8 w-1.5 h-1.5 rounded-full bg-magenta/40 blur-[0.5px]" />
-          <div className="animate-particle-float-2 absolute top-14 right-24 w-1 h-1 rounded-full bg-teal/50 blur-[0.3px]" />
-          <div className="animate-particle-float-1 absolute top-28 right-12 w-1 h-1 rounded-full bg-orange/40 blur-[0.3px]" />
-        </div>
-
-        {/* Corner Particles - Bottom Left */}
-        <div className="absolute bottom-0 left-0 w-48 h-48 z-30 pointer-events-none">
-          <div className="animate-particle-float-3 absolute bottom-4 left-4 w-1 h-1 rounded-full bg-magenta/50 blur-[0.3px]" />
-          <div className="animate-particle-float-1 absolute bottom-12 left-10 w-1.5 h-1.5 rounded-full bg-cyan/40 blur-[0.5px]" />
-          <div className="animate-particle-float-2 absolute bottom-20 left-6 w-1 h-1 rounded-full bg-primary/40 blur-[0.3px]" />
-          <div className="animate-particle-float-3 absolute bottom-8 left-22 w-1.5 h-1.5 rounded-full bg-electric-blue/40 blur-[0.5px]" />
-          <div className="animate-particle-float-1 absolute bottom-24 left-18 w-1 h-1 rounded-full bg-teal/50 blur-[0.3px]" />
-        </div>
-
-        {/* Corner Particles - Bottom Right */}
-        <div className="absolute bottom-0 right-0 w-48 h-48 z-30 pointer-events-none">
-          <div className="animate-particle-float-1 absolute bottom-4 right-4 w-1.5 h-1.5 rounded-full bg-primary/50 blur-[0.3px]" />
-          <div className="animate-particle-float-3 absolute bottom-10 right-12 w-1 h-1 rounded-full bg-orange/40 blur-[0.5px]" />
-          <div className="animate-particle-float-2 absolute bottom-18 right-6 w-1.5 h-1.5 rounded-full bg-cyan/40 blur-[0.5px]" />
-          <div className="animate-particle-float-1 absolute bottom-14 right-22 w-1 h-1 rounded-full bg-magenta/50 blur-[0.3px]" />
-          <div className="animate-particle-float-3 absolute bottom-26 right-16 w-1 h-1 rounded-full bg-teal/40 blur-[0.3px]" />
-        </div>
-
         {/* "Easy" - Left of Head */}
         <div className="absolute top-[35%] left-[8%] md:left-[12%] lg:left-[18%] z-20">
           <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground/90 tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
@@ -184,7 +148,7 @@ export default function EasyDayHome() {
         </div>
 
         {/* Abstract Head - Centered */}
-        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center overflow-hidden pt-16">
+        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center overflow-visible">
           <AbstractHead />
         </div>
       </section>
