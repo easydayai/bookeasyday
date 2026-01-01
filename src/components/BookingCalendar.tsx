@@ -33,6 +33,7 @@ export default function BookingCalendar({
   const [isBooking, setIsBooking] = useState(false);
   const [isBooked, setIsBooked] = useState(false);
   const [resolvedEventTypeId, setResolvedEventTypeId] = useState<number | null>(eventTypeId || null);
+  const [eventLength, setEventLength] = useState<number>(15); // Default to 15 minutes
   
   // Form state
   const [name, setName] = useState("");
@@ -71,10 +72,12 @@ export default function BookingCalendar({
       
       if (matchingEvent) {
         setResolvedEventTypeId(matchingEvent.id);
-        console.log("Resolved event type ID:", matchingEvent.id);
+        setEventLength(matchingEvent.length || 15);
+        console.log("Resolved event type ID:", matchingEvent.id, "length:", matchingEvent.length);
       } else if (eventTypes.length > 0) {
         setResolvedEventTypeId(eventTypes[0].id);
-        console.log("Using first event type ID:", eventTypes[0].id);
+        setEventLength(eventTypes[0].length || 15);
+        console.log("Using first event type ID:", eventTypes[0].id, "length:", eventTypes[0].length);
       } else {
         // If no event types found, still try to fetch slots with username/slug
         console.log("No event types found, will use username/slug for slots");
@@ -136,6 +139,7 @@ export default function BookingCalendar({
         body: {
           action: "createBooking",
           eventTypeId: resolvedEventTypeId,
+          eventLength: eventLength,
           start: selectedTime,
           attendee: {
             name,

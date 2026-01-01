@@ -68,11 +68,12 @@ serve(async (req) => {
 
       case "createBooking": {
         // Create a new booking using v1 API
-        const { eventTypeId, start, attendee, timeZone, metadata, eventTypeSlug, username } = params;
+        const { eventTypeId, start, attendee, timeZone, metadata, eventLength } = params;
 
-        // Calculate end time (30 minutes after start by default)
+        // Use provided event length or default to 15 minutes
+        const lengthMinutes = eventLength || 15;
         const startDate = new Date(start);
-        const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
+        const endDate = new Date(startDate.getTime() + lengthMinutes * 60 * 1000);
 
         const bookingData = {
           eventTypeId: Number(eventTypeId),
