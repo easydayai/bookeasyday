@@ -18,6 +18,7 @@ import {
   Clock,
 } from "lucide-react";
 import { AbstractHead } from "@/components/AbstractHead";
+import { RainbowParticles } from "@/components/RainbowParticles";
 
 const features = [
   {
@@ -154,10 +155,11 @@ export default function EasyDayHome() {
 
       {/* SECTION 2: Text + CTAs (Below the Fold) */}
       <section 
-        className="relative bg-background"
+        className="relative bg-background overflow-hidden"
         style={{ paddingTop: "100px", paddingBottom: "100px" }}
       >
-        <div className="container mx-auto px-4">
+        <RainbowParticles density="medium" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-up">
               Automate your business.{" "}
@@ -182,8 +184,9 @@ export default function EasyDayHome() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-secondary/30">
-        <div className="container mx-auto px-4">
+      <section className="relative py-20 bg-secondary/30 overflow-hidden">
+        <RainbowParticles density="high" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What Easy Day AI Automates</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -207,8 +210,9 @@ export default function EasyDayHome() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="relative py-20 overflow-hidden">
+        <RainbowParticles density="low" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -231,8 +235,9 @@ export default function EasyDayHome() {
       </section>
 
       {/* Industries Section */}
-      <section className="py-20 bg-secondary/30">
-        <div className="container mx-auto px-4">
+      <section className="relative py-20 bg-secondary/30 overflow-hidden">
+        <RainbowParticles density="high" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Who Easy Day AI Is Built For</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -259,7 +264,7 @@ export default function EasyDayHome() {
                       <span className="text-muted-foreground">{industry.solution}</span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-accent font-medium shrink-0">Result:</span>
+                      <span className="text-[hsl(var(--cyan))] font-medium shrink-0">Result:</span>
                       <span className="text-foreground font-medium">{industry.outcome}</span>
                     </div>
                   </div>
@@ -271,8 +276,9 @@ export default function EasyDayHome() {
       </section>
 
       {/* Credibility Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="relative py-20 overflow-hidden">
+        <RainbowParticles density="medium" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Trusted by Growing Businesses</h2>
             <p className="text-muted-foreground">Early access automation partners onboarding now.</p>
@@ -294,7 +300,7 @@ export default function EasyDayHome() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-1 mb-3">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <span key={star} className="text-accent">★</span>
+                      <span key={star} className="text-[hsl(var(--orange))]">★</span>
                     ))}
                   </div>
                   <p className="text-muted-foreground mb-4 italic">
@@ -315,8 +321,9 @@ export default function EasyDayHome() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 bg-gradient-primary">
-        <div className="container mx-auto px-4 text-center">
+      <section className="relative py-20 bg-gradient-primary overflow-hidden">
+        <RainbowParticles density="high" className="opacity-30" />
+        <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
             Ready to make your business easier to run?
           </h2>
