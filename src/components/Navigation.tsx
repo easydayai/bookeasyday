@@ -26,7 +26,7 @@ export const Navigation = () => {
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-12">
+        <div className="flex items-center justify-between h-10">
           <Link to="/" className="flex items-center">
             <LogoInsignia className="h-8 w-8" />
           </Link>
