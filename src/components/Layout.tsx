@@ -22,7 +22,6 @@ export const Layout = ({ children }: LayoutProps) => {
       {/* Show floating chat bubble only on non-homepage */}
       {!isPWAMobile && !isHomepage && <Chatbot />}
       {!isPWAMobile && <Footer />}
-      <PWAInstallBanner />
     </div>
   );
 };
