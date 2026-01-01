@@ -40,8 +40,8 @@ export default function BookingCalendar({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
-  // Generate days to display (2 weeks)
-  const days = Array.from({ length: 28 }, (_, i) => addDays(currentDate, i));
+  // Generate days to display (3 rows = 21 days)
+  const days = Array.from({ length: 21 }, (_, i) => addDays(currentDate, i));
 
   // Fetch event type ID if not provided
   useEffect(() => {
@@ -92,7 +92,7 @@ export default function BookingCalendar({
     setIsLoadingSlots(true);
     try {
       const startTime = currentDate.toISOString();
-      const endTime = addDays(currentDate, 28).toISOString();
+      const endTime = addDays(currentDate, 21).toISOString();
 
       const { data, error } = await supabase.functions.invoke("calcom-api", {
         body: {
