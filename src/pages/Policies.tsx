@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { Shield, FileText, HeadphonesIcon } from "lucide-react";
 
 export default function Policies() {
   return (
@@ -9,7 +9,7 @@ export default function Policies() {
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold">Policies & Terms</h1>
             <p className="text-xl text-muted-foreground">
-              Everything you need to know about working with Rent EZ
+              Everything you need to know about working with Easy Day AI
             </p>
           </div>
 
@@ -17,78 +17,81 @@ export default function Policies() {
             <CardContent className="pt-6 space-y-6">
               <section className="space-y-4">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <CheckCircle className="h-6 w-6 text-primary" />
-                  30-Day Move-In Money-Back Policy
+                  <Shield className="h-6 w-6 text-primary" />
+                  Privacy Policy
                 </h2>
                 <div className="space-y-3 text-muted-foreground">
                   <p>
-                    After you are fully approved by Rent EZ and have paid the $20 application fee, we
-                    guarantee that we will help you secure an approved move-in within 30 days from
-                    the date of your approval.
+                    Easy Day AI takes your privacy seriously. We collect business information including
+                    your name, contact details, and business data solely for the purpose of providing
+                    our AI automation services.
                   </p>
-                  <p>
-                    If we are unable to help you move into an apartment within this 30-day period,
-                    you may request a full refund of your $20 application fee.
-                  </p>
-                  <p className="font-semibold text-foreground">This guarantee is subject to the following conditions:</p>
+                  <p>Your information is used to:</p>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li>
-                      You must respond to all communication from Rent EZ and our rental specialists
-                      in a timely manner
-                    </li>
-                    <li>
-                      You must provide accurate, complete, and truthful information and documentation
-                    </li>
-                    <li>
-                      You must cooperate with the process and not repeatedly reject reasonable
-                      listings that match your stated criteria
-                    </li>
-                    <li>
-                      You must meet the eligibility requirements outlined in our Basic Eligibility
-                      section
-                    </li>
-                    <li>
-                      The guarantee does not apply if there is evidence of fraud, false documents, or
-                      non-cooperation
-                    </li>
+                    <li>Configure and deploy AI agents for your business</li>
+                    <li>Handle calls, texts, and booking on your behalf</li>
+                    <li>Communicate with you about your service status</li>
+                    <li>Improve our AI capabilities and services</li>
                   </ul>
                   <p>
-                    To request a refund, contact us at refunds@rentez.com with your application
-                    details within 60 days of your approval date.
+                    We use industry-standard security measures to protect your data. We do not sell
+                    your personal or business information to third parties. We may process your
+                    customer interactions through our AI systems to provide the automation services.
+                  </p>
+                  <p>
+                    You have the right to request access to, correction of, or deletion of your
+                    information at any time by contacting privacy@easyday.ai.
                   </p>
                 </div>
               </section>
 
               <section className="space-y-4">
-                <h2 className="text-2xl font-bold">Basic Eligibility Requirements</h2>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <FileText className="h-6 w-6 text-primary" />
+                  Terms of Service
+                </h2>
                 <div className="space-y-3 text-muted-foreground">
-                  <p>To qualify for Rent EZ services, applicants must:</p>
+                  <p>
+                    Easy Day AI provides AI-powered automation services including call handling,
+                    text messaging, booking, and follow-up systems for service businesses.
+                  </p>
+                  <p>By using our service, you agree to:</p>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li>
-                      Have verifiable income from employment, self-employment, benefits, or other
-                      legitimate sources
-                    </li>
-                    <li>
-                      Meet minimum income requirements (typically 2.5-3x the monthly rent, though
-                      this varies by landlord)
-                    </li>
-                    <li>
-                      Pass background and credit screening criteria set by landlords and property
-                      managers
-                    </li>
-                    <li>
-                      Have no active serious evictions or recent violent felony convictions (some
-                      exceptions may apply based on circumstances and time passed)
-                    </li>
-                    <li>
-                      Be able to provide required documentation including ID, bank statements, pay
-                      stubs, and references
-                    </li>
+                    <li>Provide accurate business and contact information</li>
+                    <li>Use the service for legitimate business purposes only</li>
+                    <li>Comply with all applicable laws regarding automated communications</li>
+                    <li>Not use the service for spam, harassment, or fraudulent activities</li>
+                    <li>Maintain appropriate customer consent for automated messaging</li>
                   </ul>
                   <p>
-                    Please note: Meeting these basic requirements does not guarantee approval by all
-                    landlords. Final approval decisions are made by individual property owners and
-                    managers based on their specific criteria.
+                    Easy Day AI reserves the right to suspend or terminate service for violations
+                    of these terms or for any activity that may harm our platform or other users.
+                  </p>
+                  <p>
+                    Service availability and AI performance may vary. We continuously improve our
+                    systems but cannot guarantee 100% uptime or accuracy.
+                  </p>
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <HeadphonesIcon className="h-6 w-6 text-primary" />
+                  Support & Contact
+                </h2>
+                <div className="space-y-3 text-muted-foreground">
+                  <p>
+                    Need help with your Easy Day AI setup or have questions about our services?
+                    Our team is here to assist you.
+                  </p>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>General inquiries: hello@easyday.ai</li>
+                    <li>Technical support: support@easyday.ai</li>
+                    <li>Privacy concerns: privacy@easyday.ai</li>
+                  </ul>
+                  <p>
+                    We aim to respond to all inquiries within 24-48 business hours. For urgent
+                    issues, please book a call through our scheduling system.
                   </p>
                 </div>
               </section>
@@ -96,92 +99,17 @@ export default function Policies() {
               <section className="space-y-4">
                 <h2 className="text-2xl font-bold">Refund Policy</h2>
                 <div className="space-y-3 text-muted-foreground">
-                  <p className="font-semibold text-foreground">Refunds are granted when:</p>
+                  <p>
+                    We want you to be completely satisfied with Easy Day AI. If you're not happy
+                    with our service:
+                  </p>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li>
-                      We are unable to help you secure an approved move-in within 30 days of your
-                      approval date (subject to conditions above)
-                    </li>
-                    <li>
-                      There is a technical error or service failure on our part that prevents us from
-                      providing the service
-                    </li>
-                  </ul>
-                  <p className="font-semibold text-foreground">Refunds are NOT granted when:</p>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>You do not meet basic eligibility requirements</li>
-                    <li>
-                      You fail to respond to communications or provide requested documentation in a
-                      timely manner
-                    </li>
-                    <li>You repeatedly reject reasonable property matches without valid reasons</li>
-                    <li>
-                      You provide false or fraudulent information or documentation
-                    </li>
-                    <li>You violate our terms of service</li>
-                    <li>You decide to stop looking for housing or move out of the area</li>
+                    <li>Cancel anytime during your trial period for a full refund</li>
+                    <li>Monthly subscriptions can be cancelled before the next billing cycle</li>
+                    <li>Setup fees are non-refundable once AI agents are deployed</li>
                   </ul>
                   <p>
-                    All refund requests must be submitted via email to refunds@rentez.com and will be
-                    reviewed within 7-10 business days.
-                  </p>
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h2 className="text-2xl font-bold">Privacy Policy</h2>
-                <div className="space-y-3 text-muted-foreground">
-                  <p>
-                    Rent EZ takes your privacy seriously. We collect personal information including
-                    your name, contact details, employment information, income documentation, and
-                    background details solely for the purpose of helping you secure rental housing.
-                  </p>
-                  <p>Your information is used to:</p>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Match you with suitable rental properties and specialists</li>
-                    <li>Submit applications to landlords and property managers on your behalf</li>
-                    <li>Communicate with you about your application status</li>
-                    <li>Improve our services</li>
-                  </ul>
-                  <p>
-                    We use industry-standard security measures to protect your data. We do not sell
-                    your personal information to third parties. We may share your information with
-                    rental specialists, landlords, and property managers as necessary to facilitate
-                    your housing search.
-                  </p>
-                  <p>
-                    You have the right to request access to, correction of, or deletion of your
-                    personal information at any time by contacting privacy@rentez.com.
-                  </p>
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h2 className="text-2xl font-bold">Terms of Use</h2>
-                <div className="space-y-3 text-muted-foreground">
-                  <p>
-                    Rent EZ is a rental application service that connects renters with rental
-                    specialists, landlords, and property managers. We do not own or manage rental
-                    properties directly.
-                  </p>
-                  <p>By using our service, you agree to:</p>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Provide truthful and accurate information</li>
-                    <li>Respond to communications in a timely manner</li>
-                    <li>Work cooperatively with our specialists and landlords</li>
-                    <li>
-                      Understand that final rental approval decisions are made by property owners
-                      and managers
-                    </li>
-                    <li>Not use the service for fraudulent or illegal purposes</li>
-                  </ul>
-                  <p>
-                    Rent EZ reserves the right to refuse service to anyone who violates these terms,
-                    provides false information, or engages in behavior that interferes with our
-                    ability to provide services.
-                  </p>
-                  <p>
-                    For questions about our policies, please contact us at support@rentez.com.
+                    For refund requests or billing questions, contact billing@easyday.ai.
                   </p>
                 </div>
               </section>
