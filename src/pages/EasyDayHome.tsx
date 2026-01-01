@@ -130,27 +130,14 @@ export default function EasyDayHome() {
         className="relative overflow-visible bg-background"
         style={{ minHeight: "85vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* Mobile: Stacked text above head */}
-        <div className="md:hidden absolute top-[8%] left-0 right-0 z-20 text-center">
-          <span className="text-4xl font-bold text-foreground/90 tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
-            Easy{" "}
-          </span>
-          <span 
-            className="text-4xl font-bold tracking-wider animate-head-breathe animate-rainbow-text" 
-            style={{ fontFamily: "'Nunito', sans-serif" }}
-          >
-            Day
-          </span>
-        </div>
-
-        {/* Desktop: "Easy" - Left of Head */}
+        {/* Desktop only: "Easy" - Left of Head */}
         <div className="hidden md:block absolute top-[35%] left-[12%] lg:left-[18%] z-20">
           <span className="text-6xl lg:text-7xl font-bold text-foreground/90 tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
             Easy
           </span>
         </div>
 
-        {/* Desktop: "Day" - Right of Head */}
+        {/* Desktop only: "Day" - Right of Head */}
         <div className="hidden md:block absolute top-[35%] right-[12%] lg:right-[18%] z-20">
           <span 
             className="text-6xl lg:text-7xl font-bold tracking-wider animate-head-breathe animate-rainbow-text" 
@@ -160,8 +147,8 @@ export default function EasyDayHome() {
           </span>
         </div>
 
-        {/* Abstract Head - Centered */}
-        <div className="relative z-10 w-full h-[75vh] md:h-[90vh] flex items-center justify-center overflow-visible pt-16 md:pt-0">
+        {/* Abstract Head - Centered (mobile: just the head, no text) */}
+        <div className="relative z-10 w-full h-[80vh] md:h-[90vh] flex items-center justify-center overflow-visible">
           <AbstractHead />
         </div>
       </section>
