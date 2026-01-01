@@ -32,8 +32,8 @@ export const AbstractHead = () => {
         }}
       />
 
-      {/* Floating particles - tight cloud around the head (in front) */}
-      <div className="absolute inset-[5%] z-20 pointer-events-none overflow-visible">
+      {/* Floating particles - around the head (in front) */}
+      <div className="absolute inset-[-10%] z-20 pointer-events-none overflow-visible">
         {/* Top area particles - close to head */}
         <div className="animate-particle-fast-1 absolute top-[15%] left-[30%] w-2 h-2 rounded-full bg-primary/70 blur-[0.5px]" />
         <div className="animate-particle-fast-2 absolute top-[12%] left-[45%] w-3 h-3 rounded-full bg-[hsl(var(--cyan))]/60 blur-[1px]" />
