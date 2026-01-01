@@ -124,10 +124,10 @@ const metrics = [
 
 export default function EasyDayHome() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* SECTION 1: Hero - HEAD ONLY (Above the Fold) */}
       <section 
-        className="relative overflow-visible bg-background"
+        className="relative overflow-hidden bg-background"
         style={{ minHeight: "85vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
         {/* "Easy" - Left of Head */}
@@ -148,7 +148,7 @@ export default function EasyDayHome() {
         </div>
 
         {/* Abstract Head - Centered */}
-        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center overflow-visible">
+        <div className="relative z-10 w-full h-[90vh] flex items-center justify-center overflow-hidden">
           <AbstractHead />
         </div>
       </section>
