@@ -221,16 +221,16 @@
     opacity: 0.5;
   }
   25% {
-    transform: translate(8px, -12px);
-    opacity: 0.8;
+    transform: translate(15px, -25px);
+    opacity: 0.9;
   }
   50% {
-    transform: translate(-5px, -20px);
+    transform: translate(-10px, -40px);
     opacity: 0.6;
   }
   75% {
-    transform: translate(12px, -8px);
-    opacity: 0.9;
+    transform: translate(20px, -15px);
+    opacity: 1;
   }
 }
 
@@ -240,11 +240,11 @@
     opacity: 0.6;
   }
   33% {
-    transform: translate(-10px, -15px);
-    opacity: 0.9;
+    transform: translate(-20px, -30px);
+    opacity: 1;
   }
   66% {
-    transform: translate(6px, -25px);
+    transform: translate(15px, -50px);
     opacity: 0.5;
   }
 }
@@ -255,8 +255,113 @@
     opacity: 0.4;
   }
   50% {
-    transform: translate(15px, -18px);
+    transform: translate(25px, -35px);
+    opacity: 0.9;
+  }
+}
+
+/* Fast moving particles */
+@keyframes particle-fast-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  20% {
+    transform: translate(30px, -20px) scale(1.2);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-15px, -50px) scale(0.8);
+    opacity: 0.6;
+  }
+  60% {
+    transform: translate(25px, -30px) scale(1.1);
+    opacity: 0.9;
+  }
+  80% {
+    transform: translate(-20px, -10px) scale(1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes particle-fast-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(-25px, -35px) scale(1.3);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(20px, -60px) scale(0.7);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-30px, -25px) scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes particle-fast-3 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.6;
+  }
+  33% {
+    transform: translate(35px, -45px) rotate(120deg);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(-25px, -20px) rotate(240deg);
+    opacity: 0.7;
+  }
+}
+
+/* Orbiting particles */
+@keyframes particle-orbit-1 {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(40px, -20px) rotate(90deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(0, -60px) rotate(180deg);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translate(-40px, -20px) rotate(270deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+    opacity: 0.5;
+  }
+}
+
+@keyframes particle-orbit-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translate(-30px, -40px) scale(1.4);
     opacity: 0.8;
+  }
+  50% {
+    transform: translate(30px, -70px) scale(0.8);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(0, -30px) scale(1.2);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
   }
 }
 
@@ -306,17 +411,37 @@
 }
 
 .animate-particle-float-1 {
-  animation: particle-float-1 8s ease-in-out infinite;
+  animation: particle-float-1 5s ease-in-out infinite;
 }
 
 .animate-particle-float-2 {
-  animation: particle-float-2 10s ease-in-out infinite;
-  animation-delay: 1s;
+  animation: particle-float-2 6s ease-in-out infinite;
+  animation-delay: 0.5s;
 }
 
 .animate-particle-float-3 {
-  animation: particle-float-3 7s ease-in-out infinite;
-  animation-delay: 2s;
+  animation: particle-float-3 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-particle-fast-1 {
+  animation: particle-fast-1 4s ease-in-out infinite;
+}
+
+.animate-particle-fast-2 {
+  animation: particle-fast-2 5s ease-in-out infinite;
+}
+
+.animate-particle-fast-3 {
+  animation: particle-fast-3 4.5s ease-in-out infinite;
+}
+
+.animate-particle-orbit-1 {
+  animation: particle-orbit-1 6s linear infinite;
+}
+
+.animate-particle-orbit-2 {
+  animation: particle-orbit-2 7s ease-in-out infinite;
 }
 
 .animate-ribbon-shimmer {
