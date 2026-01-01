@@ -15,9 +15,9 @@ export const RainbowParticles = ({ density = "medium", className = "" }: Rainbow
   ];
 
   const particleCounts = {
-    low: 8,
-    medium: 16,
-    high: 24,
+    low: 4,
+    medium: 8,
+    high: 12,
   };
 
   const count = particleCounts[density];
