@@ -129,6 +129,22 @@ export default function EasyDayHome() {
         className="relative overflow-visible bg-background"
         style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
+        {/* "Easy" - Left of Head */}
+        <div className="absolute top-[35%] left-[8%] md:left-[12%] lg:left-[18%] z-20">
+          <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground/90 tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+            Easy
+          </span>
+        </div>
+
+        {/* "Day" - Right of Head */}
+        <div className="absolute top-[35%] right-[8%] md:right-[12%] lg:right-[18%] z-20">
+          <span 
+            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider animate-head-breathe animate-rainbow-text" 
+            style={{ fontFamily: "'Nunito', sans-serif" }}
+          >
+            Day
+          </span>
+        </div>
 
         {/* Abstract Head - Centered */}
         <div className="relative z-10 w-full h-[90vh] flex items-center justify-center overflow-visible">
