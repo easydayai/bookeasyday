@@ -15,8 +15,8 @@ export const AbstractHead = () => {
         alt="Easy Day AI - Abstract head representing intelligent automation"
         className="animate-head-breathe relative z-10 h-auto object-contain border-0 outline-none"
         style={{
-          maxHeight: "95vh",
-          minHeight: "70vh",
+          maxHeight: "110vh",
+          minHeight: "85vh",
           width: "auto",
           maxWidth: "100%",
         }}
