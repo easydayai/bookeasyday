@@ -316,7 +316,7 @@ export default function BookingCalendar({
               <Clock className="w-4 h-4" />
               {format(selectedDate, "EEEE, MMMM d")}
             </h3>
-            <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
               {getSlotsForDate(selectedDate).map((slot) => {
                 const slotTime = parseISO(slot.start);
                 const isSelectedSlot = selectedTime === slot.start;
@@ -345,7 +345,7 @@ export default function BookingCalendar({
           <form onSubmit={handleBooking} className="border-t border-border/50 p-6 space-y-4">
             <h3 className="font-medium mb-3">Your Information</h3>
             
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name *</Label>
                 <Input
