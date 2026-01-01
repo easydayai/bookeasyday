@@ -128,7 +128,7 @@ export default function EasyDayHome() {
       {/* SECTION 1: Hero - HEAD ONLY (Above the Fold) */}
       <section 
         className="relative overflow-visible bg-background"
-        style={{ minHeight: "100vh", paddingTop: "20px", paddingBottom: "20px" }}
+        style={{ minHeight: "85vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
         {/* "Easy" - Left of Head */}
         <div className="absolute top-[35%] left-[8%] md:left-[12%] lg:left-[18%] z-20">
@@ -156,7 +156,7 @@ export default function EasyDayHome() {
       {/* SECTION 2: Text + CTAs (Below the Fold) */}
       <section 
         className="relative bg-background overflow-hidden"
-        style={{ paddingTop: "100px", paddingBottom: "100px" }}
+        style={{ paddingTop: "40px", paddingBottom: "100px" }}
       >
         <RainbowParticles density="medium" />
         <div className="container mx-auto px-4 relative z-10">
