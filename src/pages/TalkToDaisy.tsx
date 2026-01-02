@@ -117,7 +117,7 @@ export default function TalkToDaisy() {
   };
 
   return (
-    <div className="h-screen pt-[60px] pb-2 flex flex-col overflow-hidden">
+    <div className="h-screen pt-[50px] pb-2 flex flex-col overflow-hidden">
       <div className="container mx-auto px-4 flex-1 flex flex-col max-w-5xl overflow-hidden">
         {/* Chat Container */}
         <div className="flex-1 bg-card border border-border rounded-2xl shadow-card flex flex-col overflow-hidden">
