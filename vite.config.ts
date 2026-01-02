@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt'],
       manifest: {
-        name: 'Rent EZ',
-        short_name: 'RentEZ',
-        description: 'Apply for just $20. Get approved and moved into an apartment within 30 days or your money back.',
+        name: 'Easy Day AI',
+        short_name: 'EasyDay',
+        description: 'AI-powered automation solutions for modern businesses. Book your demo today.',
         theme_color: '#a855f7',
         background_color: '#0a0a0a',
         display: 'standalone',
