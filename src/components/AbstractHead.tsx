@@ -12,7 +12,7 @@ export const AbstractHead = () => {
 
         {/* Abstract Head Image - Hero Scale, no borders (middle) */}
         <div 
-          className="relative z-10 scale-[1.35] sm:scale-100 dark:[mask-image:radial-gradient(ellipse_50%_50%_at_center,black_20%,transparent_70%)] dark:[-webkit-mask-image:radial-gradient(ellipse_50%_50%_at_center,black_20%,transparent_70%)]"
+          className="relative z-10 scale-[1.35] sm:scale-100 dark:[mask-image:radial-gradient(ellipse_90%_90%_at_center,black_60%,transparent_95%)] dark:[-webkit-mask-image:radial-gradient(ellipse_90%_90%_at_center,black_60%,transparent_95%)]"
         >
           <img
             src={abstractHeadImage}
