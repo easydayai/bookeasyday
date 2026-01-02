@@ -12,6 +12,7 @@ import Policies from "./pages/Policies";
 import Pricing from "./pages/Pricing";
 import Affiliate from "./pages/Affiliate";
 import AffiliateLegal from "./pages/AffiliateLegal";
+import TalkToDaisy from "./pages/TalkToDaisy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/demo" element={<Layout><Demo /></Layout>} />
           <Route path="/contact" element={<Layout><EasyDayContact /></Layout>} />
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+          <Route path="/talk-to-daisy" element={<Layout><TalkToDaisy /></Layout>} />
           <Route path="/affiliate" element={<Layout><Affiliate /></Layout>} />
           <Route path="/affiliate-legal" element={<Layout><AffiliateLegal /></Layout>} />
           <Route path="/policies" element={<Layout><Policies /></Layout>} />

@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.create-custom-payment]
 verify_jwt = false
+
+[functions.daisy-chat]
+verify_jwt = false
