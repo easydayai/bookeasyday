@@ -15,8 +15,8 @@ import { Link } from "react-router-dom";
 const benefits = [
   {
     icon: DollarSign,
-    title: "Generous Commissions",
-    description: "Earn competitive commissions on every successful referral that converts to a paying customer.",
+    title: "35% Commission",
+    description: "Earn 35% commission on every successful referral that converts to a paying customer.",
   },
   {
     icon: TrendingUp,
