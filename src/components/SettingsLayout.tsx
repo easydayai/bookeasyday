@@ -32,6 +32,9 @@ export function SettingsLayout({ children, title, description }: SettingsLayoutP
             <span className="text-xl font-bold">Easy Day AI</span>
           </Link>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">Home</Link>
+            </Button>
             <ThemeToggle />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/dashboard">
