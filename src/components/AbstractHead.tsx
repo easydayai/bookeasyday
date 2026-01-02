@@ -11,8 +11,9 @@ export const AbstractHead = () => {
         </div>
 
         {/* Abstract Head Image - Hero Scale, no borders (middle) */}
-        <div className="relative z-10 scale-[1.35] sm:scale-100">
-          {/* Dark mode: white becomes transparent with mix-blend-multiply + invert */}
+        <div 
+          className="relative z-10 scale-[1.35] sm:scale-100 dark:[mask-image:radial-gradient(ellipse_70%_70%_at_center,black_40%,transparent_80%)] dark:[-webkit-mask-image:radial-gradient(ellipse_70%_70%_at_center,black_40%,transparent_80%)]"
+        >
           <img
             src={abstractHeadImage}
             alt="Easy Day AI - Abstract head representing intelligent automation"
