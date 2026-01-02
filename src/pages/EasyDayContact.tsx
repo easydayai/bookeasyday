@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Mail, Phone, Clock } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import BookingCalendar from "@/components/BookingCalendar";
 
 export default function EasyDayContact() {
@@ -29,53 +29,8 @@ export default function EasyDayContact() {
               <BookingCalendar />
             </div>
 
-            {/* Contact Info */}
+            {/* What to Expect */}
             <div className="space-y-6">
-              <Card className="bg-card border-border/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Response Time</h3>
-                      <p className="text-sm text-muted-foreground">Within 24 hours</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    We'll reach out to schedule a call at a time that works for you.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card border-border/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Email Us</h3>
-                      <p className="text-sm text-muted-foreground">hello@easydayai.com</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card border-border/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Phone className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Call Us</h3>
-                      <p className="text-sm text-muted-foreground">(555) 000-0000</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-border/50">
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-3">What to Expect</h3>
