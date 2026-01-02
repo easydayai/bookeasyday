@@ -40,6 +40,16 @@ export const AbstractHead = () => {
           {/* Additional scattered particles */}
           <div className="animate-particle-float-1 absolute top-[25%] left-[15%] w-1.5 h-1.5 rounded-full bg-primary/40 blur-[0.5px]" />
           <div className="animate-particle-float-2 absolute top-[5%] left-[45%] w-2 h-2 rounded-full bg-magenta/40 blur-[1px]" />
+
+          {/* Mobile-only lower particles */}
+          <div className="sm:hidden animate-particle-float-1 absolute bottom-[15%] left-[20%] w-1.5 h-1.5 rounded-full bg-primary/50 blur-[0.5px]" />
+          <div className="sm:hidden animate-particle-float-2 absolute bottom-[20%] left-[35%] w-2 h-2 rounded-full bg-cyan/40 blur-[1px]" />
+          <div className="sm:hidden animate-particle-float-3 absolute bottom-[12%] left-[50%] w-1.5 h-1.5 rounded-full bg-magenta/50 blur-[0.5px]" />
+          <div className="sm:hidden animate-particle-float-1 absolute bottom-[25%] right-[25%] w-2 h-2 rounded-full bg-electric-blue/40 blur-[1px]" />
+          <div className="sm:hidden animate-particle-float-2 absolute bottom-[18%] right-[40%] w-1.5 h-1.5 rounded-full bg-orange/50 blur-[0.5px]" />
+          <div className="sm:hidden animate-particle-float-3 absolute bottom-[10%] right-[15%] w-2 h-2 rounded-full bg-cyan/50 blur-[1px]" />
+          <div className="sm:hidden animate-particle-float-1 absolute bottom-[22%] left-[10%] w-1 h-1 rounded-full bg-primary/60 blur-[0.5px]" />
+          <div className="sm:hidden animate-particle-float-2 absolute bottom-[8%] left-[60%] w-1.5 h-1.5 rounded-full bg-magenta/40 blur-[0.5px]" />
         </div>
       </div>
     </div>
