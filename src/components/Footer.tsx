@@ -13,14 +13,20 @@ export const Footer = () => {
           </div>
           
           <div className="flex flex-wrap justify-center gap-6 text-sm">
+            <Link to="/solutions" className="text-muted-foreground hover:text-foreground transition-colors">
+              Solutions
+            </Link>
+            <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+              Pricing
+            </Link>
+            <Link to="/affiliate" className="text-muted-foreground hover:text-foreground transition-colors">
+              Affiliate Program
+            </Link>
             <Link to="/policies" className="text-muted-foreground hover:text-foreground transition-colors">
               Privacy Policy
             </Link>
-            <Link to="/policies" className="text-muted-foreground hover:text-foreground transition-colors">
-              Terms
-            </Link>
             <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
-              Support
+              Contact
             </Link>
           </div>
         </div>
