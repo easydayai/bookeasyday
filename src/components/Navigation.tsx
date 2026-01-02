@@ -25,9 +25,9 @@ export const Navigation = () => {
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-12">
+        <div className="flex items-center justify-between h-10">
           <Link to="/" className="flex items-center">
-            <LogoInsignia className="h-6 w-6" />
+            <LogoInsignia className="h-5 w-5" />
           </Link>
 
           {/* Desktop Navigation */}
