@@ -15,6 +15,7 @@ export const Navigation = () => {
     { to: "/solutions", label: "Solutions" },
     { to: "/pricing", label: "Pricing" },
     { to: "/talk-to-daisy", label: "Talk to Daisy", isRainbow: true },
+    { to: "/login", label: "Sign In" },
   ];
 
   return (
@@ -49,14 +50,14 @@ export const Navigation = () => {
               </Link>
             ))}
             <Button size="sm" className="shadow-glow" asChild>
-              <Link to="/contact">Book an Appointment</Link>
+              <Link to="/signup">Sign Up Free</Link>
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
             <Button size="sm" className="shadow-glow" asChild>
-              <Link to="/contact">Book</Link>
+              <Link to="/signup">Sign Up</Link>
             </Button>
             <button
               className="p-2"
@@ -89,8 +90,8 @@ export const Navigation = () => {
               </Link>
             ))}
             <Button className="w-full mt-4 shadow-glow" size="sm" asChild>
-              <Link to="/contact" onClick={() => setIsOpen(false)}>
-                Book an Appointment
+              <Link to="/signup" onClick={() => setIsOpen(false)}>
+                Sign Up Free
               </Link>
             </Button>
           </div>

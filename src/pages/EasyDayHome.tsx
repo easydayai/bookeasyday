@@ -170,7 +170,7 @@ export default function EasyDayHome() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6 animate-fade-up" style={{ animationDelay: "0.2s" }}>
               <Button size="lg" className="text-lg px-8 shadow-glow" asChild>
-                <Link to="/contact">Book an Appointment</Link>
+                <Link to="/signup">Sign Up Free</Link>
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-8" asChild>
                 <Link to="/demo">See Live Demo</Link>
@@ -328,7 +328,7 @@ export default function EasyDayHome() {
             Ready to make your business easier to run?
           </h2>
           <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-            <Link to="/contact">Book an Appointment</Link>
+            <Link to="/signup">Sign Up Free</Link>
           </Button>
         </div>
       </section>
