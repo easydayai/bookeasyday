@@ -51,7 +51,7 @@ const packages = [
       "Go-live testing",
       "Priority support",
     ],
-    popular: true,
+    popular: false,
   },
   {
     id: "full",
@@ -67,7 +67,7 @@ const packages = [
       "Complete automation",
       "Dedicated onboarding",
     ],
-    popular: false,
+    popular: true,
   },
 ];
 
