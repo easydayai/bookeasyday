@@ -23,50 +23,53 @@ export function useRetell({
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const retellClientRef = useRef<RetellWebClient | null>(null);
+  const callbacksRef = useRef({ onCallStarted, onCallEnded, onError, onAgentStartTalking, onAgentStopTalking });
+
+  // Keep callbacks up to date without re-registering events
+  useEffect(() => {
+    callbacksRef.current = { onCallStarted, onCallEnded, onError, onAgentStartTalking, onAgentStopTalking };
+  }, [onCallStarted, onCallEnded, onError, onAgentStartTalking, onAgentStopTalking]);
 
   useEffect(() => {
-    // Initialize the Retell client
-    retellClientRef.current = new RetellWebClient();
-
-    const client = retellClientRef.current;
+    // Initialize the Retell client once
+    const client = new RetellWebClient();
+    retellClientRef.current = client;
 
     client.on("call_started", () => {
       console.log("Retell call started");
       setIsCallActive(true);
       setIsConnecting(false);
-      onCallStarted?.();
+      callbacksRef.current.onCallStarted?.();
     });
 
     client.on("call_ended", () => {
       console.log("Retell call ended");
       setIsCallActive(false);
       setIsSpeaking(false);
-      onCallEnded?.();
+      callbacksRef.current.onCallEnded?.();
     });
 
     client.on("agent_start_talking", () => {
       setIsSpeaking(true);
-      onAgentStartTalking?.();
+      callbacksRef.current.onAgentStartTalking?.();
     });
 
     client.on("agent_stop_talking", () => {
       setIsSpeaking(false);
-      onAgentStopTalking?.();
+      callbacksRef.current.onAgentStopTalking?.();
     });
 
     client.on("error", (error) => {
       console.error("Retell error:", error);
       setIsCallActive(false);
       setIsConnecting(false);
-      onError?.(new Error(String(error)));
+      callbacksRef.current.onError?.(new Error(String(error)));
     });
 
     return () => {
-      if (client) {
-        client.stopCall();
-      }
+      client.stopCall();
     };
-  }, [onCallStarted, onCallEnded, onError, onAgentStartTalking, onAgentStopTalking]);
+  }, []);
 
   const startCall = useCallback(async () => {
     if (!retellClientRef.current || isCallActive || isConnecting) return;
@@ -74,6 +77,10 @@ export function useRetell({
     setIsConnecting(true);
 
     try {
+      // Request microphone permission first
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log("Microphone permission granted");
+
       // Get access token from edge function
       const { data, error } = await supabase.functions.invoke("retell-token", {
         body: { agentId },
@@ -90,9 +97,15 @@ export function useRetell({
     } catch (error) {
       console.error("Failed to start call:", error);
       setIsConnecting(false);
-      onError?.(error instanceof Error ? error : new Error("Failed to start call"));
+      
+      // Handle specific error types
+      if (error instanceof DOMException && error.name === "NotAllowedError") {
+        callbacksRef.current.onError?.(new Error("Microphone access denied. Please allow microphone permission."));
+      } else {
+        callbacksRef.current.onError?.(error instanceof Error ? error : new Error("Failed to start call"));
+      }
     }
-  }, [agentId, isCallActive, isConnecting, onError]);
+  }, [agentId, isCallActive, isConnecting]);
 
   const endCall = useCallback(() => {
     if (retellClientRef.current && isCallActive) {
