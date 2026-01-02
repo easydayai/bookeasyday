@@ -134,7 +134,7 @@ serve(async (req) => {
 
         // Build a comprehensive description
         const descriptionParts = [
-          `📅 Easy Day AI - Automation Discovery Call`,
+          `📞 Easy Day AI - Phone Consultation`,
           ``,
           `👤 Attendee Details:`,
           `   Name: ${attendee.name}`,
@@ -145,7 +145,9 @@ serve(async (req) => {
           `   ${formattedDate} at ${formattedTime}`,
           `   Duration: ${durationMinutes} minutes`,
           ``,
-          `📝 Meeting Agenda:`,
+          metadata?.phone ? `📱 We will call you at: ${metadata.phone}` : null,
+          ``,
+          `📝 Call Agenda:`,
           `   • Discuss your current business processes`,
           `   • Identify automation opportunities`,
           `   • Review Easy Day AI solutions`,
@@ -165,16 +167,12 @@ serve(async (req) => {
             }
           ],
           description: descriptionParts,
-          location: metadata?.phone ? `Phone: ${metadata.phone}` : "Google Meet",
+          location: metadata?.phone ? `Phone Call: ${metadata.phone}` : "Phone Call",
           when: {
             start_time: Math.floor(startDate.getTime() / 1000),
             end_time: Math.floor(endDate.getTime() / 1000),
             start_timezone: timeZone || "America/New_York",
             end_timezone: timeZone || "America/New_York"
-          },
-          conferencing: {
-            provider: "Google Meet",
-            autocreate: {}
           }
         };
 
