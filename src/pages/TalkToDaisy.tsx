@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, Bot, User, Mic, MicOff, Phone, PhoneOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { useRetell } from "@/hooks/use-retell";
 
 type Message = {
   role: "user" | "assistant";
@@ -12,17 +12,43 @@ type Message = {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/daisy-chat`;
 
+// Replace with your Retell agent ID from the Retell dashboard
+const RETELL_AGENT_ID = "agent_daisy_easy_day";
+
 export default function TalkToDaisy() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm Daisy, your AI assistant from Easy Day AI. I'm here to help you discover how AI automation can transform your service business. What would you like to know?",
+      content: "Hi! I'm Daisy, your AI assistant from Easy Day AI. I'm here to help you discover how AI automation can transform your service business. What would you like to know? You can also click the phone button to talk to me!",
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const { isCallActive, isConnecting, isSpeaking, startCall, endCall } = useRetell({
+    agentId: RETELL_AGENT_ID,
+    onCallStarted: () => {
+      toast({
+        title: "Connected!",
+        description: "You're now talking to Daisy. Speak naturally!",
+      });
+    },
+    onCallEnded: () => {
+      toast({
+        title: "Call ended",
+        description: "Thanks for chatting with Daisy!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Voice Error",
+        description: error.message || "Failed to connect voice. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,6 +57,14 @@ export default function TalkToDaisy() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleVoiceToggle = () => {
+    if (isCallActive) {
+      endCall();
+    } else {
+      startCall();
+    }
+  };
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +160,16 @@ export default function TalkToDaisy() {
           </h1>
         </div>
 
+        {/* Voice Call Status */}
+        {isCallActive && (
+          <div className="mb-2 p-3 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center gap-3 animate-pulse">
+            <div className={`w-3 h-3 rounded-full ${isSpeaking ? 'bg-primary animate-pulse' : 'bg-green-500'}`} />
+            <span className="text-sm font-medium">
+              {isSpeaking ? "Daisy is speaking..." : "Listening..."}
+            </span>
+          </div>
+        )}
+
         {/* Chat Container */}
         <div className="flex-1 bg-card border border-border rounded-2xl shadow-card flex flex-col overflow-hidden">
           {/* Messages */}
@@ -178,17 +222,39 @@ export default function TalkToDaisy() {
           {/* Input */}
           <form onSubmit={sendMessage} className="p-4 border-t border-border">
             <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={isCallActive ? "destructive" : "outline"}
+                size="icon"
+                onClick={handleVoiceToggle}
+                disabled={isConnecting}
+                className={`shrink-0 ${isCallActive ? 'animate-pulse' : ''}`}
+                title={isCallActive ? "End call" : "Start voice call"}
+              >
+                {isConnecting ? (
+                  <Mic className="w-4 h-4 animate-pulse" />
+                ) : isCallActive ? (
+                  <PhoneOff className="w-4 h-4" />
+                ) : (
+                  <Phone className="w-4 h-4" />
+                )}
+              </Button>
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask Daisy anything..."
                 className="flex-1"
-                disabled={isLoading}
+                disabled={isLoading || isCallActive}
               />
-              <Button type="submit" disabled={isLoading || !input.trim()} className="shadow-glow">
+              <Button type="submit" disabled={isLoading || !input.trim() || isCallActive} className="shadow-glow">
                 <Send className="w-4 h-4" />
               </Button>
             </div>
+            {isCallActive && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Voice call active. Click the phone button to end.
+              </p>
+            )}
           </form>
         </div>
 

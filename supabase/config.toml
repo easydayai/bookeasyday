@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.daisy-chat]
 verify_jwt = false
+
+[functions.retell-token]
+verify_jwt = false
