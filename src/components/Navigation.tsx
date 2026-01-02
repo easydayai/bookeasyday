@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,28 @@ import LogoInsignia from "@/components/LogoInsignia";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === "/";
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > 100 && currentScrollY > lastScrollY) {
+        setIsHidden(true);
+      } else {
+        setIsHidden(false);
+      }
+      
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -20,8 +40,9 @@ export const Navigation = () => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 backdrop-blur-sm",
+        "fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-transform duration-300",
         isHome ? "bg-background/30" : "bg-background/95",
+        isHidden && "-translate-y-full"
       )}
     >
       <div className="container mx-auto px-4">
