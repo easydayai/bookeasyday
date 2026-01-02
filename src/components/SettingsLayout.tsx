@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import LogoInsignia from "@/components/LogoInsignia";
-import { User, Clock, Calendar, ArrowLeft } from "lucide-react";
+import { User, Clock, Calendar, ArrowLeft, Palette } from "lucide-react";
 
 interface SettingsLayoutProps {
   children: ReactNode;
@@ -15,6 +15,7 @@ const navItems = [
   { to: "/settings/profile", label: "Profile", icon: User },
   { to: "/settings/availability", label: "Availability", icon: Clock },
   { to: "/settings/appointment-types", label: "Appointment Types", icon: Calendar },
+  { to: "/settings/calendar-design", label: "Calendar Design", icon: Palette },
 ];
 
 export function SettingsLayout({ children, title, description }: SettingsLayoutProps) {

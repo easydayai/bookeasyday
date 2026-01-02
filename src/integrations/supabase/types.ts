@@ -244,6 +244,60 @@ export type Database = {
           },
         ]
       }
+      calendar_design_settings: {
+        Row: {
+          accent_color: string | null
+          background_color: string | null
+          button_radius: number | null
+          cover_image_url: string | null
+          cover_style: string | null
+          created_at: string | null
+          font_family: string | null
+          id: string
+          logo_url: string | null
+          primary_color: string | null
+          show_business_name: boolean | null
+          show_contact: boolean | null
+          show_logo: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string | null
+          background_color?: string | null
+          button_radius?: number | null
+          cover_image_url?: string | null
+          cover_style?: string | null
+          created_at?: string | null
+          font_family?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          show_business_name?: boolean | null
+          show_contact?: boolean | null
+          show_logo?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          accent_color?: string | null
+          background_color?: string | null
+          button_radius?: number | null
+          cover_image_url?: string | null
+          cover_style?: string | null
+          created_at?: string | null
+          font_family?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          show_business_name?: boolean | null
+          show_contact?: boolean | null
+          show_logo?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       credits_balance: {
         Row: {
           balance_credits: number
