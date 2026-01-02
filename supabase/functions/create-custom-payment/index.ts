@@ -34,7 +34,7 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    const origin = req.headers.get("origin") || "https://easydayai.com";
+    const origin = req.headers.get("origin") || "https://bookeasy.day";
     logStep("Creating checkout session", { amount, origin });
 
     // Create a one-time payment session with custom amount
