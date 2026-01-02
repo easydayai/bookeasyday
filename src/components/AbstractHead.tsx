@@ -11,17 +11,19 @@ export const AbstractHead = () => {
         </div>
 
         {/* Abstract Head Image - Hero Scale, no borders (middle) */}
-        <img
-          src={abstractHeadImage}
-          alt="Easy Day AI - Abstract head representing intelligent automation"
-          className="animate-head-breathe relative z-10 h-auto object-contain border-0 outline-none scale-150 sm:scale-100"
-          style={{
-            maxHeight: "110vh",
-            minHeight: "85vh",
-            width: "auto",
-            maxWidth: "100%",
-          }}
-        />
+        <div className="relative z-10 scale-150 sm:scale-100">
+          <img
+            src={abstractHeadImage}
+            alt="Easy Day AI - Abstract head representing intelligent automation"
+            className="animate-head-breathe h-auto object-contain border-0 outline-none"
+            style={{
+              maxHeight: "110vh",
+              minHeight: "85vh",
+              width: "auto",
+              maxWidth: "100%",
+            }}
+          />
+        </div>
 
         {/* Floating particles - positioned around the head area (in front) */}
         <div className="absolute inset-[-20%] z-20 pointer-events-none overflow-visible">
