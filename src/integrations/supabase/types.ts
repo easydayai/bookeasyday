@@ -131,6 +131,119 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_types: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_active: boolean | null
+          location_type: string | null
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          location_type?: string | null
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          location_type?: string | null
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      availability_rules: {
+        Row: {
+          created_at: string | null
+          day_of_week: number
+          end_time: string
+          id: string
+          start_time: string
+          timezone: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week: number
+          end_time: string
+          id?: string
+          start_time: string
+          timezone?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          start_time?: string
+          timezone?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          appointment_type_id: string | null
+          created_at: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          end_time: string
+          id: string
+          notes: string | null
+          start_time: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          appointment_type_id?: string | null
+          created_at?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          end_time: string
+          id?: string
+          notes?: string | null
+          start_time: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          appointment_type_id?: string | null
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          end_time?: string
+          id?: string
+          notes?: string | null
+          start_time?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_appointment_type_id_fkey"
+            columns: ["appointment_type_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credits_balance: {
         Row: {
           balance_credits: number
@@ -237,27 +350,36 @@ export type Database = {
       }
       profiles: {
         Row: {
+          business_name: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
           id: string
           phone: string | null
+          slug: string | null
+          timezone: string | null
           updated_at: string | null
         }
         Insert: {
+          business_name?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id: string
           phone?: string | null
+          slug?: string | null
+          timezone?: string | null
           updated_at?: string | null
         }
         Update: {
+          business_name?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
+          slug?: string | null
+          timezone?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -321,6 +443,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_slug_from_email: { Args: { email: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
