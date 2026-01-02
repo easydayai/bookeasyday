@@ -5,16 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Loader2, 
-  Copy, 
-  Calendar, 
-  CreditCard, 
-  Settings, 
-  Clock, 
+import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+  Loader2,
+  Copy,
+  Calendar,
+  CreditCard,
+  Settings,
+  Clock,
   User,
   ExternalLink,
-  Zap
+  Zap,
 } from "lucide-react";
 import LogoInsignia from "@/components/LogoInsignia";
 
@@ -156,7 +157,11 @@ export default function Dashboard() {
             <LogoInsignia className="h-8 w-8" />
             <span className="text-xl font-bold">Easy Day AI</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">Home</Link>
+            </Button>
+            <ThemeToggle />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/settings/profile">
                 <Settings className="h-4 w-4 mr-2" />
