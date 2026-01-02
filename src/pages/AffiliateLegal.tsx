@@ -5,7 +5,7 @@ import { Building2, FileText, DollarSign, Shield, Mail } from "lucide-react";
 
 const AffiliateLegal = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-24">
       {/* Header */}
       <div className="bg-muted/30 border-b border-border">
         <div className="container mx-auto px-4 py-12 md:py-16">
@@ -13,7 +13,7 @@ const AffiliateLegal = () => {
             Affiliate Program – Legal & Compliance Information
           </h1>
           <p className="text-muted-foreground text-lg max-w-3xl">
-            This page provides transparency regarding RentEZ Official's business structure, 
+            This page provides transparency regarding Easy Day AI's business structure, 
             affiliate program terms, and compliance practices for prospective and current affiliates.
           </p>
         </div>
@@ -53,7 +53,7 @@ const AffiliateLegal = () => {
             </div>
             <Separator />
             <p className="text-muted-foreground text-sm leading-relaxed">
-              RentEZ Official operates as a legally registered business entity in accordance with applicable 
+              Easy Day AI operates as a legally registered business entity in accordance with applicable 
               federal and state regulations. We maintain proper business licensing, tax compliance, and 
               corporate governance standards. Documentation verifying our legal status is available to 
               qualified partners upon execution of appropriate confidentiality agreements or formal 
@@ -62,27 +62,27 @@ const AffiliateLegal = () => {
           </CardContent>
         </Card>
 
-        {/* Section 2: Overview of the RentEZ Affiliate Program */}
+        {/* Section 2: Overview of the Affiliate Program */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl">
               <FileText className="h-6 w-6 text-primary" />
-              2. Overview of the RentEZ Affiliate Program
+              2. Overview of the Easy Day AI Affiliate Program
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground leading-relaxed">
-              The RentEZ Affiliate Program enables independent affiliates to promote RentEZ's rental 
-              application platform in exchange for performance-based commissions tied to verified 
-              renter activity. Affiliates earn commissions when referred users complete qualifying 
-              actions as defined in the Affiliate Agreement.
+              The Easy Day AI Affiliate Program enables independent affiliates to promote our AI automation 
+              platform in exchange for performance-based commissions tied to verified client activity. 
+              Affiliates earn commissions when referred businesses complete qualifying actions as defined 
+              in the Affiliate Agreement.
             </p>
             <div className="bg-muted/50 border border-border rounded-lg p-4">
               <p className="text-sm font-medium text-foreground mb-2">Independent Contractor Status</p>
               <p className="text-sm text-muted-foreground">
                 All affiliates participate as independent contractors. Affiliates are not employees, 
-                agents, joint venturers, or legal representatives of RentEZ Official. Affiliates have 
-                no authority to bind RentEZ Official to any contract, agreement, or obligation, and 
+                agents, joint venturers, or legal representatives of Easy Day AI. Affiliates have 
+                no authority to bind Easy Day AI to any contract, agreement, or obligation, and 
                 shall not represent themselves as having such authority.
               </p>
             </div>
@@ -99,8 +99,8 @@ const AffiliateLegal = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground leading-relaxed">
-              Participation in the RentEZ Affiliate Program requires acceptance of the official 
-              RentEZ Affiliate Agreement. This legally binding agreement governs:
+              Participation in the Easy Day AI Affiliate Program requires acceptance of the official 
+              Affiliate Agreement. This legally binding agreement governs:
             </p>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
               <li>Commission eligibility requirements and calculation methods</li>
@@ -119,7 +119,7 @@ const AffiliateLegal = () => {
               <Button 
                 variant="outline" 
                 className="gap-2"
-                onClick={() => window.open('https://rentezofficial.goaffpro.com/create-account', '_blank')}
+                onClick={() => window.open('https://easydayai.goaffpro.com/create-account', '_blank')}
               >
                 <FileText className="h-4 w-4" />
                 View Affiliate Agreement
@@ -187,7 +187,7 @@ const AffiliateLegal = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground leading-relaxed">
-              RentEZ Official is committed to operating with full transparency, ethical marketing 
+              Easy Day AI is committed to operating with full transparency, ethical marketing 
               practices, and compliance with all applicable federal, state, and local regulations. 
               We maintain open communication with our affiliate partners and welcome inquiries 
               regarding our business practices, program terms, and compliance measures.
@@ -206,10 +206,10 @@ const AffiliateLegal = () => {
                 For legal inquiries, partnership discussions, or compliance-related questions, 
                 please contact us at:{" "}
                 <a 
-                  href="mailto:partners@rentezofficial.com" 
+                  href="mailto:hello@easydayai.com" 
                   className="text-primary hover:underline"
                 >
-                  partners@rentezofficial.com
+                  hello@easydayai.com
                 </a>
               </p>
             </div>
@@ -230,15 +230,15 @@ const AffiliateLegal = () => {
         {/* CTA Section */}
         <div className="text-center py-8">
           <h2 className="text-2xl font-semibold text-foreground mb-4">
-            Ready to Join the RentEZ Affiliate Program?
+            Ready to Join the Easy Day AI Affiliate Program?
           </h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Apply today to become a RentEZ affiliate partner and start earning commissions 
-            for referring qualified renters to our platform.
+            Apply today to become an Easy Day AI affiliate partner and start earning commissions 
+            for referring businesses to our AI automation platform.
           </p>
           <Button 
             size="lg"
-            onClick={() => window.open('https://rentezofficial.goaffpro.com/create-account', '_blank')}
+            onClick={() => window.open('https://easydayai.goaffpro.com/create-account', '_blank')}
           >
             Apply to Become an Affiliate
           </Button>
