@@ -127,7 +127,7 @@ export default function EasyDayHome() {
     <div className="min-h-screen bg-background">
       {/* SECTION 1: Hero - Title + Particles (Above the Fold) */}
       <section 
-        className="relative overflow-hidden bg-background flex items-center justify-center"
+        className="relative overflow-hidden bg-background flex items-start justify-center pt-32 md:pt-40"
         style={{ minHeight: "85vh" }}
       >
         {/* Dynamic particle background */}
