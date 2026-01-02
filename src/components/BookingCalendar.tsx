@@ -1067,7 +1067,7 @@ export default function BookingCalendar({
                   }}
                   disabled={!dayHasSlots || isPast}
                   className={cn(
-                    "aspect-square flex items-center justify-center text-sm font-medium transition-colors text-white border-r border-b border-white/20 last:border-r-0 [&:nth-child(7n+7)]:border-r-0",
+                    "py-2 flex items-center justify-center text-sm font-medium transition-colors text-white border-r border-b border-white/20 last:border-r-0 [&:nth-child(7n+7)]:border-r-0",
                     isSelected && "bg-white text-purple-700",
                     !isSelected && dayHasSlots && !isPast && "hover:bg-white/20 cursor-pointer",
                     !dayHasSlots && "text-white/30",
