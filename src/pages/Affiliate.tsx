@@ -85,7 +85,7 @@ export default function Affiliate() {
               <Button 
                 size="lg" 
                 className="shadow-glow"
-                onClick={() => window.open('https://easydayai.goaffpro.com/create-account', '_blank')}
+                onClick={() => window.open('https://bookeasy.goaffpro.com/create-account', '_blank')}
               >
                 Become an Affiliate
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -181,7 +181,7 @@ export default function Affiliate() {
                   </p>
                   <Button 
                     className="w-full"
-                    onClick={() => window.open('https://easydayai.goaffpro.com/create-account', '_blank')}
+                    onClick={() => window.open('https://bookeasy.goaffpro.com/create-account', '_blank')}
                   >
                     Apply Now
                   </Button>
