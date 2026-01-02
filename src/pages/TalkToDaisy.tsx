@@ -134,7 +134,7 @@ export default function TalkToDaisy() {
         </div>
 
         {/* Chat Container */}
-        <div className="flex-1 bg-card border border-border rounded-2xl shadow-card flex flex-col overflow-hidden min-h-[500px]">
+        <div className="flex-1 bg-card border border-border rounded-2xl shadow-card flex flex-col overflow-hidden max-h-[60vh]">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
