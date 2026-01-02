@@ -5,18 +5,20 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import LogoInsignia from "@/components/LogoInsignia";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const { user } = useAuth();
 
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/solutions", label: "Solutions" },
     { to: "/pricing", label: "Pricing" },
     { to: "/talk-to-daisy", label: "Talk to Daisy", isRainbow: true },
-    { to: "/login", label: "Sign In" },
+    ...(user ? [{ to: "/dashboard", label: "Dashboard" }] : [{ to: "/login", label: "Sign In" }]),
   ];
 
   return (
@@ -50,18 +52,22 @@ export const Navigation = () => {
                 {link.label}
               </Link>
             ))}
-            <ThemeToggle />
-            <Button size="sm" className="shadow-glow" asChild>
-              <Link to="/signup">Sign Up Free</Link>
-            </Button>
+            {user && <ThemeToggle />}
+            {!user && (
+              <Button size="sm" className="shadow-glow" asChild>
+                <Link to="/signup">Sign Up Free</Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
-            <ThemeToggle />
-            <Button size="sm" className="shadow-glow" asChild>
-              <Link to="/signup">Sign Up</Link>
-            </Button>
+            {user && <ThemeToggle />}
+            {!user && (
+              <Button size="sm" className="shadow-glow" asChild>
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            )}
             <button
               className="p-2"
               onClick={() => setIsOpen(!isOpen)}
@@ -92,11 +98,13 @@ export const Navigation = () => {
                 {link.label}
               </Link>
             ))}
-            <Button className="w-full mt-4 shadow-glow" size="sm" asChild>
-              <Link to="/signup" onClick={() => setIsOpen(false)}>
-                Sign Up Free
-              </Link>
-            </Button>
+            {!user && (
+              <Button className="w-full mt-4 shadow-glow" size="sm" asChild>
+                <Link to="/signup" onClick={() => setIsOpen(false)}>
+                  Sign Up Free
+                </Link>
+              </Button>
+            )}
           </div>
         )}
       </div>
