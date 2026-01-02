@@ -11,20 +11,56 @@ import { Label } from "@/components/ui/label";
 // Subscription plans (recurring)
 const subscriptionPlans = [
   {
+    id: "free-sub",
+    name: "Free",
+    subtitle: "Get started",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    monthlyPriceId: null, // No checkout for free tier
+    yearlyPriceId: null,
+    credits: 100,
+    icon: Sparkles,
+    features: [
+      "100 AI credits (one-time)",
+      "Community support",
+      "Basic features",
+    ],
+    popular: false,
+    isFree: true,
+  },
+  {
+    id: "basic-sub",
+    name: "Basic",
+    subtitle: "For starters",
+    monthlyPrice: 12.5,
+    yearlyPrice: 125,
+    monthlyPriceId: "price_1SlFztBTVPq8Pb96YwTeDQY1",
+    yearlyPriceId: "price_1SlG0uBTVPq8Pb969Xk4wRkA",
+    credits: 100,
+    icon: Zap,
+    features: [
+      "100 AI credits/month",
+      "Email support",
+      "Basic analytics",
+      "1 user seat",
+    ],
+    popular: false,
+  },
+  {
     id: "starter-sub",
     name: "Starter",
     subtitle: "For individuals",
     monthlyPrice: 25,
-    yearlyPrice: 270,
+    yearlyPrice: 250,
     monthlyPriceId: "price_1SlFg0BTVPq8Pb96oWKt1dHM",
-    yearlyPriceId: "price_1SlFmkBTVPq8Pb96whtHOBHB",
+    yearlyPriceId: "price_1SlG1xBTVPq8Pb960yQak2q9",
     credits: 100,
     icon: Rocket,
     features: [
       "100 AI credits/month",
-      "Basic support",
-      "Email notifications",
-      "1 user seat",
+      "Priority email support",
+      "Advanced analytics",
+      "2 user seats",
     ],
     popular: false,
   },
@@ -33,7 +69,7 @@ const subscriptionPlans = [
     name: "Pro",
     subtitle: "For growing teams",
     monthlyPrice: 50,
-    yearlyPrice: 540,
+    yearlyPrice: 500,
     monthlyPriceId: "price_1SlFgFBTVPq8Pb96pql8EA3O",
     yearlyPriceId: "price_1SlFmvBTVPq8Pb96701jtQfS",
     credits: 200,
@@ -41,9 +77,9 @@ const subscriptionPlans = [
     features: [
       "200 AI credits/month",
       "Priority support",
-      "Advanced analytics",
-      "5 user seats",
       "Custom integrations",
+      "5 user seats",
+      "API access",
     ],
     popular: true,
   },
@@ -52,7 +88,7 @@ const subscriptionPlans = [
     name: "Business",
     subtitle: "For enterprises",
     monthlyPrice: 100,
-    yearlyPrice: 1080,
+    yearlyPrice: 1000,
     monthlyPriceId: "price_1SlFgqBTVPq8Pb96yZsMQMd5",
     yearlyPriceId: "price_1SlFncBTVPq8Pb96e8rHexjI",
     credits: 400,
@@ -62,7 +98,6 @@ const subscriptionPlans = [
       "Dedicated support",
       "White-label options",
       "Unlimited seats",
-      "API access",
       "SLA guarantee",
     ],
     popular: false,
@@ -245,12 +280,13 @@ export default function Pricing() {
             </div>
 
             {/* Subscription Cards */}
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
               {subscriptionPlans.map((plan) => {
                 const Icon = plan.icon;
                 const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
                 const priceId = isYearly ? plan.yearlyPriceId : plan.monthlyPriceId;
                 const savings = yearlySavings(plan.monthlyPrice, plan.yearlyPrice);
+                const isFree = 'isFree' in plan && plan.isFree;
                 
                 return (
                   <Card
@@ -267,43 +303,57 @@ export default function Pricing() {
                       </div>
                     )}
                     <CardHeader className="text-center pb-4">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                        <Icon className="w-6 h-6 text-primary" />
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                        <Icon className="w-5 h-5 text-primary" />
                       </div>
-                      <CardTitle className="text-lg">{plan.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{plan.subtitle}</p>
-                      <div className="mt-4">
-                        <span className="text-4xl font-bold">${price}</span>
-                        <span className="text-muted-foreground ml-1">
-                          /{isYearly ? "year" : "month"}
+                      <CardTitle className="text-base">{plan.name}</CardTitle>
+                      <p className="text-xs text-muted-foreground">{plan.subtitle}</p>
+                      <div className="mt-3">
+                        <span className="text-3xl font-bold">
+                          {isFree ? "Free" : `$${price}`}
                         </span>
+                        {!isFree && (
+                          <span className="text-muted-foreground text-sm ml-1">
+                            /{isYearly ? "year" : "month"}
+                          </span>
+                        )}
                       </div>
-                      {isYearly && (
+                      {isYearly && !isFree && plan.monthlyPrice > 0 && (
                         <p className="text-xs text-accent font-medium mt-1">
                           Save {savings}% vs monthly
                         </p>
                       )}
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {plan.credits} credits/month
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {plan.credits} credits{isFree ? "" : "/month"}
                       </p>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <ul className="space-y-2">
+                    <CardContent className="space-y-3">
+                      <ul className="space-y-1.5">
                         {plan.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-2 text-sm">
-                            <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                          <li key={feature} className="flex items-start gap-2 text-xs">
+                            <Check className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
                             {feature}
                           </li>
                         ))}
                       </ul>
-                      <Button
-                        className="w-full"
-                        variant={plan.popular ? "default" : "outline"}
-                        onClick={() => handleCheckout(priceId, plan.id)}
-                        disabled={loadingId === plan.id}
-                      >
-                        {loadingId === plan.id ? "Processing..." : "Subscribe"}
-                      </Button>
+                      {isFree ? (
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          asChild
+                        >
+                          <a href="/login">Sign Up Free</a>
+                        </Button>
+                      ) : (
+                        <Button
+                          className="w-full"
+                          variant={plan.popular ? "default" : "outline"}
+                          onClick={() => priceId && handleCheckout(priceId, plan.id)}
+                          disabled={loadingId === plan.id || !priceId}
+                        >
+                          {loadingId === plan.id ? "Processing..." : "Subscribe"}
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 );
