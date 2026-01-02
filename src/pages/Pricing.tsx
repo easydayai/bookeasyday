@@ -34,7 +34,6 @@ const packages = [
       "24/7 inbound handling",
       "Lead capture",
       "Call summaries",
-      "Human escalation",
     ],
     popular: false,
   },
