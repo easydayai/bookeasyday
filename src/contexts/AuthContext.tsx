@@ -48,8 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Computed property: profile is complete if required fields are filled
   const isProfileComplete = Boolean(
     profile?.full_name &&
-    profile?.business_name &&
-    profile?.slug
+    profile?.business_name
   );
 
   const fetchUserData = async (userId: string) => {
