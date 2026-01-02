@@ -11,7 +11,7 @@ export const AbstractHead = () => {
         </div>
 
         {/* Abstract Head Image - Hero Scale, no borders (middle) */}
-        <div className="relative z-10 scale-150 sm:scale-100">
+        <div className="relative z-10 scale-[1.35] sm:scale-100">
           <img
             src={abstractHeadImage}
             alt="Easy Day AI - Abstract head representing intelligent automation"
