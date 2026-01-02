@@ -136,7 +136,7 @@ export default function EasyDayHome() {
         {/* Centered "Easy Day" text */}
         <div className="relative z-10 text-center">
           <h1 
-            className="text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight animate-head-breathe"
+            className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight animate-head-breathe"
             style={{ fontFamily: "'Nunito', sans-serif" }}
           >
             <span className="text-foreground/90">Easy </span>
