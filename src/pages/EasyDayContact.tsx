@@ -21,7 +21,7 @@ export default function EasyDayContact() {
       {/* Calendar Section */}
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <BookingCalendar />
           </div>
         </div>
