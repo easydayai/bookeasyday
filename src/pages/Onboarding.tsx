@@ -117,14 +117,15 @@ export default function Onboarding() {
     if (!formData.business_name.trim()) {
       newErrors.business_name = "Business name is required";
     }
-    if (!formData.slug.trim()) {
-      newErrors.slug = "Booking link is required";
-    } else if (formData.slug.length < 3) {
-      newErrors.slug = "Must be at least 3 characters";
-    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      newErrors.slug = "Only lowercase letters, numbers, and hyphens allowed";
-    } else if (slugAvailable === false) {
-      newErrors.slug = "This link is already taken";
+    // Slug is optional, but validate if provided
+    if (formData.slug.trim()) {
+      if (formData.slug.length < 3) {
+        newErrors.slug = "Must be at least 3 characters";
+      } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
+        newErrors.slug = "Only lowercase letters, numbers, and hyphens allowed";
+      } else if (slugAvailable === false) {
+        newErrors.slug = "This link is already taken";
+      }
     }
     if (!formData.timezone) {
       newErrors.timezone = "Timezone is required";
@@ -151,7 +152,7 @@ export default function Onboarding() {
           business_name: formData.business_name.trim(),
           phone: formData.phone.trim() || null,
           timezone: formData.timezone,
-          slug: formData.slug,
+          slug: formData.slug.trim() || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
@@ -300,7 +301,7 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug">Your Booking Link *</Label>
+                <Label htmlFor="slug">Your Booking Link (optional)</Label>
                 <div className="flex items-center gap-2">
                   <div className="flex-shrink-0 text-sm text-muted-foreground flex items-center gap-1">
                     <LinkIcon className="h-4 w-4" />
