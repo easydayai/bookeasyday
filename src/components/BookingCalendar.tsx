@@ -6,8 +6,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, ChevronRight, Clock, CheckCircle2, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, CheckCircle2, Loader2, Calendar, X, RefreshCw, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TimeSlot {
   start: string;
@@ -15,6 +25,13 @@ interface TimeSlot {
 
 interface BookingCalendarProps {
   durationMinutes?: number;
+}
+
+interface BookingEvent {
+  id: string;
+  title?: string;
+  when?: { start_time: number; end_time: number };
+  participants?: { email: string; name?: string }[];
 }
 
 export default function BookingCalendar({ 
@@ -35,8 +52,25 @@ export default function BookingCalendar({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
+  // Manage booking state
+  const [showManage, setShowManage] = useState(false);
+  const [manageEventId, setManageEventId] = useState("");
+  const [existingBooking, setExistingBooking] = useState<BookingEvent | null>(null);
+  const [isLoadingBooking, setIsLoadingBooking] = useState(false);
+  const [showReschedule, setShowReschedule] = useState(false);
+  const [rescheduleSlots, setRescheduleSlots] = useState<Record<string, TimeSlot[]>>({});
+  const [rescheduleDate, setRescheduleDate] = useState(startOfDay(new Date()));
+  const [selectedRescheduleDate, setSelectedRescheduleDate] = useState<Date | null>(null);
+  const [selectedRescheduleTime, setSelectedRescheduleTime] = useState<string | null>(null);
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
+  const [isRescheduled, setIsRescheduled] = useState(false);
+
   // Generate days to display (3 rows = 21 days)
   const days = Array.from({ length: 21 }, (_, i) => addDays(currentDate, i));
+  const rescheduleDays = Array.from({ length: 21 }, (_, i) => addDays(rescheduleDate, i));
 
   // Fetch slots when date range changes
   useEffect(() => {
@@ -137,13 +171,187 @@ export default function BookingCalendar({
     setSelectedTime(null);
   };
 
+  const navigateRescheduleWeek = (direction: "prev" | "next") => {
+    setRescheduleDate(prev => addDays(prev, direction === "next" ? 7 : -7));
+    setSelectedRescheduleDate(null);
+    setSelectedRescheduleTime(null);
+  };
+
   const getSlotsForDate = (date: Date): TimeSlot[] => {
     const dateKey = format(date, "yyyy-MM-dd");
     return slots[dateKey] || [];
   };
 
+  const getRescheduleSlotsForDate = (date: Date): TimeSlot[] => {
+    const dateKey = format(date, "yyyy-MM-dd");
+    return rescheduleSlots[dateKey] || [];
+  };
+
   const hasSlots = (date: Date): boolean => {
     return getSlotsForDate(date).length > 0;
+  };
+
+  const hasRescheduleSlots = (date: Date): boolean => {
+    return getRescheduleSlotsForDate(date).length > 0;
+  };
+
+  // Fetch existing booking
+  const fetchExistingBooking = async () => {
+    if (!manageEventId.trim()) {
+      toast({
+        title: "Missing Booking ID",
+        description: "Please enter your booking ID.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoadingBooking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("nylas-api", {
+        body: {
+          action: "getBooking",
+          params: { eventId: manageEventId.trim() },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setExistingBooking(data);
+    } catch (err: any) {
+      console.error("Error fetching booking:", err);
+      toast({
+        title: "Booking Not Found",
+        description: "Could not find a booking with that ID. Please check and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingBooking(false);
+    }
+  };
+
+  // Fetch reschedule slots
+  const fetchRescheduleSlots = async () => {
+    try {
+      const startTime = rescheduleDate.toISOString();
+      const endTime = addDays(rescheduleDate, 21).toISOString();
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      const { data, error } = await supabase.functions.invoke("nylas-api", {
+        body: {
+          action: "getAvailability",
+          startTime,
+          endTime,
+          timeZone,
+          durationMinutes,
+          intervalMinutes: 15,
+        },
+      });
+
+      if (error) throw error;
+      setRescheduleSlots(data?.data || {});
+    } catch (err) {
+      console.error("Error fetching reschedule slots:", err);
+    }
+  };
+
+  // Handle cancel
+  const handleCancel = async () => {
+    if (!existingBooking) return;
+
+    setIsCancelling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("nylas-api", {
+        body: {
+          action: "cancelBooking",
+          params: { eventId: existingBooking.id },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setIsCancelled(true);
+      setShowCancelConfirm(false);
+      toast({
+        title: "Booking Cancelled",
+        description: "Your appointment has been cancelled successfully.",
+      });
+    } catch (err: any) {
+      console.error("Cancel error:", err);
+      toast({
+        title: "Cancellation Failed",
+        description: err.message || "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  // Handle reschedule
+  const handleReschedule = async () => {
+    if (!existingBooking || !selectedRescheduleTime) return;
+
+    setIsRescheduling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("nylas-api", {
+        body: {
+          action: "rescheduleBooking",
+          params: {
+            eventId: existingBooking.id,
+            newStart: selectedRescheduleTime,
+            durationMinutes,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setIsRescheduled(true);
+      toast({
+        title: "Booking Rescheduled",
+        description: "Your appointment has been rescheduled successfully.",
+      });
+    } catch (err: any) {
+      console.error("Reschedule error:", err);
+      toast({
+        title: "Reschedule Failed",
+        description: err.message || "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRescheduling(false);
+    }
+  };
+
+  // Start reschedule flow
+  const startReschedule = () => {
+    setShowReschedule(true);
+    fetchRescheduleSlots();
+  };
+
+  // Reset manage state
+  const resetManageState = () => {
+    setShowManage(false);
+    setManageEventId("");
+    setExistingBooking(null);
+    setShowReschedule(false);
+    setSelectedRescheduleDate(null);
+    setSelectedRescheduleTime(null);
+    setIsCancelled(false);
+    setIsRescheduled(false);
   };
 
   if (isBooked) {
@@ -205,166 +413,470 @@ export default function BookingCalendar({
     );
   }
 
-  return (
-    <Card className="bg-card border-border/50 shadow-card overflow-hidden">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl">Select a Date & Time</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        {/* Calendar Navigation */}
-        <div className="flex items-center justify-between px-6 pb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigateWeek("prev")}
-            disabled={currentDate <= startOfDay(new Date())}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <span className="font-medium">
-            {format(currentDate, "MMMM yyyy")}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigateWeek("next")}
-          >
-            <ChevronRight className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Days Grid */}
-        <div className="grid grid-cols-7 gap-1 px-4 pb-4">
-          {days.slice(0, 7).map((day) => (
-            <div key={day.toISOString()} className="text-center text-xs text-muted-foreground pb-1">
-              {format(day, "EEE")}
+  // Manage booking views
+  if (showManage) {
+    // Cancelled state
+    if (isCancelled) {
+      return (
+        <Card className="bg-card border-border/50 shadow-card">
+          <CardContent className="p-12 text-center">
+            <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-6">
+              <X className="w-10 h-10 text-destructive" />
             </div>
-          ))}
-          {days.map((day) => {
-            const dayHasSlots = hasSlots(day);
-            const isSelected = selectedDate && isSameDay(day, selectedDate);
-            const isPast = day < startOfDay(new Date());
-
-            return (
-              <button
-                key={day.toISOString()}
-                onClick={() => {
-                  if (dayHasSlots && !isPast) {
-                    setSelectedDate(day);
-                    setSelectedTime(null);
-                  }
-                }}
-                disabled={!dayHasSlots || isPast}
-                className={cn(
-                  "aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-colors",
-                  isSelected && "bg-primary text-primary-foreground",
-                  !isSelected && dayHasSlots && !isPast && "hover:bg-primary/10 cursor-pointer",
-                  !dayHasSlots && "text-muted-foreground/50",
-                  isPast && "text-muted-foreground/30 cursor-not-allowed"
-                )}
-              >
-                {format(day, "d")}
-              </button>
-            );
-          })}
-        </div>
-
-        {isLoadingSlots && (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          </div>
-        )}
-
-        {/* Time Slots */}
-        {selectedDate && (
-          <div className="border-t border-border/50 p-6">
-            <h3 className="font-medium mb-3 flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              {format(selectedDate, "EEEE, MMMM d")}
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-              {getSlotsForDate(selectedDate).map((slot) => {
-                const slotTime = parseISO(slot.start);
-                const isSelectedSlot = selectedTime === slot.start;
-
-                return (
-                  <button
-                    key={slot.start}
-                    onClick={() => setSelectedTime(slot.start)}
-                    className={cn(
-                      "py-2 px-3 rounded-lg text-sm font-medium transition-colors",
-                      isSelectedSlot
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary hover:bg-primary/10"
-                    )}
-                  >
-                    {format(slotTime, "h:mm a")}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Booking Form */}
-        {selectedTime && (
-          <form onSubmit={handleBooking} className="border-t border-border/50 p-6 space-y-4">
-            <h3 className="font-medium mb-3">Your Information</h3>
-            
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your full name"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="(555) 555-5555"
-                required
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full shadow-glow" 
-              size="lg"
-              disabled={isBooking}
-            >
-              {isBooking ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Booking...
-                </>
-              ) : (
-                `Confirm Booking for ${format(parseISO(selectedTime), "h:mm a")}`
-              )}
+            <h2 className="text-2xl font-bold mb-4">Booking Cancelled</h2>
+            <p className="text-muted-foreground mb-8">
+              Your appointment has been cancelled successfully.
+            </p>
+            <Button onClick={resetManageState}>
+              Book a New Appointment
             </Button>
-          </form>
-        )}
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Rescheduled state
+    if (isRescheduled) {
+      return (
+        <Card className="bg-card border-border/50 shadow-card">
+          <CardContent className="p-12 text-center">
+            <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-10 h-10 text-accent" />
+            </div>
+            <h2 className="text-2xl font-bold mb-4">Booking Rescheduled</h2>
+            <p className="text-muted-foreground mb-2">
+              Your appointment has been rescheduled to:
+            </p>
+            <p className="text-lg font-semibold text-primary mb-8">
+              {selectedRescheduleTime && format(parseISO(selectedRescheduleTime), "EEEE, MMMM d 'at' h:mm a")}
+            </p>
+            <Button onClick={resetManageState}>
+              Done
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Existing booking found - show details and options
+    if (existingBooking) {
+      const bookingDate = existingBooking.when?.start_time 
+        ? new Date(existingBooking.when.start_time * 1000)
+        : null;
+
+      return (
+        <Card className="bg-card border-border/50 shadow-card overflow-hidden">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">Manage Your Booking</CardTitle>
+              <Button variant="ghost" size="sm" onClick={resetManageState}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Current booking details */}
+            <div className="bg-secondary/50 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                <span className="font-medium">Current Appointment</span>
+              </div>
+              {bookingDate ? (
+                <p className="text-lg font-semibold">
+                  {format(bookingDate, "EEEE, MMMM d 'at' h:mm a")}
+                </p>
+              ) : (
+                <p className="text-muted-foreground">Appointment details not available</p>
+              )}
+            </div>
+
+            {/* Reschedule flow */}
+            {showReschedule ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium">Select New Date & Time</h3>
+                  <Button variant="ghost" size="sm" onClick={() => setShowReschedule(false)}>
+                    Cancel
+                  </Button>
+                </div>
+
+                {/* Calendar Navigation */}
+                <div className="flex items-center justify-between">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigateRescheduleWeek("prev")}
+                    disabled={rescheduleDate <= startOfDay(new Date())}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                  <span className="font-medium">
+                    {format(rescheduleDate, "MMMM yyyy")}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigateRescheduleWeek("next")}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* Days Grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {rescheduleDays.slice(0, 7).map((day) => (
+                    <div key={day.toISOString()} className="text-center text-xs text-muted-foreground pb-1">
+                      {format(day, "EEE")}
+                    </div>
+                  ))}
+                  {rescheduleDays.map((day) => {
+                    const dayHasSlots = hasRescheduleSlots(day);
+                    const isSelected = selectedRescheduleDate && isSameDay(day, selectedRescheduleDate);
+                    const isPast = day < startOfDay(new Date());
+
+                    return (
+                      <button
+                        key={day.toISOString()}
+                        onClick={() => {
+                          if (dayHasSlots && !isPast) {
+                            setSelectedRescheduleDate(day);
+                            setSelectedRescheduleTime(null);
+                          }
+                        }}
+                        disabled={!dayHasSlots || isPast}
+                        className={cn(
+                          "aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-colors",
+                          isSelected && "bg-primary text-primary-foreground",
+                          !isSelected && dayHasSlots && !isPast && "hover:bg-primary/10 cursor-pointer",
+                          !dayHasSlots && "text-muted-foreground/50",
+                          isPast && "text-muted-foreground/30 cursor-not-allowed"
+                        )}
+                      >
+                        {format(day, "d")}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Time Slots */}
+                {selectedRescheduleDate && (
+                  <div className="border-t border-border/50 pt-4">
+                    <h4 className="font-medium mb-3 flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      {format(selectedRescheduleDate, "EEEE, MMMM d")}
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                      {getRescheduleSlotsForDate(selectedRescheduleDate).map((slot) => {
+                        const slotTime = parseISO(slot.start);
+                        const isSelectedSlot = selectedRescheduleTime === slot.start;
+
+                        return (
+                          <button
+                            key={slot.start}
+                            onClick={() => setSelectedRescheduleTime(slot.start)}
+                            className={cn(
+                              "py-2 px-3 rounded-lg text-sm font-medium transition-colors",
+                              isSelectedSlot
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-secondary hover:bg-primary/10"
+                            )}
+                          >
+                            {format(slotTime, "h:mm a")}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Confirm reschedule */}
+                {selectedRescheduleTime && (
+                  <Button 
+                    onClick={handleReschedule} 
+                    className="w-full shadow-glow"
+                    disabled={isRescheduling}
+                  >
+                    {isRescheduling ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Rescheduling...
+                      </>
+                    ) : (
+                      `Reschedule to ${format(parseISO(selectedRescheduleTime), "h:mm a")}`
+                    )}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              /* Action buttons */
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={startReschedule}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Reschedule
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  className="flex-1"
+                  onClick={() => setShowCancelConfirm(true)}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancel Booking
+                </Button>
+              </div>
+            )}
+          </CardContent>
+
+          {/* Cancel confirmation dialog */}
+          <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Cancel Appointment?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will cancel your appointment. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Keep Appointment</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleCancel}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  disabled={isCancelling}
+                >
+                  {isCancelling ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Cancelling...
+                    </>
+                  ) : (
+                    "Yes, Cancel"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </Card>
+      );
+    }
+
+    // Lookup booking form
+    return (
+      <Card className="bg-card border-border/50 shadow-card">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl">Manage Existing Booking</CardTitle>
+            <Button variant="ghost" size="sm" onClick={resetManageState}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground text-sm">
+            Enter the booking ID from your confirmation email to manage your appointment.
+          </p>
+          <div className="space-y-2">
+            <Label htmlFor="eventId">Booking ID</Label>
+            <Input
+              id="eventId"
+              value={manageEventId}
+              onChange={(e) => setManageEventId(e.target.value)}
+              placeholder="Enter your booking ID"
+            />
+          </div>
+          <Button 
+            onClick={fetchExistingBooking} 
+            className="w-full"
+            disabled={isLoadingBooking}
+          >
+            {isLoadingBooking ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Looking up...
+              </>
+            ) : (
+              "Find My Booking"
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card className="bg-card border-border/50 shadow-card overflow-hidden">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl">Select a Date & Time</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {/* Calendar Navigation */}
+          <div className="flex items-center justify-between px-6 pb-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigateWeek("prev")}
+              disabled={currentDate <= startOfDay(new Date())}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <span className="font-medium">
+              {format(currentDate, "MMMM yyyy")}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigateWeek("next")}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* Days Grid */}
+          <div className="grid grid-cols-7 gap-1 px-4 pb-4">
+            {days.slice(0, 7).map((day) => (
+              <div key={day.toISOString()} className="text-center text-xs text-muted-foreground pb-1">
+                {format(day, "EEE")}
+              </div>
+            ))}
+            {days.map((day) => {
+              const dayHasSlots = hasSlots(day);
+              const isSelected = selectedDate && isSameDay(day, selectedDate);
+              const isPast = day < startOfDay(new Date());
+
+              return (
+                <button
+                  key={day.toISOString()}
+                  onClick={() => {
+                    if (dayHasSlots && !isPast) {
+                      setSelectedDate(day);
+                      setSelectedTime(null);
+                    }
+                  }}
+                  disabled={!dayHasSlots || isPast}
+                  className={cn(
+                    "aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-colors",
+                    isSelected && "bg-primary text-primary-foreground",
+                    !isSelected && dayHasSlots && !isPast && "hover:bg-primary/10 cursor-pointer",
+                    !dayHasSlots && "text-muted-foreground/50",
+                    isPast && "text-muted-foreground/30 cursor-not-allowed"
+                  )}
+                >
+                  {format(day, "d")}
+                </button>
+              );
+            })}
+          </div>
+
+          {isLoadingSlots && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          )}
+
+          {/* Time Slots */}
+          {selectedDate && (
+            <div className="border-t border-border/50 p-6">
+              <h3 className="font-medium mb-3 flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                {format(selectedDate, "EEEE, MMMM d")}
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                {getSlotsForDate(selectedDate).map((slot) => {
+                  const slotTime = parseISO(slot.start);
+                  const isSelectedSlot = selectedTime === slot.start;
+
+                  return (
+                    <button
+                      key={slot.start}
+                      onClick={() => setSelectedTime(slot.start)}
+                      className={cn(
+                        "py-2 px-3 rounded-lg text-sm font-medium transition-colors",
+                        isSelectedSlot
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary hover:bg-primary/10"
+                      )}
+                    >
+                      {format(slotTime, "h:mm a")}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Booking Form */}
+          {selectedTime && (
+            <form onSubmit={handleBooking} className="border-t border-border/50 p-6 space-y-4">
+              <h3 className="font-medium mb-3">Your Information</h3>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name *</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your full name"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(555) 555-5555"
+                  required
+                />
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full shadow-glow" 
+                size="lg"
+                disabled={isBooking}
+              >
+                {isBooking ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Booking...
+                  </>
+                ) : (
+                  `Confirm Booking for ${format(parseISO(selectedTime), "h:mm a")}`
+                )}
+              </Button>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Manage existing booking link */}
+      <div className="text-center">
+        <button
+          onClick={() => setShowManage(true)}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+        >
+          Need to cancel or reschedule an existing booking?
+        </button>
+      </div>
+    </div>
   );
 }
