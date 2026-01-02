@@ -132,7 +132,10 @@ serve(async (req) => {
           timeZone: timeZone || "America/New_York"
         });
 
-        // Build a comprehensive description
+        // Generate cancel/reschedule link
+        const siteUrl = Deno.env.get("SITE_URL") || "https://easydayai.com";
+
+        // Build a comprehensive description with manage links
         const descriptionParts = [
           `📞 Easy Day AI - Phone Consultation`,
           ``,
@@ -151,6 +154,12 @@ serve(async (req) => {
           `   • Discuss your current business processes`,
           `   • Identify automation opportunities`,
           `   • Review Easy Day AI solutions`,
+          ``,
+          `---`,
+          ``,
+          `🔄 Need to cancel or reschedule?`,
+          `Visit: ${siteUrl}/contact`,
+          `Use your email (${attendee.email}) to look up and manage this booking.`,
           ``,
           `---`,
           `Booked via Easy Day AI | https://easydayai.com`
