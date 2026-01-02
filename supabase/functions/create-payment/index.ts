@@ -16,9 +16,13 @@ serve(async (req) => {
   try {
     console.log("[CREATE-PAYMENT] Starting payment session creation");
 
-    // Get application ID from request body
-    const { applicationId } = await req.json().catch(() => ({}));
-    console.log("[CREATE-PAYMENT] Application ID:", applicationId);
+    // Get priceId from request body
+    const { priceId, applicationId } = await req.json().catch(() => ({}));
+    console.log("[CREATE-PAYMENT] Price ID:", priceId, "Application ID:", applicationId);
+
+    if (!priceId) {
+      throw new Error("Price ID is required");
+    }
 
     // Initialize Stripe with the secret key
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -57,7 +61,7 @@ serve(async (req) => {
     }
 
     // Get origin for success/cancel URLs
-    const origin = req.headers.get("origin") || "http://localhost:3000";
+    const origin = req.headers.get("origin") || "https://bookeasy.day";
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
@@ -65,13 +69,13 @@ serve(async (req) => {
       customer_email: customerId ? undefined : userEmail,
       line_items: [
         {
-          price: "price_1SWhFvBTVPq8Pb96E3ExM4OS",
+          price: priceId,
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${origin}/confirmation`,
-      cancel_url: `${origin}/checkout`,
+      success_url: `${origin}/pricing?success=true`,
+      cancel_url: `${origin}/pricing?canceled=true`,
       metadata: {
         application_id: applicationId || "",
       },
