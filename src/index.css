@@ -490,6 +490,23 @@
   animation: rainbow-shift 4s ease-in-out infinite;
 }
 
+.rainbow-text {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)),
+    hsl(var(--electric-blue)),
+    hsl(var(--cyan)),
+    hsl(var(--magenta)),
+    hsl(var(--orange)),
+    hsl(var(--primary))
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow-shift 3s ease-in-out infinite;
+}
+
 /* Radial gradient utility */
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));

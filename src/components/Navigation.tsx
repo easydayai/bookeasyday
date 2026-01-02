@@ -13,9 +13,7 @@ export const Navigation = () => {
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/solutions", label: "Solutions" },
-    { to: "/pricing", label: "Pricing" },
-    { to: "/demo", label: "Demo" },
-    { to: "/contact", label: "Contact" },
+    { to: "/contact", label: "Talk to Daisy", isRainbow: true },
   ];
 
   return (
@@ -39,9 +37,11 @@ export const Navigation = () => {
                 to={link.to}
                 className={cn(
                   "text-sm font-medium transition-colors",
-                  location.pathname === link.to
-                    ? "text-primary"
-                    : "text-foreground/70 hover:text-foreground"
+                  link.isRainbow 
+                    ? "rainbow-text font-semibold" 
+                    : location.pathname === link.to
+                      ? "text-primary"
+                      : "text-foreground/70 hover:text-foreground"
                 )}
               >
                 {link.label}
@@ -76,9 +76,11 @@ export const Navigation = () => {
                 to={link.to}
                 className={cn(
                   "block py-2 text-sm font-medium transition-colors",
-                  location.pathname === link.to
-                    ? "text-primary"
-                    : "text-foreground/70 hover:text-foreground"
+                  link.isRainbow 
+                    ? "rainbow-text font-semibold" 
+                    : location.pathname === link.to
+                      ? "text-primary"
+                      : "text-foreground/70 hover:text-foreground"
                 )}
                 onClick={() => setIsOpen(false)}
               >
