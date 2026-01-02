@@ -62,6 +62,41 @@
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 13%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Vibrant purple - slightly brighter for dark mode */
+    --primary: 270 80% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Vibrant cyan/teal accent */
+    --accent: 195 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 270 80% 60%;
+
+    --purple-glow: 0 8px 40px hsl(270 80% 60% / 0.4);
+    --rainbow-glow: 0 8px 50px hsl(270 80% 60% / 0.3), 0 4px 30px hsl(195 100% 50% / 0.2);
+    --card-shadow: 0 4px 24px hsl(0 0% 0% / 0.3);
+  }
 }
 
 @layer base {

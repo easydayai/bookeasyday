@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import LogoInsignia from "@/components/LogoInsignia";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,6 +50,7 @@ export const Navigation = () => {
                 {link.label}
               </Link>
             ))}
+            <ThemeToggle />
             <Button size="sm" className="shadow-glow" asChild>
               <Link to="/signup">Sign Up Free</Link>
             </Button>
@@ -56,6 +58,7 @@ export const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
+            <ThemeToggle />
             <Button size="sm" className="shadow-glow" asChild>
               <Link to="/signup">Sign Up</Link>
             </Button>

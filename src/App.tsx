@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Layout } from "@/components/Layout";
 import EasyDayHome from "./pages/EasyDayHome";
 import Solutions from "./pages/Solutions";
@@ -30,6 +31,7 @@ import Dashboard from "./pages/Dashboard";
 import ProfileSettings from "./pages/settings/ProfileSettings";
 import AvailabilitySettings from "./pages/settings/AvailabilitySettings";
 import AppointmentTypesSettings from "./pages/settings/AppointmentTypesSettings";
+import CalendarDesignSettings from "./pages/settings/CalendarDesignSettings";
 import AppointmentsPage from "./pages/dashboard/AppointmentsPage";
 
 // Public booking
@@ -42,44 +44,47 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public pages */}
-            <Route path="/" element={<Layout><EasyDayHome /></Layout>} />
-            <Route path="/solutions" element={<Layout><Solutions /></Layout>} />
-            <Route path="/demo" element={<Layout><Demo /></Layout>} />
-            <Route path="/contact" element={<Layout><EasyDayContact /></Layout>} />
-            <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
-            <Route path="/talk-to-daisy" element={<Layout><TalkToDaisy /></Layout>} />
-            <Route path="/affiliate" element={<Layout><Affiliate /></Layout>} />
-            <Route path="/affiliate-legal" element={<Layout><AffiliateLegal /></Layout>} />
-            <Route path="/policies" element={<Layout><Policies /></Layout>} />
-            <Route path="/manage-booking/:eventId" element={<Layout><ManageBooking /></Layout>} />
+        <ThemeProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public pages */}
+              <Route path="/" element={<Layout><EasyDayHome /></Layout>} />
+              <Route path="/solutions" element={<Layout><Solutions /></Layout>} />
+              <Route path="/demo" element={<Layout><Demo /></Layout>} />
+              <Route path="/contact" element={<Layout><EasyDayContact /></Layout>} />
+              <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+              <Route path="/talk-to-daisy" element={<Layout><TalkToDaisy /></Layout>} />
+              <Route path="/affiliate" element={<Layout><Affiliate /></Layout>} />
+              <Route path="/affiliate-legal" element={<Layout><AffiliateLegal /></Layout>} />
+              <Route path="/policies" element={<Layout><Policies /></Layout>} />
+              <Route path="/manage-booking/:eventId" element={<Layout><ManageBooking /></Layout>} />
 
-            {/* Auth pages (no layout) */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/subscribe" element={<Subscribe />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/upgrade-success" element={<UpgradeSuccess />} />
+              {/* Auth pages (no layout) */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/subscribe" element={<Subscribe />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/upgrade-success" element={<UpgradeSuccess />} />
 
-            {/* Dashboard pages (no layout - custom header) */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/settings/profile" element={<ProfileSettings />} />
-            <Route path="/settings/availability" element={<AvailabilitySettings />} />
-            <Route path="/settings/appointment-types" element={<AppointmentTypesSettings />} />
-            <Route path="/dashboard/appointments" element={<AppointmentsPage />} />
+              {/* Dashboard pages (no layout - custom header) */}
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/settings/profile" element={<ProfileSettings />} />
+              <Route path="/settings/availability" element={<AvailabilitySettings />} />
+              <Route path="/settings/appointment-types" element={<AppointmentTypesSettings />} />
+              <Route path="/settings/calendar-design" element={<CalendarDesignSettings />} />
+              <Route path="/dashboard/appointments" element={<AppointmentsPage />} />
 
-            {/* Public booking */}
-            <Route path="/book/:slug" element={<BookingPage />} />
-            <Route path="/book/:slug/success" element={<BookingSuccess />} />
+              {/* Public booking */}
+              <Route path="/book/:slug" element={<BookingPage />} />
+              <Route path="/book/:slug/success" element={<BookingSuccess />} />
 
-            <Route path="*" element={<Layout><NotFound /></Layout>} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="*" element={<Layout><NotFound /></Layout>} />
+            </Routes>
+          </BrowserRouter>
+        </ThemeProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
