@@ -117,24 +117,17 @@ export default function TalkToDaisy() {
   };
 
   return (
-    <div className="min-h-screen pt-16 pb-4 flex flex-col">
-      <div className="container mx-auto px-4 flex-1 flex flex-col max-w-3xl">
+    <div className="h-screen pt-16 pb-4 flex flex-col overflow-hidden">
+      <div className="container mx-auto px-4 flex-1 flex flex-col max-w-3xl overflow-hidden">
         {/* Header */}
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-2">
-            <Sparkles className="w-4 h-4" />
-            AI Support
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-1">
+        <div className="text-center mb-2 shrink-0">
+          <h1 className="text-xl md:text-2xl font-bold">
             Talk to <span className="rainbow-text">Daisy</span>
           </h1>
-          <p className="text-muted-foreground text-sm">
-            Your AI guide to business automation. Ask anything!
-          </p>
         </div>
 
         {/* Chat Container */}
-        <div className="flex-1 bg-card border border-border rounded-2xl shadow-card flex flex-col overflow-hidden max-h-[75vh]">
+        <div className="flex-1 bg-card border border-border rounded-2xl shadow-card flex flex-col overflow-hidden">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
@@ -199,15 +192,6 @@ export default function TalkToDaisy() {
           </form>
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground mb-3">
-            Ready to see AI automation in action?
-          </p>
-          <Button asChild>
-            <Link to="/contact">Book a Demo</Link>
-          </Button>
-        </div>
       </div>
     </div>
   );
