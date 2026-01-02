@@ -117,10 +117,10 @@ export default function TalkToDaisy() {
   };
 
   return (
-    <div className="h-screen pt-[50px] pb-2 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 pt-10 pb-2 flex flex-col overflow-hidden">
       <div className="container mx-auto px-4 flex-1 flex flex-col max-w-5xl overflow-hidden">
         {/* Chat Container */}
-        <div className="flex-1 bg-card border border-border rounded-2xl shadow-card flex flex-col overflow-hidden">
+        <div className="flex-1 bg-card border border-border rounded-2xl shadow-card flex flex-col overflow-hidden min-h-0">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
