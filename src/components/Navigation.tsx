@@ -52,7 +52,7 @@ export const Navigation = () => {
                 {link.label}
               </Link>
             ))}
-            <ThemeToggle />
+            {!isHome && <ThemeToggle />}
             {!user && (
               <Button size="sm" className="shadow-glow" asChild>
                 <Link to="/signup">Sign Up Free</Link>
@@ -62,7 +62,7 @@ export const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
-            <ThemeToggle />
+            {!isHome && <ThemeToggle />}
             {!user && (
               <Button size="sm" className="shadow-glow" asChild>
                 <Link to="/signup">Sign Up</Link>
