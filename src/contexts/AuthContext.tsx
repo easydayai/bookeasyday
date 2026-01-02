@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 interface Profile {
   id: string;
@@ -31,6 +30,7 @@ interface AuthContextType {
   subscription: Subscription | null;
   credits: number;
   isLoading: boolean;
+  isProfileComplete: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -44,6 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [credits, setCredits] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Computed property: profile is complete if required fields are filled
+  const isProfileComplete = Boolean(
+    profile?.full_name &&
+    profile?.business_name &&
+    profile?.slug
+  );
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -142,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         subscription,
         credits,
         isLoading,
+        isProfileComplete,
         signOut,
         refreshProfile,
       }}

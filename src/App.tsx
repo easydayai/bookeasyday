@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 // Auth pages
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Onboarding from "./pages/Onboarding";
 import Subscribe from "./pages/Subscribe";
 import Checkout from "./pages/Checkout";
 import UpgradeSuccess from "./pages/UpgradeSuccess";
@@ -60,6 +61,7 @@ const App = () => (
             {/* Auth pages (no layout) */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/upgrade-success" element={<UpgradeSuccess />} />
