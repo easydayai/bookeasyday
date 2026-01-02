@@ -119,16 +119,53 @@ serve(async (req) => {
         const startDate = new Date(start);
         const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
 
+        // Format the date for the description
+        const formattedDate = startDate.toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        const formattedTime = startDate.toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          timeZone: timeZone || "America/New_York"
+        });
+
+        // Build a comprehensive description
+        const descriptionParts = [
+          `📅 Easy Day AI - Automation Discovery Call`,
+          ``,
+          `👤 Attendee Details:`,
+          `   Name: ${attendee.name}`,
+          `   Email: ${attendee.email}`,
+          metadata?.phone ? `   Phone: ${metadata.phone}` : null,
+          ``,
+          `⏰ Scheduled Time:`,
+          `   ${formattedDate} at ${formattedTime}`,
+          `   Duration: ${durationMinutes} minutes`,
+          ``,
+          `📝 Meeting Agenda:`,
+          `   • Discuss your current business processes`,
+          `   • Identify automation opportunities`,
+          `   • Review Easy Day AI solutions`,
+          ``,
+          `---`,
+          `Booked via Easy Day AI | https://easydayai.com`
+        ].filter(Boolean).join('\n');
+
         const eventData = {
-          title: `Meeting with ${attendee.name}`,
+          title: `Easy Day AI Call - ${attendee.name}`,
           busy: true,
           participants: [
             {
               name: attendee.name,
-              email: attendee.email
+              email: attendee.email,
+              status: "yes"
             }
           ],
-          description: metadata?.phone ? `Phone: ${metadata.phone}` : "",
+          description: descriptionParts,
+          location: metadata?.phone ? `Phone: ${metadata.phone}` : "Google Meet",
           when: {
             start_time: Math.floor(startDate.getTime() / 1000),
             end_time: Math.floor(endDate.getTime() / 1000),
