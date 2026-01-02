@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader2, ArrowLeft, Calendar, X } from "lucide-react";
 import LogoInsignia from "@/components/LogoInsignia";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -131,12 +132,18 @@ export default function AppointmentsPage() {
             <LogoInsignia className="h-8 w-8" />
             <span className="text-xl font-bold">Easy Day AI</span>
           </Link>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/dashboard">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">Home</Link>
+            </Button>
+            <ThemeToggle />
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/dashboard">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 

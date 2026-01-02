@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import LogoInsignia from "@/components/LogoInsignia";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { User, Clock, Calendar, ArrowLeft, Palette } from "lucide-react";
 
 interface SettingsLayoutProps {
@@ -30,12 +31,15 @@ export function SettingsLayout({ children, title, description }: SettingsLayoutP
             <LogoInsignia className="h-8 w-8" />
             <span className="text-xl font-bold">Easy Day AI</span>
           </Link>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/dashboard">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/dashboard">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
