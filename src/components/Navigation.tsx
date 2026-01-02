@@ -13,13 +13,22 @@ export const Navigation = () => {
   const isHome = location.pathname === "/";
   const { user } = useAuth();
 
-  const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/solutions", label: "Solutions" },
-    { to: "/pricing", label: "Pricing" },
-    { to: "/talk-to-daisy", label: "Talk to Daisy", isRainbow: true },
-    ...(user ? [{ to: "/dashboard", label: "Dashboard" }] : [{ to: "/login", label: "Sign In" }]),
-  ];
+  // RULE: Authenticated users do NOT see Home link - they go to Dashboard instead
+  // RULE: No theme toggle on home page
+  const navLinks = user
+    ? [
+        { to: "/dashboard", label: "Dashboard" },
+        { to: "/solutions", label: "Solutions" },
+        { to: "/pricing", label: "Pricing" },
+        { to: "/talk-to-daisy", label: "Talk to Daisy", isRainbow: true },
+      ]
+    : [
+        { to: "/", label: "Home" },
+        { to: "/solutions", label: "Solutions" },
+        { to: "/pricing", label: "Pricing" },
+        { to: "/talk-to-daisy", label: "Talk to Daisy", isRainbow: true },
+        { to: "/login", label: "Sign In" },
+      ];
 
   return (
     <nav
@@ -30,7 +39,8 @@ export const Navigation = () => {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center">
+          {/* Logo - links to dashboard for auth users, home for guests */}
+          <Link to={user ? "/dashboard" : "/"} className="flex items-center">
             <LogoInsignia className="h-8 w-8" />
           </Link>
 
@@ -52,6 +62,7 @@ export const Navigation = () => {
                 {link.label}
               </Link>
             ))}
+            {/* RULE: Theme toggle only on non-home pages */}
             {!isHome && <ThemeToggle />}
             {!user && (
               <Button size="sm" className="shadow-glow" asChild>
@@ -62,6 +73,7 @@ export const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
+            {/* RULE: Theme toggle only on non-home pages */}
             {!isHome && <ThemeToggle />}
             {!user && (
               <Button size="sm" className="shadow-glow" asChild>
