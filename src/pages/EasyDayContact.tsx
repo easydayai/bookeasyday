@@ -1,5 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2 } from "lucide-react";
 import BookingCalendar from "@/components/BookingCalendar";
 
 export default function EasyDayContact() {
@@ -23,38 +21,8 @@ export default function EasyDayContact() {
       {/* Calendar Section */}
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Custom Booking Calendar */}
-            <div className="lg:col-span-2">
-              <BookingCalendar />
-            </div>
-
-            {/* What to Expect */}
-            <div className="space-y-6">
-              <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-border/50">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold mb-3">What to Expect</h3>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                      15-minute discovery call
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                      Custom automation plan
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                      No technical skills required
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                      Setup in days, not weeks
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
+          <div className="max-w-3xl mx-auto">
+            <BookingCalendar />
           </div>
         </div>
       </section>
