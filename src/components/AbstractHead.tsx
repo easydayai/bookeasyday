@@ -12,15 +12,17 @@ export const AbstractHead = () => {
 
         {/* Abstract Head Image - Hero Scale, no borders (middle) */}
         <div 
-          className="relative z-10 scale-[1.35] sm:scale-100 dark:[mask-image:radial-gradient(ellipse_100%_100%_at_center,black_80%,transparent_100%)] dark:[-webkit-mask-image:radial-gradient(ellipse_100%_100%_at_center,black_80%,transparent_100%)]"
+          className="relative z-10 scale-[1.35] sm:scale-100 dark:[mask-image:radial-gradient(ellipse_70%_70%_at_center,black_40%,transparent_80%)] dark:[-webkit-mask-image:radial-gradient(ellipse_70%_70%_at_center,black_40%,transparent_80%)]"
         >
           <img
             src={abstractHeadImage}
             alt="Easy Day AI - Abstract head representing intelligent automation"
-            className="animate-head-breathe h-auto w-[120vw] max-w-none object-contain border-0 outline-none dark:invert dark:hue-rotate-180 sm:w-auto sm:max-w-full"
+            className="animate-head-breathe h-auto object-contain border-0 outline-none dark:invert dark:hue-rotate-180"
             style={{
               maxHeight: "110vh",
               minHeight: "85vh",
+              width: "auto",
+              maxWidth: "100%",
             }}
           />
         </div>
