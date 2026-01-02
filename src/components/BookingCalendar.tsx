@@ -28,6 +28,7 @@ export default function BookingCalendar({
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [isBooked, setIsBooked] = useState(false);
+  const [bookedEventId, setBookedEventId] = useState<string | null>(null);
   
   // Form state
   const [name, setName] = useState("");
@@ -109,6 +110,7 @@ export default function BookingCalendar({
       console.log("Booking response:", data);
       
       if (data?.id || data?.uid || data?.status === "success") {
+        setBookedEventId(data.id || data.uid);
         setIsBooked(true);
         toast({
           title: "Booking Confirmed!",
@@ -145,6 +147,10 @@ export default function BookingCalendar({
   };
 
   if (isBooked) {
+    const manageUrl = bookedEventId 
+      ? `${window.location.origin}/manage-booking/${bookedEventId}`
+      : null;
+
     return (
       <Card className="bg-card border-border/50 shadow-card">
         <CardContent className="p-12 text-center">
@@ -167,6 +173,7 @@ export default function BookingCalendar({
               variant="outline" 
               onClick={() => {
                 setIsBooked(false);
+                setBookedEventId(null);
                 setSelectedDate(null);
                 setSelectedTime(null);
                 setName("");
@@ -178,11 +185,20 @@ export default function BookingCalendar({
             </Button>
           </div>
           
+          {manageUrl && (
+            <div className="bg-secondary/50 rounded-lg p-4 mb-4">
+              <p className="text-sm font-medium mb-2">Need to cancel or reschedule?</p>
+              <a 
+                href={manageUrl}
+                className="text-primary hover:underline text-sm break-all"
+              >
+                {manageUrl}
+              </a>
+            </div>
+          )}
+          
           <p className="text-xs text-muted-foreground">
-            Need to cancel or reschedule? Check your confirmation email or contact us at{" "}
-            <a href="mailto:hello@easydayai.com" className="text-primary hover:underline">
-              hello@easydayai.com
-            </a>
+            Save this link or check your confirmation email for booking management options.
           </p>
         </CardContent>
       </Card>

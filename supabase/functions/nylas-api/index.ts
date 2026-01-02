@@ -207,6 +207,122 @@ serve(async (req) => {
         );
       }
 
+      case "getBooking": {
+        // Get a specific booking/event by ID
+        const { eventId } = params;
+
+        if (!eventId) {
+          return new Response(
+            JSON.stringify({ error: "eventId is required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const url = `${NYLAS_API_URL}/grants/${NYLAS_GRANT_ID}/events/${eventId}?calendar_id=primary`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers,
+        });
+
+        const data = await response.json();
+        console.log(`Nylas get event response status: ${response.status}`, JSON.stringify(data).slice(0, 500));
+
+        if (!response.ok) {
+          return new Response(
+            JSON.stringify({ error: data.message || "Event not found", details: data }),
+            { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ status: "success", event: data.data }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "cancelBooking": {
+        // Delete/cancel a booking
+        const { eventId } = params;
+
+        if (!eventId) {
+          return new Response(
+            JSON.stringify({ error: "eventId is required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        console.log(`Cancelling event: ${eventId}`);
+
+        const url = `${NYLAS_API_URL}/grants/${NYLAS_GRANT_ID}/events/${eventId}?calendar_id=primary&notify_participants=true`;
+        const response = await fetch(url, {
+          method: "DELETE",
+          headers,
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          return new Response(
+            JSON.stringify({ error: data.message || "Failed to cancel booking", details: data }),
+            { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        console.log(`Event ${eventId} cancelled successfully`);
+
+        return new Response(
+          JSON.stringify({ status: "success", message: "Booking cancelled" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "rescheduleBooking": {
+        // Reschedule a booking to a new time
+        const { eventId, newStart, durationMinutes: rescheduleDuration = 15, timeZone: rescheduleTimeZone } = params;
+
+        if (!eventId || !newStart) {
+          return new Response(
+            JSON.stringify({ error: "eventId and newStart are required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const newStartDate = new Date(newStart);
+        const newEndDate = new Date(newStartDate.getTime() + rescheduleDuration * 60 * 1000);
+
+        console.log(`Rescheduling event ${eventId} to ${newStart}`);
+
+        const updateData = {
+          when: {
+            start_time: Math.floor(newStartDate.getTime() / 1000),
+            end_time: Math.floor(newEndDate.getTime() / 1000),
+            start_timezone: rescheduleTimeZone || "America/New_York",
+            end_timezone: rescheduleTimeZone || "America/New_York"
+          }
+        };
+
+        const url = `${NYLAS_API_URL}/grants/${NYLAS_GRANT_ID}/events/${eventId}?calendar_id=primary&notify_participants=true`;
+        const response = await fetch(url, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(updateData),
+        });
+
+        const data = await response.json();
+        console.log(`Nylas reschedule response status: ${response.status}`, JSON.stringify(data).slice(0, 500));
+
+        if (!response.ok) {
+          return new Response(
+            JSON.stringify({ error: data.message || "Failed to reschedule", details: data }),
+            { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ status: "success", event: data.data }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       default:
         return new Response(
           JSON.stringify({ error: `Unknown action: ${action}` }),
