@@ -14,6 +14,7 @@ export const Navigation = () => {
     { to: "/", label: "Home" },
     { to: "/solutions", label: "Solutions" },
     { to: "/industries", label: "Industries" },
+    { to: "/pricing", label: "Pricing" },
     { to: "/demo", label: "Demo" },
     { to: "/contact", label: "Contact" },
   ];

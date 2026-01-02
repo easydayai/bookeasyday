@@ -10,6 +10,7 @@ import Industries from "./pages/Industries";
 import Demo from "./pages/Demo";
 import EasyDayContact from "./pages/EasyDayContact";
 import Policies from "./pages/Policies";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/industries" element={<Layout><Industries /></Layout>} />
           <Route path="/demo" element={<Layout><Demo /></Layout>} />
           <Route path="/contact" element={<Layout><EasyDayContact /></Layout>} />
+          <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/policies" element={<Layout><Policies /></Layout>} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
