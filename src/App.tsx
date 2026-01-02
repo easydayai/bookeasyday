@@ -13,6 +13,7 @@ import Pricing from "./pages/Pricing";
 import Affiliate from "./pages/Affiliate";
 import AffiliateLegal from "./pages/AffiliateLegal";
 import TalkToDaisy from "./pages/TalkToDaisy";
+import ManageBooking from "./pages/ManageBooking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/affiliate" element={<Layout><Affiliate /></Layout>} />
           <Route path="/affiliate-legal" element={<Layout><AffiliateLegal /></Layout>} />
           <Route path="/policies" element={<Layout><Policies /></Layout>} />
+          <Route path="/manage-booking/:eventId" element={<Layout><ManageBooking /></Layout>} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
       </BrowserRouter>
