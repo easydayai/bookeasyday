@@ -1015,9 +1015,9 @@ export default function BookingCalendar({
 
   return (
     <div className="space-y-4">
-      <Card className="bg-card border-border/50 shadow-card overflow-hidden">
+      <Card className="bg-gradient-to-br from-purple-600 to-purple-800 border-purple-500/50 shadow-card overflow-hidden text-white">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">Select a Date & Time</CardTitle>
+          <CardTitle className="text-xl text-white">Select a Date & Time</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {/* Calendar Navigation */}
@@ -1027,16 +1027,18 @@ export default function BookingCalendar({
               size="icon"
               onClick={() => navigateWeek("prev")}
               disabled={currentDate <= startOfDay(new Date())}
+              className="text-white hover:bg-white/10"
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
-            <span className="font-medium">
+            <span className="font-medium text-white">
               {format(currentDate, "MMMM yyyy")}
             </span>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigateWeek("next")}
+              className="text-white hover:bg-white/10"
             >
               <ChevronRight className="w-5 h-5" />
             </Button>
@@ -1045,7 +1047,7 @@ export default function BookingCalendar({
           {/* Days Grid */}
           <div className="grid grid-cols-7 gap-1 px-4 pb-4">
             {days.slice(0, 7).map((day) => (
-              <div key={day.toISOString()} className="text-center text-xs text-muted-foreground pb-1">
+              <div key={day.toISOString()} className="text-center text-xs text-white/70 pb-1">
                 {format(day, "EEE")}
               </div>
             ))}
@@ -1065,11 +1067,11 @@ export default function BookingCalendar({
                   }}
                   disabled={!dayHasSlots || isPast}
                   className={cn(
-                    "aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-colors",
-                    isSelected && "bg-primary text-primary-foreground",
-                    !isSelected && dayHasSlots && !isPast && "hover:bg-primary/10 cursor-pointer",
-                    !dayHasSlots && "text-muted-foreground/50",
-                    isPast && "text-muted-foreground/30 cursor-not-allowed"
+                    "aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-colors text-white",
+                    isSelected && "bg-white text-purple-700",
+                    !isSelected && dayHasSlots && !isPast && "hover:bg-white/20 cursor-pointer",
+                    !dayHasSlots && "text-white/30",
+                    isPast && "text-white/20 cursor-not-allowed"
                   )}
                 >
                   {format(day, "d")}
@@ -1086,8 +1088,8 @@ export default function BookingCalendar({
 
           {/* Time Slots */}
           {selectedDate && (
-            <div className="border-t border-border/50 p-6">
-              <h3 className="font-medium mb-3 flex items-center gap-2">
+            <div className="border-t border-white/20 p-6">
+              <h3 className="font-medium mb-3 flex items-center gap-2 text-white">
                 <Clock className="w-4 h-4" />
                 {format(selectedDate, "EEEE, MMMM d")}
               </h3>
@@ -1103,8 +1105,8 @@ export default function BookingCalendar({
                       className={cn(
                         "py-2 px-3 rounded-lg text-sm font-medium transition-colors",
                         isSelectedSlot
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary hover:bg-primary/10"
+                          ? "bg-white text-purple-700"
+                          : "bg-white/20 text-white hover:bg-white/30"
                       )}
                     >
                       {format(slotTime, "h:mm a")}
@@ -1117,22 +1119,23 @@ export default function BookingCalendar({
 
           {/* Booking Form */}
           {selectedTime && (
-            <form onSubmit={handleBooking} className="border-t border-border/50 p-6 space-y-4">
-              <h3 className="font-medium mb-3">Your Information</h3>
+            <form onSubmit={handleBooking} className="border-t border-white/20 p-6 space-y-4">
+              <h3 className="font-medium mb-3 text-white">Your Information</h3>
               
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="name" className="text-white">Name *</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your full name"
                     required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email" className="text-white">Email *</Label>
                   <Input
                     id="email"
                     type="email"
@@ -1140,12 +1143,13 @@ export default function BookingCalendar({
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone *</Label>
+                <Label htmlFor="phone" className="text-white">Phone *</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -1153,12 +1157,13 @@ export default function BookingCalendar({
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="(555) 555-5555"
                   required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                 />
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full shadow-glow" 
+                className="w-full bg-white text-purple-700 hover:bg-white/90" 
                 size="lg"
                 disabled={isBooking}
               >
