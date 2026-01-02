@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, ChevronRight, Clock, CheckCircle2, Loader2, Calendar, X, RefreshCw, AlertCircle } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Clock, CheckCircle2, Loader2, Calendar, X, RefreshCw, AlertCircle, Mail, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -38,6 +39,7 @@ export default function BookingCalendar({
   durationMinutes = 15
 }: BookingCalendarProps) {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
   const [slots, setSlots] = useState<Record<string, TimeSlot[]>>({});
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -55,8 +57,11 @@ export default function BookingCalendar({
   // Manage booking state
   const [showManage, setShowManage] = useState(false);
   const [manageEventId, setManageEventId] = useState("");
+  const [manageEmail, setManageEmail] = useState("");
   const [existingBooking, setExistingBooking] = useState<BookingEvent | null>(null);
+  const [emailBookings, setEmailBookings] = useState<BookingEvent[]>([]);
   const [isLoadingBooking, setIsLoadingBooking] = useState(false);
+  const [lookupMethod, setLookupMethod] = useState<"email" | "id">("email");
   const [showReschedule, setShowReschedule] = useState(false);
   const [rescheduleSlots, setRescheduleSlots] = useState<Record<string, TimeSlot[]>>({});
   const [rescheduleDate, setRescheduleDate] = useState(startOfDay(new Date()));
@@ -67,6 +72,22 @@ export default function BookingCalendar({
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [isRescheduled, setIsRescheduled] = useState(false);
+
+  // Check for URL params from email links
+  useEffect(() => {
+    const manageParam = searchParams.get("manage");
+    const emailParam = searchParams.get("email");
+    
+    if (manageParam) {
+      setShowManage(true);
+      setManageEventId(manageParam);
+      if (emailParam) {
+        setManageEmail(emailParam);
+      }
+      // Auto-fetch the booking
+      fetchBookingById(manageParam);
+    }
+  }, [searchParams]);
 
   // Generate days to display (3 rows = 21 days)
   const days = Array.from({ length: 21 }, (_, i) => addDays(currentDate, i));
@@ -125,6 +146,7 @@ export default function BookingCalendar({
 
     setIsBooking(true);
     try {
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const { data, error } = await supabase.functions.invoke("nylas-api", {
         body: {
           action: "createBooking",
@@ -134,7 +156,7 @@ export default function BookingCalendar({
             name,
             email,
           },
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timeZone,
           metadata: { phone },
         },
       });
@@ -144,8 +166,31 @@ export default function BookingCalendar({
       console.log("Booking response:", data);
       
       if (data?.id || data?.uid || data?.status === "success") {
-        setBookedEventId(data.id || data.uid);
+        const eventId = data.id || data.uid;
+        setBookedEventId(eventId);
         setIsBooked(true);
+        
+        // Send confirmation email with cancel/reschedule links
+        const appointmentDate = format(parseISO(selectedTime), "EEEE, MMMM d, yyyy");
+        const appointmentTime = format(parseISO(selectedTime), "h:mm a");
+        
+        try {
+          await supabase.functions.invoke("nylas-api", {
+            body: {
+              action: "sendConfirmationEmail",
+              eventId,
+              attendeeEmail: email,
+              attendeeName: name,
+              appointmentDate,
+              appointmentTime,
+              phone,
+            },
+          });
+          console.log("Confirmation email sent");
+        } catch (emailErr) {
+          console.error("Failed to send confirmation email:", emailErr);
+        }
+        
         toast({
           title: "Booking Confirmed!",
           description: "Check your email for confirmation details.",
@@ -195,9 +240,11 @@ export default function BookingCalendar({
     return getRescheduleSlotsForDate(date).length > 0;
   };
 
-  // Fetch existing booking
-  const fetchExistingBooking = async () => {
-    if (!manageEventId.trim()) {
+  // Fetch booking by ID
+  const fetchBookingById = async (eventId?: string) => {
+    const idToFetch = eventId || manageEventId.trim();
+    
+    if (!idToFetch) {
       toast({
         title: "Missing Booking ID",
         description: "Please enter your booking ID.",
@@ -211,7 +258,7 @@ export default function BookingCalendar({
       const { data, error } = await supabase.functions.invoke("nylas-api", {
         body: {
           action: "getBooking",
-          params: { eventId: manageEventId.trim() },
+          eventId: idToFetch,
         },
       });
 
@@ -221,7 +268,11 @@ export default function BookingCalendar({
         throw new Error(data.error);
       }
 
-      setExistingBooking(data);
+      if (data?.event) {
+        setExistingBooking(data.event);
+      } else {
+        throw new Error("Booking not found");
+      }
     } catch (err: any) {
       console.error("Error fetching booking:", err);
       toast({
@@ -232,6 +283,60 @@ export default function BookingCalendar({
     } finally {
       setIsLoadingBooking(false);
     }
+  };
+
+  // Fetch bookings by email
+  const fetchBookingsByEmail = async () => {
+    if (!manageEmail.trim()) {
+      toast({
+        title: "Missing Email",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoadingBooking(true);
+    setEmailBookings([]);
+    try {
+      const { data, error } = await supabase.functions.invoke("nylas-api", {
+        body: {
+          action: "findBookingByEmail",
+          email: manageEmail.trim(),
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      if (data?.events && data.events.length > 0) {
+        setEmailBookings(data.events);
+      } else {
+        toast({
+          title: "No Bookings Found",
+          description: "No upcoming appointments found for this email address.",
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      console.error("Error fetching bookings:", err);
+      toast({
+        title: "Search Failed",
+        description: err.message || "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingBooking(false);
+    }
+  };
+
+  // Select a booking from email results
+  const selectBookingFromEmail = (booking: BookingEvent) => {
+    setExistingBooking(booking);
+    setEmailBookings([]);
   };
 
   // Fetch reschedule slots
@@ -346,7 +451,10 @@ export default function BookingCalendar({
   const resetManageState = () => {
     setShowManage(false);
     setManageEventId("");
+    setManageEmail("");
     setExistingBooking(null);
+    setEmailBookings([]);
+    setLookupMethod("email");
     setShowReschedule(false);
     setSelectedRescheduleDate(null);
     setSelectedRescheduleTime(null);
@@ -662,6 +770,56 @@ export default function BookingCalendar({
       );
     }
 
+    // Show email results list
+    if (emailBookings.length > 0) {
+      return (
+        <Card className="bg-card border-border/50 shadow-card">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">Your Bookings</CardTitle>
+              <Button variant="ghost" size="sm" onClick={resetManageState}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-muted-foreground text-sm mb-4">
+              Select a booking to manage:
+            </p>
+            {emailBookings.map((booking) => {
+              const bookingDate = booking.when?.start_time 
+                ? new Date(booking.when.start_time * 1000)
+                : null;
+              return (
+                <button
+                  key={booking.id}
+                  onClick={() => selectBookingFromEmail(booking)}
+                  className="w-full p-4 bg-secondary/50 rounded-lg text-left hover:bg-secondary transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium">
+                        {bookingDate ? format(bookingDate, "EEEE, MMMM d 'at' h:mm a") : "Appointment"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{booking.title}</p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+            <Button 
+              variant="outline" 
+              onClick={() => setEmailBookings([])} 
+              className="w-full mt-4"
+            >
+              Search Again
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
     // Lookup booking form
     return (
       <Card className="bg-card border-border/50 shadow-card">
@@ -674,32 +832,94 @@ export default function BookingCalendar({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground text-sm">
-            Enter the booking ID from your confirmation email to manage your appointment.
-          </p>
-          <div className="space-y-2">
-            <Label htmlFor="eventId">Booking ID</Label>
-            <Input
-              id="eventId"
-              value={manageEventId}
-              onChange={(e) => setManageEventId(e.target.value)}
-              placeholder="Enter your booking ID"
-            />
+          {/* Lookup method tabs */}
+          <div className="flex gap-2 p-1 bg-secondary/50 rounded-lg">
+            <button
+              onClick={() => setLookupMethod("email")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors",
+                lookupMethod === "email" 
+                  ? "bg-background shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Mail className="w-4 h-4" />
+              By Email
+            </button>
+            <button
+              onClick={() => setLookupMethod("id")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors",
+                lookupMethod === "id" 
+                  ? "bg-background shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Search className="w-4 h-4" />
+              By Booking ID
+            </button>
           </div>
-          <Button 
-            onClick={fetchExistingBooking} 
-            className="w-full"
-            disabled={isLoadingBooking}
-          >
-            {isLoadingBooking ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Looking up...
-              </>
-            ) : (
-              "Find My Booking"
-            )}
-          </Button>
+
+          {lookupMethod === "email" ? (
+            <>
+              <p className="text-muted-foreground text-sm">
+                Enter the email address you used when booking to find your appointments.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="manageEmail">Email Address</Label>
+                <Input
+                  id="manageEmail"
+                  type="email"
+                  value={manageEmail}
+                  onChange={(e) => setManageEmail(e.target.value)}
+                  placeholder="your@email.com"
+                />
+              </div>
+              <Button 
+                onClick={fetchBookingsByEmail} 
+                className="w-full"
+                disabled={isLoadingBooking}
+              >
+                {isLoadingBooking ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  "Find My Bookings"
+                )}
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-muted-foreground text-sm">
+                Enter the booking ID from your confirmation email.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="eventId">Booking ID</Label>
+                <Input
+                  id="eventId"
+                  value={manageEventId}
+                  onChange={(e) => setManageEventId(e.target.value)}
+                  placeholder="Enter your booking ID"
+                />
+              </div>
+              <Button 
+                onClick={() => fetchBookingById()} 
+                className="w-full"
+                disabled={isLoadingBooking}
+              >
+                {isLoadingBooking ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Looking up...
+                  </>
+                ) : (
+                  "Find My Booking"
+                )}
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
     );
