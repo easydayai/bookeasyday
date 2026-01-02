@@ -13,19 +13,23 @@ export default function UpgradeSuccess() {
   const maxRetries = 10;
 
   useEffect(() => {
+    let timer: number | undefined;
+    let cancelled = false;
+
     // Poll for subscription status
     const checkSubscription = async () => {
       await refreshProfile();
-      
+      if (cancelled) return;
+
       if (subscription?.status === "active" && subscription?.plan_key !== "free") {
         // Subscription is active, redirect to dashboard after a short delay
-        setTimeout(() => {
-          navigate("/dashboard");
+        timer = window.setTimeout(() => {
+          if (!cancelled) navigate("/dashboard");
         }, 2000);
       } else if (retryCount < maxRetries) {
         // Keep polling
-        setTimeout(() => {
-          setRetryCount((prev) => prev + 1);
+        timer = window.setTimeout(() => {
+          if (!cancelled) setRetryCount((prev) => prev + 1);
         }, 2000);
       }
     };
@@ -33,6 +37,11 @@ export default function UpgradeSuccess() {
     if (!isLoading) {
       checkSubscription();
     }
+
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
   }, [retryCount, subscription, refreshProfile, isLoading, navigate]);
 
   const isComplete = subscription?.status === "active" && subscription?.plan_key !== "free";
