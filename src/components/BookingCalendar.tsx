@@ -1045,9 +1045,9 @@ export default function BookingCalendar({
           </div>
 
           {/* Days Grid */}
-          <div className="grid grid-cols-7 gap-1 px-4 pb-4">
+          <div className="grid grid-cols-7 px-4 pb-4 border border-white/20 mx-4 rounded-lg overflow-hidden">
             {days.slice(0, 7).map((day) => (
-              <div key={day.toISOString()} className="text-center text-xs text-white/70 pb-1">
+              <div key={day.toISOString()} className="text-center text-xs text-white/70 py-2 border-b border-white/20 font-medium">
                 {format(day, "EEE")}
               </div>
             ))}
@@ -1067,7 +1067,7 @@ export default function BookingCalendar({
                   }}
                   disabled={!dayHasSlots || isPast}
                   className={cn(
-                    "aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-colors text-white",
+                    "aspect-square flex items-center justify-center text-sm font-medium transition-colors text-white border-r border-b border-white/20 last:border-r-0 [&:nth-child(7n+7)]:border-r-0",
                     isSelected && "bg-white text-purple-700",
                     !isSelected && dayHasSlots && !isPast && "hover:bg-white/20 cursor-pointer",
                     !dayHasSlots && "text-white/30",
