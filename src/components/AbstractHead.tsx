@@ -15,7 +15,7 @@ export const AbstractHead = () => {
           <img
             src={abstractHeadImage}
             alt="Easy Day AI - Abstract head representing intelligent automation"
-            className="animate-head-breathe h-auto object-contain border-0 outline-none"
+            className="animate-head-breathe h-auto object-contain border-0 outline-none dark:mix-blend-screen dark:brightness-110 dark:contrast-110"
             style={{
               maxHeight: "110vh",
               minHeight: "85vh",
@@ -23,6 +23,8 @@ export const AbstractHead = () => {
               maxWidth: "100%",
             }}
           />
+          {/* Dark mode background overlay for image */}
+          <div className="absolute inset-0 -z-10 bg-background hidden dark:block" />
         </div>
 
         {/* Floating particles - positioned around the head area (in front) */}
