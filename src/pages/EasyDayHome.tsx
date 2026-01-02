@@ -17,8 +17,8 @@ import {
   ArrowRight,
   Clock,
 } from "lucide-react";
+import { AbstractHead } from "@/components/AbstractHead";
 import { RainbowParticles } from "@/components/RainbowParticles";
-import { HeroParticles } from "@/components/HeroParticles";
 
 const features = [
   {
@@ -125,23 +125,31 @@ const metrics = [
 export default function EasyDayHome() {
   return (
     <div className="min-h-screen bg-background">
-      {/* SECTION 1: Hero - Title + Particles (Above the Fold) */}
+      {/* SECTION 1: Hero - HEAD ONLY (Above the Fold) */}
       <section 
-        className="relative overflow-hidden bg-background flex items-start justify-center pt-32 md:pt-40"
-        style={{ minHeight: "85vh" }}
+        className="relative overflow-visible bg-background"
+        style={{ minHeight: "85vh", paddingTop: "20px", paddingBottom: "20px" }}
       >
-        {/* Dynamic particle background */}
-        <HeroParticles />
-        
-        {/* Centered "Easy Day" text */}
-        <div className="relative z-10 text-center">
-          <h1 
-            className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight animate-head-breathe"
+        {/* Desktop only: "Easy" - Left of Head */}
+        <div className="hidden md:block absolute top-[35%] left-[12%] lg:left-[18%] z-20">
+          <span className="text-6xl lg:text-7xl font-bold text-foreground/90 tracking-wide animate-head-breathe" style={{ fontFamily: "'Nunito', sans-serif" }}>
+            Easy
+          </span>
+        </div>
+
+        {/* Desktop only: "Day" - Right of Head */}
+        <div className="hidden md:block absolute top-[35%] right-[12%] lg:right-[18%] z-20">
+          <span 
+            className="text-6xl lg:text-7xl font-bold tracking-wider animate-head-breathe animate-rainbow-text" 
             style={{ fontFamily: "'Nunito', sans-serif" }}
           >
-            <span className="text-foreground/90">Easy </span>
-            <span className="animate-rainbow-text">Day</span>
-          </h1>
+            Day
+          </span>
+        </div>
+
+        {/* Abstract Head - Centered (mobile: just the head, no text) */}
+        <div className="relative z-10 w-full h-[80vh] md:h-[90vh] flex items-center justify-center overflow-visible">
+          <AbstractHead />
         </div>
       </section>
 
