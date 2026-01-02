@@ -70,8 +70,9 @@ export default function BookingCalendar({
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [isCancelled, setIsCancelled] = useState(false);
-  const [isRescheduled, setIsRescheduled] = useState(false);
+  const [showCancelAllConfirm, setShowCancelAllConfirm] = useState(false);
+  const [isCancellingAll, setIsCancellingAll] = useState(false);
+  const [savedEmail, setSavedEmail] = useState("");
 
   // Check for URL params from email links
   useEffect(() => {
@@ -314,7 +315,7 @@ export default function BookingCalendar({
 
       if (data?.events && data.events.length > 0) {
         setEmailBookings(data.events);
-      } else {
+        setSavedEmail(manageEmail.trim());
         toast({
           title: "No Bookings Found",
           description: "No upcoming appointments found for this email address.",
@@ -364,7 +365,7 @@ export default function BookingCalendar({
     }
   };
 
-  // Handle cancel
+  // Handle cancel - then go back to bookings list
   const handleCancel = async () => {
     if (!existingBooking) return;
 
@@ -383,12 +384,21 @@ export default function BookingCalendar({
         throw new Error(data.error);
       }
 
-      setIsCancelled(true);
       setShowCancelConfirm(false);
       toast({
         title: "Booking Cancelled",
         description: "Your appointment has been cancelled successfully.",
       });
+      
+      // Go back to bookings list if we came from email lookup
+      if (savedEmail) {
+        setExistingBooking(null);
+        setShowReschedule(false);
+        // Refresh the bookings list
+        fetchBookingsByEmail();
+      } else {
+        resetManageState();
+      }
     } catch (err: any) {
       console.error("Cancel error:", err);
       toast({
@@ -401,7 +411,62 @@ export default function BookingCalendar({
     }
   };
 
-  // Handle reschedule
+  // Handle cancel all bookings
+  const handleCancelAll = async () => {
+    if (emailBookings.length === 0) return;
+
+    setIsCancellingAll(true);
+    try {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const booking of emailBookings) {
+        try {
+          const { data, error } = await supabase.functions.invoke("nylas-api", {
+            body: {
+              action: "cancelBooking",
+              eventId: booking.id,
+            },
+          });
+
+          if (error || data?.error) {
+            failCount++;
+          } else {
+            successCount++;
+          }
+        } catch {
+          failCount++;
+        }
+      }
+
+      setShowCancelAllConfirm(false);
+      
+      if (successCount > 0) {
+        toast({
+          title: "Bookings Cancelled",
+          description: `Successfully cancelled ${successCount} appointment${successCount > 1 ? 's' : ''}.${failCount > 0 ? ` ${failCount} failed.` : ''}`,
+        });
+      }
+      
+      // Refresh the bookings list
+      if (savedEmail) {
+        fetchBookingsByEmail();
+      } else {
+        setEmailBookings([]);
+      }
+    } catch (err: any) {
+      console.error("Cancel all error:", err);
+      toast({
+        title: "Cancellation Failed",
+        description: err.message || "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCancellingAll(false);
+    }
+  };
+
+  // Handle reschedule - then go back to bookings list
   const handleReschedule = async () => {
     if (!existingBooking || !selectedRescheduleTime) return;
 
@@ -422,11 +487,22 @@ export default function BookingCalendar({
         throw new Error(data.error);
       }
 
-      setIsRescheduled(true);
       toast({
         title: "Booking Rescheduled",
-        description: "Your appointment has been rescheduled successfully.",
+        description: `Your appointment has been rescheduled to ${format(parseISO(selectedRescheduleTime), "EEEE, MMMM d 'at' h:mm a")}.`,
       });
+      
+      // Go back to bookings list if we came from email lookup
+      if (savedEmail) {
+        setExistingBooking(null);
+        setShowReschedule(false);
+        setSelectedRescheduleDate(null);
+        setSelectedRescheduleTime(null);
+        // Refresh the bookings list
+        fetchBookingsByEmail();
+      } else {
+        resetManageState();
+      }
     } catch (err: any) {
       console.error("Reschedule error:", err);
       toast({
@@ -456,8 +532,8 @@ export default function BookingCalendar({
     setShowReschedule(false);
     setSelectedRescheduleDate(null);
     setSelectedRescheduleTime(null);
-    setIsCancelled(false);
-    setIsRescheduled(false);
+    setSavedEmail("");
+    setShowCancelAllConfirm(false);
   };
 
   if (isBooked) {
@@ -521,48 +597,6 @@ export default function BookingCalendar({
 
   // Manage booking views
   if (showManage) {
-    // Cancelled state
-    if (isCancelled) {
-      return (
-        <Card className="bg-card border-border/50 shadow-card">
-          <CardContent className="p-12 text-center">
-            <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-6">
-              <X className="w-10 h-10 text-destructive" />
-            </div>
-            <h2 className="text-2xl font-bold mb-4">Booking Cancelled</h2>
-            <p className="text-muted-foreground mb-8">
-              Your appointment has been cancelled successfully.
-            </p>
-            <Button onClick={resetManageState}>
-              Book a New Appointment
-            </Button>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    // Rescheduled state
-    if (isRescheduled) {
-      return (
-        <Card className="bg-card border-border/50 shadow-card">
-          <CardContent className="p-12 text-center">
-            <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="w-10 h-10 text-accent" />
-            </div>
-            <h2 className="text-2xl font-bold mb-4">Booking Rescheduled</h2>
-            <p className="text-muted-foreground mb-2">
-              Your appointment has been rescheduled to:
-            </p>
-            <p className="text-lg font-semibold text-primary mb-8">
-              {selectedRescheduleTime && format(parseISO(selectedRescheduleTime), "EEEE, MMMM d 'at' h:mm a")}
-            </p>
-            <Button onClick={resetManageState}>
-              Done
-            </Button>
-          </CardContent>
-        </Card>
-      );
-    }
 
     // Existing booking found - show details and options
     if (existingBooking) {
@@ -574,7 +608,23 @@ export default function BookingCalendar({
         <Card className="bg-card border-border/50 shadow-card overflow-hidden">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl">Manage Your Booking</CardTitle>
+              <div className="flex items-center gap-2">
+                {savedEmail && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      setExistingBooking(null);
+                      setShowReschedule(false);
+                      fetchBookingsByEmail();
+                    }}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Back
+                  </Button>
+                )}
+                <CardTitle className="text-xl">Manage Your Booking</CardTitle>
+              </div>
               <Button variant="ghost" size="sm" onClick={resetManageState}>
                 <X className="w-4 h-4" />
               </Button>
@@ -781,9 +831,20 @@ export default function BookingCalendar({
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-muted-foreground text-sm mb-4">
-              Select a booking to manage:
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-muted-foreground text-sm">
+                {emailBookings.length} booking{emailBookings.length > 1 ? 's' : ''} found
+              </p>
+              {emailBookings.length > 1 && (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => setShowCancelAllConfirm(true)}
+                >
+                  Cancel All
+                </Button>
+              )}
+            </div>
             {emailBookings.map((booking) => {
               const bookingDate = booking.when?.start_time 
                 ? new Date(booking.when.start_time * 1000)
@@ -808,12 +869,41 @@ export default function BookingCalendar({
             })}
             <Button 
               variant="outline" 
-              onClick={() => setEmailBookings([])} 
+              onClick={() => { setEmailBookings([]); setSavedEmail(""); }} 
               className="w-full mt-4"
             >
               Search Again
             </Button>
           </CardContent>
+
+          {/* Cancel All Confirmation Dialog */}
+          <AlertDialog open={showCancelAllConfirm} onOpenChange={setShowCancelAllConfirm}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Cancel All Bookings?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will cancel all {emailBookings.length} appointments. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Keep Bookings</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleCancelAll}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  disabled={isCancellingAll}
+                >
+                  {isCancellingAll ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Cancelling...
+                    </>
+                  ) : (
+                    "Yes, Cancel All"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </Card>
       );
     }
