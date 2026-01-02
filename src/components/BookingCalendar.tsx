@@ -373,7 +373,7 @@ export default function BookingCalendar({
       const { data, error } = await supabase.functions.invoke("nylas-api", {
         body: {
           action: "cancelBooking",
-          params: { eventId: existingBooking.id },
+          eventId: existingBooking.id,
         },
       });
 
@@ -410,11 +410,9 @@ export default function BookingCalendar({
       const { data, error } = await supabase.functions.invoke("nylas-api", {
         body: {
           action: "rescheduleBooking",
-          params: {
-            eventId: existingBooking.id,
-            newStart: selectedRescheduleTime,
-            durationMinutes,
-          },
+          eventId: existingBooking.id,
+          newStart: selectedRescheduleTime,
+          durationMinutes,
         },
       });
 
