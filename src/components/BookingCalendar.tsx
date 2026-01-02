@@ -14,15 +14,11 @@ interface TimeSlot {
 }
 
 interface BookingCalendarProps {
-  eventTypeSlug?: string;
-  username?: string;
-  eventTypeId?: number;
+  durationMinutes?: number;
 }
 
 export default function BookingCalendar({ 
-  eventTypeSlug = "bookings", 
-  username = "jeremy-rivera-n6ukhk",
-  eventTypeId
+  durationMinutes = 15
 }: BookingCalendarProps) {
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
@@ -32,8 +28,6 @@ export default function BookingCalendar({
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [isBooked, setIsBooked] = useState(false);
-  const [resolvedEventTypeId, setResolvedEventTypeId] = useState<number | null>(eventTypeId || null);
-  const [eventLength, setEventLength] = useState<number>(15); // Default to 15 minutes
   
   // Form state
   const [name, setName] = useState("");
@@ -43,71 +37,32 @@ export default function BookingCalendar({
   // Generate days to display (3 rows = 21 days)
   const days = Array.from({ length: 21 }, (_, i) => addDays(currentDate, i));
 
-  // Fetch event type ID if not provided
+  // Fetch slots when date range changes
   useEffect(() => {
-    if (!eventTypeId) {
-      fetchEventTypeId();
-    }
-  }, [eventTypeId]);
-
-  // Fetch slots when date range changes (can work with or without eventTypeId)
-  useEffect(() => {
-    // Allow fetching with either eventTypeId or username/slug
     fetchSlots();
-  }, [currentDate, resolvedEventTypeId]);
-
-  const fetchEventTypeId = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke("calcom-api", {
-        body: { action: "getEventTypes" },
-      });
-
-      if (error) throw error;
-
-      console.log("Event types:", data);
-      
-      // Find the matching event type by slug
-      const eventTypes = data?.event_types || data?.data?.eventTypes || data?.data || [];
-      const matchingEvent = eventTypes.find((et: any) => et.slug === eventTypeSlug);
-      
-      if (matchingEvent) {
-        setResolvedEventTypeId(matchingEvent.id);
-        setEventLength(matchingEvent.length || 15);
-        console.log("Resolved event type ID:", matchingEvent.id, "length:", matchingEvent.length);
-      } else if (eventTypes.length > 0) {
-        setResolvedEventTypeId(eventTypes[0].id);
-        setEventLength(eventTypes[0].length || 15);
-        console.log("Using first event type ID:", eventTypes[0].id, "length:", eventTypes[0].length);
-      } else {
-        // If no event types found, still try to fetch slots with username/slug
-        console.log("No event types found, will use username/slug for slots");
-      }
-    } catch (err) {
-      console.error("Error fetching event types:", err);
-      // Still allow slot fetching even if event types fail
-    }
-  };
+  }, [currentDate]);
 
   const fetchSlots = async () => {
     setIsLoadingSlots(true);
     try {
       const startTime = currentDate.toISOString();
       const endTime = addDays(currentDate, 21).toISOString();
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      const { data, error } = await supabase.functions.invoke("calcom-api", {
+      const { data, error } = await supabase.functions.invoke("nylas-api", {
         body: {
-          action: "getSlots",
-          eventTypeId: resolvedEventTypeId,
-          eventTypeSlug,
-          username,
+          action: "getAvailability",
           startTime,
           endTime,
+          timeZone,
+          durationMinutes,
+          intervalMinutes: 15,
         },
       });
 
       if (error) throw error;
 
-      console.log("Slots response:", data);
+      console.log("Nylas slots response:", data);
       setSlots(data?.data || {});
     } catch (err) {
       console.error("Error fetching slots:", err);
@@ -135,12 +90,11 @@ export default function BookingCalendar({
 
     setIsBooking(true);
     try {
-      const { data, error } = await supabase.functions.invoke("calcom-api", {
+      const { data, error } = await supabase.functions.invoke("nylas-api", {
         body: {
           action: "createBooking",
-          eventTypeId: resolvedEventTypeId,
-          eventLength: eventLength,
           start: selectedTime,
+          durationMinutes,
           attendee: {
             name,
             email,
@@ -154,18 +108,14 @@ export default function BookingCalendar({
 
       console.log("Booking response:", data);
       
-      // v1 returns a booking object at the top level (e.g. { id, uid, ... })
-      const bookingId = (data as any)?.id ?? (data as any)?.booking?.id;
-      const bookingUid = (data as any)?.uid ?? (data as any)?.booking?.uid;
-
-      if (bookingId || bookingUid || (data as any)?.status === "success" || (data as any)?.data) {
+      if (data?.id || data?.uid || data?.status === "success") {
         setIsBooked(true);
         toast({
           title: "Booking Confirmed!",
           description: "Check your email for confirmation details.",
         });
       } else {
-        throw new Error((data as any)?.error || "Booking failed");
+        throw new Error(data?.error || "Booking failed");
       }
     } catch (err: any) {
       console.error("Booking error:", err);
@@ -209,7 +159,7 @@ export default function BookingCalendar({
             {selectedTime && format(parseISO(selectedTime), "EEEE, MMMM d 'at' h:mm a")}
           </p>
           <p className="text-sm text-muted-foreground mb-8">
-            A confirmation email has been sent to {email} with options to reschedule or cancel.
+            A confirmation email has been sent to {email} with calendar invite and meeting details.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
@@ -230,8 +180,8 @@ export default function BookingCalendar({
           
           <p className="text-xs text-muted-foreground">
             Need to cancel or reschedule? Check your confirmation email or contact us at{" "}
-            <a href="mailto:support@easyday.ai" className="text-primary hover:underline">
-              support@easyday.ai
+            <a href="mailto:hello@easydayai.com" className="text-primary hover:underline">
+              hello@easydayai.com
             </a>
           </p>
         </CardContent>
