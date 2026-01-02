@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Layout } from "@/components/Layout";
+import { AuthGuard } from "@/components/AuthGuard";
 import EasyDayHome from "./pages/EasyDayHome";
 import Solutions from "./pages/Solutions";
 import Demo from "./pages/Demo";
@@ -43,14 +44,23 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <ThemeProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <BrowserRouter>
+        <AuthProvider>
+          <ThemeProvider>
+            <Toaster />
+            <Sonner />
             <Routes>
-              {/* Public pages */}
-              <Route path="/" element={<Layout><EasyDayHome /></Layout>} />
+              {/* Home page - CRITICAL: Redirect authenticated users to /dashboard */}
+              <Route 
+                path="/" 
+                element={
+                  <AuthGuard redirectAuthenticatedTo="/dashboard">
+                    <Layout><EasyDayHome /></Layout>
+                  </AuthGuard>
+                } 
+              />
+              
+              {/* Other public pages */}
               <Route path="/solutions" element={<Layout><Solutions /></Layout>} />
               <Route path="/demo" element={<Layout><Demo /></Layout>} />
               <Route path="/contact" element={<Layout><EasyDayContact /></Layout>} />
@@ -83,9 +93,9 @@ const App = () => (
 
               <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
-          </BrowserRouter>
-        </ThemeProvider>
-      </AuthProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
