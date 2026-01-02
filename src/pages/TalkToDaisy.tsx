@@ -12,8 +12,7 @@ type Message = {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/daisy-chat`;
 
-// Replace with your Retell agent ID from the Retell dashboard
-const RETELL_AGENT_ID = "agent_daisy_easy_day";
+const RETELL_AGENT_ID = "agent_8e782b69e20cb894465900c778";
 
 export default function TalkToDaisy() {
   const [messages, setMessages] = useState<Message[]>([
