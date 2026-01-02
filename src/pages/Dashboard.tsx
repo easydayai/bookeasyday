@@ -41,17 +41,25 @@ const PLAN_DISPLAY = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, profile, subscription, credits, isLoading, signOut } = useAuth();
+  const { user, profile, subscription, credits, isLoading, isProfileComplete, signOut } = useAuth();
   const { toast } = useToast();
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
 
+  // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
       navigate("/login");
     }
   }, [user, isLoading, navigate]);
+
+  // Redirect to onboarding if profile is incomplete
+  useEffect(() => {
+    if (!isLoading && user && !isProfileComplete) {
+      navigate("/onboarding");
+    }
+  }, [user, isLoading, isProfileComplete, navigate]);
 
   useEffect(() => {
     if (user) {

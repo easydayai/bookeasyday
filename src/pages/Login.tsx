@@ -6,32 +6,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import LogoInsignia from "@/components/LogoInsignia";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isProfileComplete } = useAuth();
 
-  // If user is already logged in, redirect to dashboard
+  // If user is already logged in, handle redirect
   useEffect(() => {
     if (!authLoading && user) {
-      navigate("/dashboard");
+      if (!isProfileComplete) {
+        navigate("/onboarding");
+      } else {
+        navigate("/dashboard");
+      }
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, isProfileComplete, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
+    if (!email || !password) {
       toast({
-        title: "Email required",
-        description: "Please enter your email address.",
+        title: "Fields required",
+        description: "Please enter your email and password.",
         variant: "destructive",
       });
       return;
@@ -40,27 +45,35 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/dashboard`;
-      
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        options: {
-          emailRedirectTo: redirectUrl,
-        },
+        password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast({
+            title: "Invalid credentials",
+            description: "Please check your email and password.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
-      setEmailSent(true);
-      toast({
-        title: "Magic link sent!",
-        description: "Check your email to sign in.",
-      });
+      if (data.user) {
+        toast({
+          title: "Welcome back!",
+          description: "You've signed in successfully.",
+        });
+        // Redirect will be handled by the useEffect above
+      }
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to send magic link",
+        title: "Login failed",
+        description: error.message || "Failed to sign in",
         variant: "destructive",
       });
     } finally {
@@ -86,64 +99,62 @@ export default function Login() {
 
         <Card className="border-border/50 shadow-card">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">
-              {emailSent ? "Check your email" : "Welcome back"}
-            </CardTitle>
-            <CardDescription>
-              {emailSent
-                ? "We sent you a magic link to sign in"
-                : "Enter your email to sign in"}
-            </CardDescription>
+            <CardTitle className="text-2xl">Welcome back</CardTitle>
+            <CardDescription>Sign in to your account</CardDescription>
           </CardHeader>
           <CardContent>
-            {emailSent ? (
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                  <CheckCircle className="h-8 w-8 text-primary" />
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                    disabled={isLoading}
+                  />
                 </div>
-                <p className="text-muted-foreground">
-                  Click the link in your email to sign in. You can close this tab.
-                </p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setEmailSent(false)}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Use a different email
-                </Button>
               </div>
-            ) : (
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                      disabled={isLoading}
-                    />
-                  </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
+              </div>
 
-                <Button type="submit" className="w-full shadow-glow" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Send Magic Link
-                </Button>
+              <Button type="submit" className="w-full shadow-glow" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Sign In
+              </Button>
 
-                <p className="text-center text-sm text-muted-foreground">
-                  Don't have an account?{" "}
-                  <Link to="/signup" className="text-primary hover:underline">
-                    Sign up
-                  </Link>
-                </p>
-              </form>
-            )}
+              <p className="text-center text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link to="/signup" className="text-primary hover:underline">
+                  Sign up
+                </Link>
+              </p>
+            </form>
           </CardContent>
         </Card>
       </div>

@@ -6,74 +6,102 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import LogoInsignia from "@/components/LogoInsignia";
 import { useAuth } from "@/contexts/AuthContext";
+import { z } from "zod";
+
+const signupSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 export default function Signup() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isProfileComplete } = useAuth();
 
-  // If user is already logged in, handle post-login flow
+  // If user is already logged in, handle redirect
   useEffect(() => {
     if (!authLoading && user) {
-      handlePostLoginRedirect();
+      if (!isProfileComplete) {
+        navigate("/onboarding");
+      } else {
+        handlePostLoginRedirect();
+      }
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, isProfileComplete]);
 
-  const handlePostLoginRedirect = async () => {
+  const handlePostLoginRedirect = () => {
     const selectedPlan = sessionStorage.getItem("selected_plan");
     
     if (!selectedPlan || selectedPlan === "free") {
-      // Free plan - go to dashboard
       sessionStorage.removeItem("selected_plan");
       navigate("/dashboard");
     } else {
-      // Paid plan - go to checkout
       navigate(`/checkout?plan=${selectedPlan}`);
     }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address.",
-        variant: "destructive",
+    setErrors({});
+
+    // Validate form
+    const result = signupSchema.safeParse({ email, password, confirmPassword });
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
       });
+      setErrors(fieldErrors);
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/signup`;
-      
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signUp({
         email,
+        password,
         options: {
-          emailRedirectTo: redirectUrl,
+          emailRedirectTo: `${window.location.origin}/onboarding`,
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes("already registered")) {
+          setErrors({ email: "This email is already registered. Please sign in instead." });
+          return;
+        }
+        throw error;
+      }
 
-      setEmailSent(true);
-      toast({
-        title: "Magic link sent!",
-        description: "Check your email to complete signup.",
-      });
+      if (data.user) {
+        toast({
+          title: "Account created!",
+          description: "Let's set up your profile.",
+        });
+        navigate("/onboarding");
+      }
     } catch (error: any) {
       console.error("Signup error:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to send magic link",
+        title: "Signup failed",
+        description: error.message || "Failed to create account",
         variant: "destructive",
       });
     } finally {
@@ -99,64 +127,94 @@ export default function Signup() {
 
         <Card className="border-border/50 shadow-card">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">
-              {emailSent ? "Check your email" : "Create your account"}
-            </CardTitle>
-            <CardDescription>
-              {emailSent
-                ? "We sent you a magic link to sign in"
-                : "Enter your email to get started"}
-            </CardDescription>
+            <CardTitle className="text-2xl">Create your account</CardTitle>
+            <CardDescription>Enter your details to get started</CardDescription>
           </CardHeader>
           <CardContent>
-            {emailSent ? (
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                  <CheckCircle className="h-8 w-8 text-primary" />
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
+                    disabled={isLoading}
+                  />
                 </div>
-                <p className="text-muted-foreground">
-                  Click the link in your email to complete signup. You can close this tab.
-                </p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setEmailSent(false)}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Use a different email
-                </Button>
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email}</p>
+                )}
               </div>
-            ) : (
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                      disabled={isLoading}
-                    />
-                  </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Min. 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password}</p>
+                )}
+              </div>
 
-                <Button type="submit" className="w-full shadow-glow" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Send Magic Link
-                </Button>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`pl-10 pr-10 ${errors.confirmPassword ? "border-destructive" : ""}`}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+                )}
+              </div>
 
-                <p className="text-center text-sm text-muted-foreground">
-                  Already have an account?{" "}
-                  <Link to="/login" className="text-primary hover:underline">
-                    Sign in
-                  </Link>
-                </p>
-              </form>
-            )}
+              <Button type="submit" className="w-full shadow-glow" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Account
+              </Button>
+
+              <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary hover:underline">
+                  Sign in
+                </Link>
+              </p>
+            </form>
           </CardContent>
         </Card>
       </div>
