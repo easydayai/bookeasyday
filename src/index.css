@@ -62,35 +62,6 @@
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .dark {
-    --background: 230 20% 8%;
-    --foreground: 0 0% 98%;
-
-    --card: 230 18% 12%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 230 18% 10%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 270 85% 60%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 230 15% 18%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 230 12% 20%;
-    --muted-foreground: 220 10% 65%;
-
-    --accent: 195 100% 55%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 230 12% 22%;
-    --input: 230 12% 22%;
-    --ring: 270 85% 60%;
-  }
 }
 
 @layer base {
