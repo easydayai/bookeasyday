@@ -134,35 +134,50 @@ export type Database = {
       appointment_types: {
         Row: {
           created_at: string | null
+          deposit_cents: number
           description: string | null
           duration_minutes: number
           id: string
           is_active: boolean | null
           location_type: string | null
+          max_pay_cents: number | null
+          min_pay_cents: number
           name: string
           price: number | null
+          pricing_mode: string
+          suggested_pay_cents: number
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          deposit_cents?: number
           description?: string | null
           duration_minutes?: number
           id?: string
           is_active?: boolean | null
           location_type?: string | null
+          max_pay_cents?: number | null
+          min_pay_cents?: number
           name: string
           price?: number | null
+          pricing_mode?: string
+          suggested_pay_cents?: number
           user_id: string
         }
         Update: {
           created_at?: string | null
+          deposit_cents?: number
           description?: string | null
           duration_minutes?: number
           id?: string
           is_active?: boolean | null
           location_type?: string | null
+          max_pay_cents?: number | null
+          min_pay_cents?: number
           name?: string
           price?: number | null
+          pricing_mode?: string
+          suggested_pay_cents?: number
           user_id?: string
         }
         Relationships: []
@@ -256,6 +271,7 @@ export type Database = {
       bookings: {
         Row: {
           appointment_type_id: string | null
+          balance_due_cents: number
           created_at: string | null
           customer_email: string
           customer_name: string
@@ -263,12 +279,18 @@ export type Database = {
           end_time: string
           id: string
           notes: string | null
+          paid_amount_cents: number
+          pricing_mode: string
           start_time: string
           status: string | null
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          total_amount_cents: number
           user_id: string
         }
         Insert: {
           appointment_type_id?: string | null
+          balance_due_cents?: number
           created_at?: string | null
           customer_email: string
           customer_name: string
@@ -276,12 +298,18 @@ export type Database = {
           end_time: string
           id?: string
           notes?: string | null
+          paid_amount_cents?: number
+          pricing_mode?: string
           start_time: string
           status?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          total_amount_cents?: number
           user_id: string
         }
         Update: {
           appointment_type_id?: string | null
+          balance_due_cents?: number
           created_at?: string | null
           customer_email?: string
           customer_name?: string
@@ -289,8 +317,13 @@ export type Database = {
           end_time?: string
           id?: string
           notes?: string | null
+          paid_amount_cents?: number
+          pricing_mode?: string
           start_time?: string
           status?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          total_amount_cents?: number
           user_id?: string
         }
         Relationships: [
