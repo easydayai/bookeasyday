@@ -3,13 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle,
-  DialogDescription 
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { 
@@ -22,15 +15,13 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelRightClose,
-  Clock,
-  User,
-  Mail,
-  Phone,
-  FileText,
   LogOut,
   Moon,
   Sun
 } from "lucide-react";
+import { MobileHeader } from "@/components/MobileHeader";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { BookingDetailsSheet } from "@/components/BookingDetailsSheet";
 
 interface Booking {
   id: string;
@@ -88,10 +79,25 @@ function getDateInTimezone(isoString: string, timezone: string): string {
       month: "2-digit",
       day: "2-digit",
     });
-    return formatter.format(date); // Returns YYYY-MM-DD
+    return formatter.format(date);
   } catch {
     const date = new Date(isoString);
     return toISODate(date);
+  }
+}
+
+function formatDateReadable(isoString: string, timezone: string): string {
+  try {
+    const date = new Date(isoString);
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: timezone,
+    });
+  } catch {
+    return isoString;
   }
 }
 
@@ -169,7 +175,6 @@ export default function CalendarPage() {
     
     setLoadingBookings(true);
     
-    // Calculate month range in UTC
     const monthStart = new Date(cursorYear, cursorMonth, 1);
     const nextMonthStart = new Date(cursorYear, cursorMonth + 1, 1);
     
@@ -225,7 +230,6 @@ export default function CalendarPage() {
       map.set(dateKey, list);
     }
     
-    // Sort each day's bookings by start time
     for (const [key, list] of map.entries()) {
       list.sort((a, b) => a.start_time.localeCompare(b.start_time));
       map.set(key, list);
@@ -243,6 +247,16 @@ export default function CalendarPage() {
     month: "long", 
     year: "numeric" 
   });
+
+  const formattedSelectedDate = useMemo(() => {
+    const [year, month, day] = selectedDateISO.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+  }, [selectedDateISO]);
 
   function prevMonth() {
     if (cursorMonth === 0) {
@@ -301,7 +315,7 @@ export default function CalendarPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <div className="text-muted-foreground">Loading...</div>
       </div>
     );
@@ -310,8 +324,24 @@ export default function CalendarPage() {
   const isDark = theme === "dark";
 
   return (
-    <div className={`min-h-screen ${isDark ? "bg-[#070A12] text-white" : "bg-gray-50 text-gray-900"}`}>
-      <div className="flex min-h-screen">
+    <div className={`min-h-[100dvh] ${isDark ? "bg-[#070A12] text-white" : "bg-gray-50 text-gray-900"}`}>
+      {/* Mobile Header */}
+      <MobileHeader
+        title="Calendar"
+        backHref="/dashboard"
+        rightContent={
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="min-h-[44px] min-w-[44px] text-white/70 hover:text-white hover:bg-white/10"
+          >
+            {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+        }
+      />
+
+      <div className="flex min-h-[100dvh] md:min-h-screen">
         {/* Sidebar - hidden on mobile */}
         <aside
           className={`hidden md:block border-r transition-all duration-200 ${
@@ -351,21 +381,14 @@ export default function CalendarPage() {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 flex flex-col min-w-0">
-          {/* Top bar */}
-          <div className={`flex items-center justify-between px-4 sm:px-6 py-3 sm:py-5 border-b ${isDark ? "border-white/10 bg-[#070A12]" : "border-gray-200 bg-white"}`}>
-            <div className="flex items-center gap-3">
-              {/* Mobile logo */}
-              <div className={`md:hidden h-8 w-8 rounded-xl flex items-center justify-center ${isDark ? "bg-violet-600/20" : "bg-violet-100"}`}>
-                <CalendarIcon className="h-4 w-4 text-violet-500" />
-              </div>
-              <div>
-                <h1 className="text-base sm:text-lg font-semibold">Calendar</h1>
-                <p className={`hidden sm:block ${isDark ? "text-white/60 text-sm" : "text-gray-500 text-sm"}`}>Manage your appointments</p>
-              </div>
+        <main className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
+          {/* Desktop top bar - hidden on mobile */}
+          <div className={`hidden md:flex items-center justify-between px-6 py-5 border-b ${isDark ? "border-white/10 bg-[#070A12]" : "border-gray-200 bg-white"}`}>
+            <div>
+              <h1 className="text-lg font-semibold">Calendar</h1>
+              <p className={`${isDark ? "text-white/60 text-sm" : "text-gray-500 text-sm"}`}>Manage your appointments</p>
             </div>
-            {/* Desktop actions */}
-            <div className="hidden sm:flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="icon"
@@ -400,25 +423,6 @@ export default function CalendarPage() {
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
-              </Button>
-            </div>
-            {/* Mobile actions */}
-            <div className="flex sm:hidden items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="min-h-[44px] min-w-[44px]"
-              >
-                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSignOut}
-                className="min-h-[44px] min-w-[44px]"
-              >
-                <LogOut className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -487,6 +491,7 @@ export default function CalendarPage() {
                     const isToday = iso === toISODate(today);
                     const dayBookings = bookingsByDate.get(iso) ?? [];
                     const activeBookings = dayBookings.filter(b => b.status !== "canceled");
+                    const eventCount = activeBookings.length;
 
                     return (
                       <button
@@ -496,7 +501,7 @@ export default function CalendarPage() {
                           !inMonth ? "opacity-40" : ""
                         } ${
                           isSelected 
-                            ? "border-violet-500 bg-violet-500/10" 
+                            ? "border-violet-500 bg-violet-500/20 ring-2 ring-violet-500/50" 
                             : isDark ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                         } ${
                           isToday && !isSelected ? "ring-1 ring-violet-400/50" : ""
@@ -505,15 +510,29 @@ export default function CalendarPage() {
                         <div className="flex items-center justify-between">
                           <span className={`text-xs sm:text-sm font-semibold ${
                             isToday ? "text-violet-500" : ""
-                          }`}>
+                          } ${isSelected ? "text-violet-300" : ""}`}>
                             {d.getDate()}
                           </span>
-                          {activeBookings.length > 0 && (
-                            <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-violet-500" />
+                          {/* Event indicator dots */}
+                          {eventCount > 0 && (
+                            <div className="flex items-center gap-0.5">
+                              {eventCount <= 3 ? (
+                                Array.from({ length: eventCount }).map((_, i) => (
+                                  <span key={i} className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                                ))
+                              ) : (
+                                <>
+                                  <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                                  <span className="text-[9px] text-violet-400 font-medium ml-0.5">
+                                    +{eventCount - 1}
+                                  </span>
+                                </>
+                              )}
+                            </div>
                           )}
                         </div>
                         
-                        {/* Hide event chips on mobile, just show dot */}
+                        {/* Hide event chips on mobile, just show dots */}
                         <div className="hidden sm:block mt-2 space-y-1">
                           {activeBookings.slice(0, 2).map((booking) => (
                             <div
@@ -549,16 +568,19 @@ export default function CalendarPage() {
                 )}
               </section>
 
-              {/* Right panels - always show on mobile as appointments list */}
+              {/* Appointments list */}
               <aside className={`space-y-4 sm:space-y-6 ${panelsCollapsed ? "hidden xl:block" : ""}`}>
-                {/* Upcoming Events for selected date */}
+                {/* Appointments for selected date */}
                 <section className={`rounded-2xl border p-4 sm:p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
-                  <h3 className="text-base sm:text-lg font-semibold mb-3">
-                    Appointments on {selectedDateISO}
+                  <h3 className="text-base sm:text-lg font-semibold mb-1">
+                    Appointments
                   </h3>
-                  <div className="space-y-2 sm:space-y-3">
+                  <p className={`text-sm mb-3 ${isDark ? "text-white/60" : "text-gray-500"}`}>
+                    {formattedSelectedDate}
+                  </p>
+                  <div className="space-y-2 sm:space-y-3 max-h-[40vh] md:max-h-[50vh] overflow-y-auto">
                     {selectedBookings.length === 0 ? (
-                      <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>
+                      <p className={`text-sm py-4 text-center ${isDark ? "text-white/50" : "text-gray-400"}`}>
                         No appointments on this date.
                       </p>
                     ) : (
@@ -572,9 +594,9 @@ export default function CalendarPage() {
                           <button
                             key={booking.id}
                             onClick={() => handleBookingClick(booking)}
-                            className={`w-full text-left rounded-xl border px-3 sm:px-4 py-3 transition min-h-[56px] ${
+                            className={`w-full text-left rounded-xl border px-3 sm:px-4 py-3 transition min-h-[56px] active:scale-[0.98] ${
                               isCanceled ? "opacity-50" : ""
-                            } ${isDark ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}
+                            } ${isDark ? "border-white/10 bg-white/5 hover:bg-white/10 active:bg-white/15" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}
                           >
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-semibold truncate mr-2">{booking.customer_name}</span>
@@ -650,125 +672,20 @@ export default function CalendarPage() {
         </main>
       </div>
 
-      {/* Booking Details Modal */}
-      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className={`w-full max-w-lg sm:max-w-lg h-[90vh] sm:h-auto overflow-y-auto ${isDark ? "bg-[#0A0F1F] border-white/10 text-white" : "bg-white border-gray-200 text-gray-900"}`}>
-          <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl">Booking Details</DialogTitle>
-            <DialogDescription className={isDark ? "text-white/60" : "text-gray-500"}>
-              View and manage this appointment
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedBooking && (
-            <div className="space-y-4 mt-4">
-              {/* Customer Info */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <User className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
-                  <div>
-                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Customer</p>
-                    <p className="font-medium">{selectedBooking.customer_name}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Mail className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
-                  <div>
-                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Email</p>
-                    <p className="font-medium">{selectedBooking.customer_email}</p>
-                  </div>
-                </div>
-                
-                {selectedBooking.customer_phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
-                    <div>
-                      <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Phone</p>
-                      <p className="font-medium">{selectedBooking.customer_phone}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
 
-              <div className={`border-t pt-4 space-y-3 ${isDark ? "border-white/10" : "border-gray-200"}`}>
-                {/* Appointment Type */}
-                {selectedBooking.appointment_type_id && appointmentTypes.get(selectedBooking.appointment_type_id) && (
-                  <div className="flex items-center gap-3">
-                    <CalendarIcon className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
-                    <div>
-                      <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Appointment Type</p>
-                      <p className="font-medium">
-                        {appointmentTypes.get(selectedBooking.appointment_type_id)?.name}
-                        <span className={`ml-2 ${isDark ? "text-white/60" : "text-gray-500"}`}>
-                          ({appointmentTypes.get(selectedBooking.appointment_type_id)?.duration_minutes} min)
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Time */}
-                <div className="flex items-center gap-3">
-                  <Clock className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
-                  <div>
-                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Time</p>
-                    <p className="font-medium">
-                      {getDateInTimezone(selectedBooking.start_time, userTimezone)} at{" "}
-                      {formatTimeInTimezone(selectedBooking.start_time, userTimezone)} – {formatTimeInTimezone(selectedBooking.end_time, userTimezone)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Status */}
-                <div className="flex items-center gap-3">
-                  <div className={`h-3 w-3 rounded-full ${
-                    selectedBooking.status === "canceled" ? "bg-red-500" : "bg-green-500"
-                  }`} />
-                  <div>
-                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Status</p>
-                    <p className="font-medium capitalize">{selectedBooking.status}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Notes */}
-              {selectedBooking.notes && (
-                <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-gray-200"}`}>
-                  <div className="flex items-start gap-3">
-                    <FileText className={`h-5 w-5 mt-0.5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
-                    <div>
-                      <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Notes</p>
-                      <p className="font-medium">{selectedBooking.notes}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className={`flex gap-3 pt-4 border-t ${isDark ? "border-white/10" : "border-gray-200"}`}>
-                {selectedBooking.status !== "canceled" && (
-                  <Button
-                    variant="destructive"
-                    onClick={handleCancelBooking}
-                    disabled={cancelling}
-                    className="flex-1"
-                  >
-                    {cancelling ? "Cancelling..." : "Cancel Booking"}
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={() => setDetailsOpen(false)}
-                  className={`flex-1 ${isDark ? "border-white/10 text-white hover:bg-white/10" : "border-gray-200 text-gray-700 hover:bg-gray-100"}`}
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Booking Details Sheet/Modal */}
+      <BookingDetailsSheet
+        booking={selectedBooking}
+        appointmentType={selectedBooking?.appointment_type_id ? appointmentTypes.get(selectedBooking.appointment_type_id) : null}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        onCancel={handleCancelBooking}
+        cancelling={cancelling}
+        formatTime={(iso) => formatTimeInTimezone(iso, userTimezone)}
+        formatDate={(iso) => formatDateReadable(iso, userTimezone)}
+      />
     </div>
   );
 }
