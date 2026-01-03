@@ -38,10 +38,12 @@ import CalendarDesignSettings from "./pages/settings/CalendarDesignSettings";
 import AppointmentsPage from "./pages/dashboard/AppointmentsPage";
 import CalendarPage from "./pages/CalendarPage";
 import BookingBuilder from "./pages/BookingBuilder";
+import BusinessDashboard from "./pages/BusinessDashboard";
 
 // Public booking
 import BookingPage from "./pages/BookingPage";
 import BookingSuccess from "./pages/BookingSuccess";
+import PublicBookingPage from "./pages/PublicBookingPage";
 
 const queryClient = new QueryClient();
 
@@ -93,10 +95,14 @@ const App = () => (
                 <Route path="/dashboard/appointments" element={<AppointmentsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/booking-builder" element={<BookingBuilder />} />
+                <Route path="/business" element={<BusinessDashboard />} />
 
-                {/* Public booking */}
+                {/* Public booking - legacy */}
                 <Route path="/book/:slug" element={<BookingPage />} />
                 <Route path="/book/:slug/success" element={<BookingSuccess />} />
+
+                {/* Public booking - new system with payments */}
+                <Route path="/b/:slug" element={<PublicBookingPage />} />
 
                 <Route path="*" element={<Layout><NotFound /></Layout>} />
               </Routes>
