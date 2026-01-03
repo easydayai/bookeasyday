@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookingPageConfig } from '@/hooks/useBookingPageConfig';
+import { useDaisy } from '@/contexts/DaisyContext';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useViewportHeight } from '@/hooks/use-viewport-height';
+import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Layers, SlidersHorizontal, X, ChevronLeft, Eye, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Link } from 'react-router-dom';
+import { bookingConfigToPageModel, pageModelToBookingConfig } from '@/types/pageModel';
 
 import { BuilderTopBar } from '@/components/booking-builder/BuilderTopBar';
 import { ComponentList } from '@/components/booking-builder/ComponentList';
@@ -30,12 +33,80 @@ export default function BookingBuilder() {
     resetToDefaults,
   } = useBookingPageConfig();
 
+  const { setPageModel, pageModel, setSelectedNode, selectedNode } = useDaisy();
+
   useViewportHeight();
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [mobilePanel, setMobilePanel] = useState<'components' | 'inspector' | null>(null);
   const [mobileEditMode, setMobileEditMode] = useState(false);
+  const [services, setServices] = useState<Array<{ id: string; name: string; duration_minutes: number; price: number | null; description: string | null }>>([]);
+
+  // Fetch services for the pageModel
+  useEffect(() => {
+    if (!user) return;
+    const fetchServices = async () => {
+      const { data } = await supabase
+        .from('appointment_types')
+        .select('id, name, duration_minutes, price, description')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+      if (data) {
+        setServices(data);
+      }
+    };
+    fetchServices();
+  }, [user]);
+
+  // Sync config to pageModel for Daisy
+  useEffect(() => {
+    if (!config) return;
+    const model = bookingConfigToPageModel(config, services);
+    setPageModel(model);
+  }, [config, services, setPageModel]);
+
+  // Sync pageModel changes back to config (when Daisy applies patches)
+  useEffect(() => {
+    if (!pageModel) return;
+    const newConfig = pageModelToBookingConfig(pageModel);
+    // Only update if there are meaningful differences
+    if (JSON.stringify(newConfig) !== JSON.stringify({
+      theme: config.theme,
+      cover: config.cover,
+      header: config.header,
+      layout: config.layout,
+      buttons: config.buttons,
+    })) {
+      // Apply each section
+      Object.entries(newConfig).forEach(([section, value]) => {
+        Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+          updateConfig(`${section}.${key}`, val);
+        });
+      });
+    }
+  }, [pageModel]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync selected element to Daisy context
+  useEffect(() => {
+    if (selectedElement) {
+      const parts = selectedElement.split('-');
+      if (parts[0] === 'service' && parts[1]) {
+        setSelectedNode({ type: 'service', index: parseInt(parts[1], 10) });
+      } else {
+        setSelectedNode({ type: selectedElement as 'brand' | 'hero' | 'cover' | 'layout' | 'buttons' | 'logo' });
+      }
+    } else {
+      setSelectedNode(null);
+    }
+  }, [selectedElement, setSelectedNode]);
+
+  // Cleanup pageModel on unmount
+  useEffect(() => {
+    return () => {
+      setPageModel(null);
+    };
+  }, [setPageModel]);
 
   // Auto-open inspector when element is selected on mobile in edit mode
   useEffect(() => {
