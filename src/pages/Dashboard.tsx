@@ -10,6 +10,7 @@ import {
   Loader2,
   Copy,
   Calendar,
+  Calendar as CalendarIcon,
   CreditCard,
   Settings,
   Clock,
@@ -286,10 +287,10 @@ export default function Dashboard() {
             </Link>
           </Button>
           <Button variant="outline" className="h-auto py-4 justify-start" asChild>
-            <Link to="/dashboard/appointments" className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-primary" />
+            <Link to="/calendar" className="flex items-center gap-3">
+              <CalendarIcon className="h-5 w-5 text-primary" />
               <div className="text-left">
-                <div className="font-medium">All Appointments</div>
+                <div className="font-medium">Calendar</div>
                 <div className="text-xs text-muted-foreground">View & manage</div>
               </div>
             </Link>
@@ -334,7 +335,7 @@ export default function Dashboard() {
                   </div>
                 ))}
                 <Button variant="outline" className="w-full" asChild>
-                  <Link to="/dashboard/appointments">View All Appointments</Link>
+                  <Link to="/calendar">View All Appointments</Link>
                 </Button>
               </div>
             )}
