@@ -5,15 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useToast } from "@/hooks/use-toast";
 import {
   Loader2,
   ChevronLeft,
@@ -26,7 +30,17 @@ import {
   Mail,
   Phone,
   FileText,
-  X,
+  LayoutDashboard,
+  Target,
+  CheckSquare,
+  PanelLeftClose,
+  PanelLeft,
+  PanelRightClose,
+  PanelRight,
+  Menu,
+  LogOut,
+  BarChart3,
+  TrendingUp,
 } from "lucide-react";
 import LogoInsignia from "@/components/LogoInsignia";
 import {
@@ -62,16 +76,51 @@ interface Booking {
   appointment_types: AppointmentType | null;
 }
 
+interface Task {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
+const PLACEHOLDER_TASKS: Task[] = [
+  { id: "1", title: "Follow up with client", completed: false },
+  { id: "2", title: "Prepare presentation", completed: false },
+  { id: "3", title: "Review weekly reports", completed: true },
+];
+
+const NAV_ITEMS = [
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: CalendarIcon, label: "Calendar", href: "/calendar" },
+  { icon: CheckSquare, label: "Tasks", href: "/calendar", disabled: true },
+  { icon: Target, label: "Goals", href: "/calendar", disabled: true },
+  { icon: Settings, label: "Settings", href: "/settings/profile" },
+];
+
 export default function CalendarPage() {
   const navigate = useNavigate();
   const { user, profile, isLoading, isProfileComplete, signOut } = useAuth();
+  const { toast } = useToast();
+  
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [cancelingBooking, setCancelingBooking] = useState(false);
-  const [activeTab, setActiveTab] = useState("upcoming");
+  
+  // Collapse states
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [panelsCollapsed, setPanelsCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobilePanelsVisible, setMobilePanelsVisible] = useState(false);
+  
+  // Add event modal
+  const [addEventOpen, setAddEventOpen] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState("");
+  const [newEventDate, setNewEventDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [newEventStartTime, setNewEventStartTime] = useState("09:00");
+  const [newEventEndTime, setNewEventEndTime] = useState("10:00");
+  const [savingEvent, setSavingEvent] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -144,17 +193,49 @@ export default function CalendarPage() {
 
       if (error) throw error;
 
-      // Update local state
       setBookings((prev) =>
         prev.map((b) =>
           b.id === selectedBooking.id ? { ...b, status: "canceled" } : b
         )
       );
       setSelectedBooking(null);
+      toast({ title: "Appointment canceled" });
     } catch (error) {
       console.error("Error canceling booking:", error);
+      toast({ title: "Failed to cancel", variant: "destructive" });
     } finally {
       setCancelingBooking(false);
+    }
+  };
+
+  const handleAddEvent = async () => {
+    if (!user || !newEventTitle.trim()) return;
+
+    setSavingEvent(true);
+    try {
+      const startDateTime = new Date(`${newEventDate}T${newEventStartTime}:00`);
+      const endDateTime = new Date(`${newEventDate}T${newEventEndTime}:00`);
+
+      const { error } = await supabase.from("bookings").insert({
+        user_id: user.id,
+        customer_name: newEventTitle,
+        customer_email: user.email || "manual@event.com",
+        start_time: startDateTime.toISOString(),
+        end_time: endDateTime.toISOString(),
+        status: "booked",
+      });
+
+      if (error) throw error;
+
+      toast({ title: "Event added successfully" });
+      setAddEventOpen(false);
+      setNewEventTitle("");
+      fetchMonthlyBookings();
+    } catch (error) {
+      console.error("Error adding event:", error);
+      toast({ title: "Failed to add event", variant: "destructive" });
+    } finally {
+      setSavingEvent(false);
     }
   };
 
@@ -173,38 +254,43 @@ export default function CalendarPage() {
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentMonth]);
 
-  // Days with bookings
-  const daysWithBookings = useMemo(() => {
-    const days = new Set<string>();
+  // Group bookings by date
+  const bookingsByDate = useMemo(() => {
+    const map = new Map<string, Booking[]>();
     bookings.forEach((booking) => {
       if (booking.status !== "canceled") {
-        days.add(format(parseISO(booking.start_time), "yyyy-MM-dd"));
+        const dateKey = format(parseISO(booking.start_time), "yyyy-MM-dd");
+        if (!map.has(dateKey)) {
+          map.set(dateKey, []);
+        }
+        map.get(dateKey)!.push(booking);
       }
     });
-    return days;
+    return map;
   }, [bookings]);
 
-  // Filter bookings for selected date and tab
-  const filteredBookings = useMemo(() => {
+  // Upcoming events (next 7 days or filtered by selected date)
+  const upcomingEvents = useMemo(() => {
     const now = new Date();
-    return bookings.filter((booking) => {
-      const bookingDate = parseISO(booking.start_time);
-      const matchesDate = isSameDay(bookingDate, selectedDate);
+    return bookings
+      .filter((b) => {
+        const bookingDate = parseISO(b.start_time);
+        return b.status === "booked" && !isBefore(bookingDate, now);
+      })
+      .slice(0, 5);
+  }, [bookings]);
 
-      if (!matchesDate) return false;
-
-      switch (activeTab) {
-        case "upcoming":
-          return booking.status === "booked" && !isBefore(bookingDate, now);
-        case "past":
-          return booking.status === "booked" && isBefore(bookingDate, now);
-        case "canceled":
-          return booking.status === "canceled";
-        default:
-          return true;
-      }
-    });
-  }, [bookings, selectedDate, activeTab]);
+  // Stats for monthly overview
+  const monthlyStats = useMemo(() => {
+    const total = bookings.filter((b) => b.status === "booked").length;
+    const canceled = bookings.filter((b) => b.status === "canceled").length;
+    const completed = bookings.filter((b) => {
+      const bookingDate = parseISO(b.start_time);
+      return b.status === "booked" && isBefore(bookingDate, new Date());
+    }).length;
+    const upcoming = total - completed;
+    return { total, canceled, completed, upcoming };
+  }, [bookings]);
 
   if (isLoading) {
     return (
@@ -214,228 +300,485 @@ export default function CalendarPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <LogoInsignia className="h-8 w-8" />
-            <span className="text-xl font-bold">Easy Day AI</span>
+  const SidebarContent = () => (
+    <nav className="flex flex-col gap-1">
+      {NAV_ITEMS.map((item) => {
+        const isActive = item.href === "/calendar";
+        return (
+          <Link
+            key={item.label}
+            to={item.disabled ? "#" : item.href}
+            className={`
+              flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+              ${isActive 
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+              }
+              ${item.disabled ? "opacity-50 cursor-not-allowed" : ""}
+              ${sidebarCollapsed ? "justify-center" : ""}
+            `}
+            onClick={(e) => {
+              if (item.disabled) e.preventDefault();
+              setMobileMenuOpen(false);
+            }}
+          >
+            <item.icon className="h-5 w-5 shrink-0" />
+            {!sidebarCollapsed && <span>{item.label}</span>}
           </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/settings/profile">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
+        );
+      })}
+    </nav>
+  );
+
+  return (
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar - Desktop */}
+      <aside
+        className={`
+          hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300
+          ${sidebarCollapsed ? "w-16" : "w-56"}
+        `}
+      >
+        {/* Logo */}
+        <div className={`p-4 border-b border-border ${sidebarCollapsed ? "flex justify-center" : ""}`}>
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <LogoInsignia className="h-8 w-8 shrink-0" />
+            {!sidebarCollapsed && <span className="text-lg font-bold">Easy Day AI</span>}
+          </Link>
+        </div>
+
+        {/* Navigation */}
+        <div className="flex-1 p-3">
+          <SidebarContent />
+        </div>
+
+        {/* User section */}
+        <div className={`p-3 border-t border-border ${sidebarCollapsed ? "flex flex-col items-center gap-2" : ""}`}>
+          {!sidebarCollapsed && (
+            <div className="mb-3 px-3">
+              <p className="text-sm font-medium truncate">{profile?.full_name || "User"}</p>
+              <p className="text-xs text-muted-foreground truncate">{profile?.business_name}</p>
+            </div>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className={sidebarCollapsed ? "w-10 h-10 p-0" : "w-full justify-start"}
+          >
+            <LogOut className="h-4 w-4" />
+            {!sidebarCollapsed && <span className="ml-2">Sign Out</span>}
+          </Button>
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar Sheet */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0">
+          <div className="p-4 border-b border-border">
+            <Link to="/dashboard" className="flex items-center gap-2">
+              <LogoInsignia className="h-8 w-8" />
+              <span className="text-lg font-bold">Easy Day AI</span>
+            </Link>
+          </div>
+          <div className="p-3">
+            <SidebarContent />
+          </div>
+          <div className="p-3 border-t border-border mt-auto">
+            <div className="mb-3 px-3">
+              <p className="text-sm font-medium">{profile?.full_name || "User"}</p>
+              <p className="text-xs text-muted-foreground">{profile?.business_name}</p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start">
+              <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
           </div>
-        </div>
-      </header>
+        </SheetContent>
+      </Sheet>
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Calendar</h1>
-            <p className="text-muted-foreground">View and manage your appointments</p>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Bar */}
+        <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+
+            {/* Sidebar collapse toggle - desktop */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:flex"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              {sidebarCollapsed ? (
+                <PanelLeft className="h-5 w-5" />
+              ) : (
+                <PanelLeftClose className="h-5 w-5" />
+              )}
+            </Button>
+
+            <h1 className="text-lg font-semibold">Calendar</h1>
           </div>
+
           <div className="flex items-center gap-2">
+            <ThemeToggle />
+            
+            {/* Panels collapse toggle - desktop */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:flex"
+              onClick={() => setPanelsCollapsed(!panelsCollapsed)}
+            >
+              {panelsCollapsed ? (
+                <PanelRight className="h-5 w-5" />
+              ) : (
+                <PanelRightClose className="h-5 w-5" />
+              )}
+            </Button>
+
+            {/* Mobile panels toggle */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                setCurrentMonth(new Date());
-                setSelectedDate(new Date());
-              }}
+              className="lg:hidden"
+              onClick={() => setMobilePanelsVisible(!mobilePanelsVisible)}
             >
-              Today
+              {mobilePanelsVisible ? "Hide Panels" : "Show Panels"}
             </Button>
-            <Button size="sm" disabled>
+
+            <Button size="sm" onClick={() => setAddEventOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              New Booking
+              Add Event
             </Button>
           </div>
-        </div>
+        </header>
 
-        {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
-          {/* Calendar Grid */}
-          <Card className="border-border/50 shadow-card">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">
+        {/* Content Area */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+          {/* Calendar Section */}
+          <div className={`flex-1 flex flex-col min-w-0 overflow-auto ${panelsCollapsed ? "" : "lg:max-w-[calc(100%-360px)]"}`}>
+            {/* Calendar Controls */}
+            <div className="p-4 flex items-center justify-between border-b border-border">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <h2 className="text-xl font-semibold min-w-[160px] text-center">
                   {format(currentMonth, "MMMM yyyy")}
-                </CardTitle>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+                </h2>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-            </CardHeader>
-            <CardContent>
-              {/* Weekday headers */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                  <div
-                    key={day}
-                    className="text-center text-sm font-medium text-muted-foreground py-2"
-                  >
-                    {day}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCurrentMonth(new Date());
+                  setSelectedDate(new Date());
+                }}
+              >
+                Today
+              </Button>
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="flex-1 p-4 overflow-auto">
+              <Card className="border-border/50 shadow-card h-full">
+                <CardContent className="p-4">
+                  {/* Weekday headers */}
+                  <div className="grid grid-cols-7 gap-1 mb-2">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                      <div
+                        key={day}
+                        className="text-center text-xs font-medium text-muted-foreground py-2"
+                      >
+                        {day}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              {/* Calendar days */}
-              <div className="grid grid-cols-7 gap-1">
-                {calendarDays.map((day) => {
-                  const dateKey = format(day, "yyyy-MM-dd");
-                  const hasBookings = daysWithBookings.has(dateKey);
-                  const isSelected = isSameDay(day, selectedDate);
-                  const isCurrentMonth = isSameMonth(day, currentMonth);
-                  const isTodayDate = isToday(day);
+                  {/* Calendar days */}
+                  <div className="grid grid-cols-7 gap-1">
+                    {calendarDays.map((day) => {
+                      const dateKey = format(day, "yyyy-MM-dd");
+                      const dayBookings = bookingsByDate.get(dateKey) || [];
+                      const isSelected = isSameDay(day, selectedDate);
+                      const isCurrentMonth = isSameMonth(day, currentMonth);
+                      const isTodayDate = isToday(day);
 
-                  return (
-                    <button
-                      key={dateKey}
-                      onClick={() => setSelectedDate(day)}
-                      className={`
-                        relative aspect-square p-2 rounded-lg text-sm font-medium
-                        transition-colors hover:bg-accent
-                        ${isSelected ? "bg-primary text-primary-foreground hover:bg-primary" : ""}
-                        ${!isCurrentMonth ? "text-muted-foreground/50" : ""}
-                        ${isTodayDate && !isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}
-                      `}
-                    >
-                      <span>{format(day, "d")}</span>
-                      {hasBookings && (
-                        <span
-                          className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${
-                            isSelected ? "bg-primary-foreground" : "bg-primary"
-                          }`}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+                      return (
+                        <button
+                          key={dateKey}
+                          onClick={() => setSelectedDate(day)}
+                          className={`
+                            relative min-h-[80px] p-1.5 rounded-lg text-sm transition-colors text-left align-top
+                            border border-transparent
+                            ${isSelected ? "bg-primary/10 border-primary/30" : "hover:bg-secondary/50"}
+                            ${!isCurrentMonth ? "opacity-40" : ""}
+                          `}
+                        >
+                          <span
+                            className={`
+                              inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium
+                              ${isTodayDate ? "bg-primary text-primary-foreground" : ""}
+                            `}
+                          >
+                            {format(day, "d")}
+                          </span>
 
-          {/* Bookings Panel */}
-          <Card className="border-border/50 shadow-card">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" />
-                Appointments
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {format(selectedDate, "EEEE, MMMM d, yyyy")}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full mb-4">
-                  <TabsTrigger value="upcoming" className="flex-1">
-                    Upcoming
-                  </TabsTrigger>
-                  <TabsTrigger value="past" className="flex-1">
-                    Past
-                  </TabsTrigger>
-                  <TabsTrigger value="canceled" className="flex-1">
-                    Canceled
-                  </TabsTrigger>
-                </TabsList>
+                          {/* Event pills */}
+                          <div className="mt-1 space-y-0.5 overflow-hidden">
+                            {dayBookings.slice(0, 2).map((booking) => (
+                              <div
+                                key={booking.id}
+                                className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary truncate"
+                                title={booking.customer_name}
+                              >
+                                {format(parseISO(booking.start_time), "HH:mm")} {booking.customer_name}
+                              </div>
+                            ))}
+                            {dayBookings.length > 2 && (
+                              <div className="text-[10px] text-muted-foreground px-1.5">
+                                +{dayBookings.length - 2} more
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-                <TabsContent value={activeTab} className="mt-0">
-                  {loadingBookings ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            {/* Monthly Overview - Bottom Panel */}
+            <div className={`border-t border-border p-4 ${panelsCollapsed ? "" : "lg:block"} ${mobilePanelsVisible ? "block" : "hidden lg:block"}`}>
+              <Card className="border-border/50 shadow-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Monthly Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="text-center p-3 rounded-lg bg-secondary/50">
+                      <div className="text-2xl font-bold">{monthlyStats.total}</div>
+                      <div className="text-xs text-muted-foreground">Total</div>
                     </div>
-                  ) : filteredBookings.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No {activeTab} appointments</p>
-                      <p className="text-sm">for this date</p>
+                    <div className="text-center p-3 rounded-lg bg-secondary/50">
+                      <div className="text-2xl font-bold text-primary">{monthlyStats.upcoming}</div>
+                      <div className="text-xs text-muted-foreground">Upcoming</div>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-secondary/50">
+                      <div className="text-2xl font-bold text-green-500">{monthlyStats.completed}</div>
+                      <div className="text-xs text-muted-foreground">Completed</div>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-secondary/50">
+                      <div className="text-2xl font-bold text-destructive">{monthlyStats.canceled}</div>
+                      <div className="text-xs text-muted-foreground">Canceled</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Right Panels */}
+          <div
+            className={`
+              border-l border-border bg-card overflow-y-auto transition-all duration-300
+              ${panelsCollapsed ? "w-0 border-0 overflow-hidden" : "lg:w-[360px]"}
+              ${mobilePanelsVisible ? "block" : "hidden lg:block"}
+            `}
+          >
+            <div className="p-4 space-y-4">
+              {/* Upcoming Events Panel */}
+              <Card className="border-border/50 shadow-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4" />
+                    Upcoming Events
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingBookings ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : upcomingEvents.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No upcoming events</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      {filteredBookings.map((booking) => (
+                    <div className="space-y-2">
+                      {upcomingEvents.map((booking) => (
                         <button
                           key={booking.id}
                           onClick={() => setSelectedBooking(booking)}
-                          className="w-full text-left p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                          className="w-full text-left p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                         >
                           <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <span className="font-medium">
-                                  {format(parseISO(booking.start_time), "h:mm a")} –{" "}
-                                  {format(parseISO(booking.end_time), "h:mm a")}
-                                </span>
-                              </div>
-                              <div className="font-medium truncate">
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium text-sm truncate">
                                 {booking.customer_name}
                               </div>
-                              <div className="text-sm text-muted-foreground truncate">
-                                {booking.appointment_types?.name || "Appointment"}
+                              <div className="text-xs text-muted-foreground">
+                                {format(parseISO(booking.start_time), "MMM d")} • {format(parseISO(booking.start_time), "h:mm a")}
                               </div>
                             </div>
-                            <Badge
-                              variant={
-                                booking.status === "canceled"
-                                  ? "destructive"
-                                  : "secondary"
-                              }
-                            >
-                              {booking.status}
+                            <Badge variant="secondary" className="shrink-0 text-xs">
+                              {booking.appointment_types?.name || "Event"}
                             </Badge>
                           </div>
                         </button>
                       ))}
                     </div>
                   )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+                </CardContent>
+              </Card>
 
-      {/* Booking Details Dialog */}
+              {/* Tasks Panel */}
+              <Card className="border-border/50 shadow-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <CheckSquare className="h-4 w-4" />
+                    Tasks
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {PLACEHOLDER_TASKS.map((task) => (
+                      <div
+                        key={task.id}
+                        className={`
+                          flex items-center gap-3 p-3 rounded-lg bg-secondary/50
+                          ${task.completed ? "opacity-60" : ""}
+                        `}
+                      >
+                        <div
+                          className={`
+                            w-4 h-4 rounded border-2 flex items-center justify-center shrink-0
+                            ${task.completed ? "bg-primary border-primary" : "border-muted-foreground"}
+                          `}
+                        >
+                          {task.completed && (
+                            <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        <span className={`text-sm ${task.completed ? "line-through" : ""}`}>
+                          {task.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3 text-center">
+                    Tasks feature coming soon
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Event Modal */}
+      <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Event</DialogTitle>
+            <DialogDescription>
+              Create a new event on your calendar
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="event-title">Title</Label>
+              <Input
+                id="event-title"
+                placeholder="Event title"
+                value={newEventTitle}
+                onChange={(e) => setNewEventTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-date">Date</Label>
+              <Input
+                id="event-date"
+                type="date"
+                value={newEventDate}
+                onChange={(e) => setNewEventDate(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="event-start">Start Time</Label>
+                <Input
+                  id="event-start"
+                  type="time"
+                  value={newEventStartTime}
+                  onChange={(e) => setNewEventStartTime(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="event-end">End Time</Label>
+                <Input
+                  id="event-end"
+                  type="time"
+                  value={newEventEndTime}
+                  onChange={(e) => setNewEventEndTime(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddEventOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddEvent} disabled={savingEvent || !newEventTitle.trim()}>
+              {savingEvent && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Save Event
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Booking Details Modal */}
       <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Appointment Details</DialogTitle>
+            <DialogTitle>Event Details</DialogTitle>
             <DialogDescription>
-              {selectedBooking &&
-                format(parseISO(selectedBooking.start_time), "EEEE, MMMM d, yyyy")}
+              {selectedBooking && format(parseISO(selectedBooking.start_time), "EEEE, MMMM d, yyyy")}
             </DialogDescription>
           </DialogHeader>
 
           {selectedBooking && (
             <div className="space-y-4">
-              {/* Time */}
               <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
                 <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
@@ -444,12 +787,11 @@ export default function CalendarPage() {
                     {format(parseISO(selectedBooking.end_time), "h:mm a")}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {selectedBooking.appointment_types?.name || "Appointment"}
+                    {selectedBooking.appointment_types?.name || "Event"}
                   </div>
                 </div>
               </div>
 
-              {/* Customer Info */}
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <User className="h-5 w-5 text-muted-foreground" />
@@ -467,7 +809,6 @@ export default function CalendarPage() {
                 )}
               </div>
 
-              {/* Notes */}
               {selectedBooking.notes && (
                 <div className="p-3 rounded-lg bg-secondary/50">
                   <div className="flex items-center gap-2 mb-2 text-sm font-medium text-muted-foreground">
@@ -478,40 +819,28 @@ export default function CalendarPage() {
                 </div>
               )}
 
-              {/* Status Badge */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Status</span>
-                <Badge
-                  variant={
-                    selectedBooking.status === "canceled" ? "destructive" : "secondary"
-                  }
-                >
+              <div className="flex items-center justify-between pt-2">
+                <Badge variant={selectedBooking.status === "canceled" ? "destructive" : "secondary"}>
                   {selectedBooking.status}
                 </Badge>
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-2 pt-4 border-t border-border">
-                {selectedBooking.status !== "canceled" && (
-                  <>
-                    <Button
-                      variant="destructive"
-                      className="flex-1"
-                      onClick={handleCancelBooking}
-                      disabled={cancelingBooking}
-                    >
-                      {cancelingBooking && (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      )}
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel Appointment
-                    </Button>
-                    <Button variant="outline" className="flex-1" disabled>
-                      Reschedule
-                    </Button>
-                  </>
-                )}
-              </div>
+              {selectedBooking.status !== "canceled" && (
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" className="flex-1" disabled>
+                    Reschedule
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="flex-1"
+                    onClick={handleCancelBooking}
+                    disabled={cancelingBooking}
+                  >
+                    {cancelingBooking && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
