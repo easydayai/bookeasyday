@@ -28,10 +28,14 @@ export default function BookingBuilder() {
     isSaving,
     hasUnsavedChanges,
     updateConfig,
+    saveConfig,
     publishConfig,
     discardChanges,
     resetToDefaults,
   } = useBookingPageConfig();
+
+  // Get user's slug for preview URL
+  const [userSlug, setUserSlug] = useState<string | null>(null);
 
   const { setPageModel, pageModel, setSelectedNode } = useDaisy();
 
@@ -139,6 +143,38 @@ export default function BookingBuilder() {
       navigate('/login');
     }
   }, [user, authLoading, navigate]);
+
+  // Fetch user slug for preview URL
+  useEffect(() => {
+    if (!user) return;
+    const fetchSlug = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('slug')
+        .eq('id', user.id)
+        .single();
+      if (data?.slug) {
+        setUserSlug(data.slug);
+      }
+    };
+    fetchSlug();
+  }, [user]);
+
+  const handleSave = async () => {
+    try {
+      await saveConfig();
+      toast({
+        title: 'Saved!',
+        description: 'Your changes have been saved.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save changes. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handlePublish = async () => {
     try {
@@ -376,7 +412,9 @@ export default function BookingBuilder() {
         isSaving={isSaving}
         onDiscard={handleDiscard}
         onReset={handleReset}
+        onSave={handleSave}
         onPublish={handlePublish}
+        previewUrl={userSlug ? `/book/${userSlug}` : undefined}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -386,20 +424,13 @@ export default function BookingBuilder() {
           onSelectElement={setSelectedElement}
         />
 
-        {/* Center - Live preview */}
+        {/* Center - Live preview (full width now, no right sidebar) */}
         <BookingPreview
           config={config}
           viewMode={viewMode}
           selectedElement={selectedElement}
           onSelectElement={setSelectedElement}
           isEditMode
-        />
-
-        {/* Right panel - Inspector */}
-        <InspectorPanel
-          selectedElement={selectedElement}
-          config={config}
-          onUpdateConfig={updateConfig}
         />
       </div>
     </div>

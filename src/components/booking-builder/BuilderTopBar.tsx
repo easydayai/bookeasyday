@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Loader2, Monitor, Smartphone, Undo2, RotateCcw, Upload } from 'lucide-react';
+import { Loader2, Monitor, Smartphone, Undo2, RotateCcw, Upload, Save, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import LogoInsignia from '@/components/LogoInsignia';
 
@@ -10,7 +10,9 @@ interface BuilderTopBarProps {
   isSaving: boolean;
   onDiscard: () => void;
   onReset: () => void;
+  onSave: () => void;
   onPublish: () => void;
+  previewUrl?: string;
 }
 
 export function BuilderTopBar({
@@ -20,7 +22,9 @@ export function BuilderTopBar({
   isSaving,
   onDiscard,
   onReset,
+  onSave,
   onPublish,
+  previewUrl,
 }: BuilderTopBarProps) {
   return (
     <div className="h-14 border-b border-border bg-background flex items-center justify-between px-4">
@@ -56,6 +60,20 @@ export function BuilderTopBar({
 
         <div className="h-6 w-px bg-border" />
 
+        {/* Preview button */}
+        {previewUrl && (
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+          >
+            <a href={previewUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Preview</span>
+            </a>
+          </Button>
+        )}
+
         <Button
           variant="ghost"
           size="sm"
@@ -74,6 +92,21 @@ export function BuilderTopBar({
         >
           <RotateCcw className="h-4 w-4 mr-1" />
           <span className="hidden sm:inline">Reset</span>
+        </Button>
+
+        {/* Save button */}
+        <Button
+          variant="secondary"
+          onClick={onSave}
+          disabled={!hasUnsavedChanges || isSaving}
+          className="gap-2"
+        >
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          <span className="hidden sm:inline">Save</span>
         </Button>
 
         <Button
