@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.daisy-assistant]
+verify_jwt = false
