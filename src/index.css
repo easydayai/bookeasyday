@@ -59,56 +59,43 @@
     --purple-glow: 0 8px 40px hsl(270 80% 55% / 0.3);
     --rainbow-glow: 0 8px 50px hsl(270 80% 55% / 0.2), 0 4px 30px hsl(195 100% 50% / 0.15);
     --card-shadow: 0 4px 24px hsl(220 20% 20% / 0.06);
-    
-    /* Light mode sidebar fallback */
-    --sidebar-bg: 240 10% 96%;
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    /* Pure black / charcoal background */
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    /* Card: slightly elevated charcoal */
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 98%;
+    --card: 222 47% 13%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    /* Neon / royal purple - primary accent */
-    --primary: 270 91% 65%;
+    /* Vibrant purple - slightly brighter for dark mode */
+    --primary: 270 80% 60%;
     --primary-foreground: 0 0% 100%;
 
-    /* Dark charcoal for secondary surfaces */
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
 
-    /* Muted: softer gray */
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    /* Purple accent for highlights */
-    --accent: 270 91% 65%;
+    /* Vibrant cyan/teal accent */
+    --accent: 195 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Purple-tinted borders */
-    --border: 270 20% 20%;
-    --input: 270 15% 18%;
-    --ring: 270 91% 65%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 270 80% 60%;
 
-    /* Purple glow effects */
-    --purple-glow: 0 8px 40px hsl(270 91% 65% / 0.35);
-    --rainbow-glow: 0 8px 50px hsl(270 91% 65% / 0.3), 0 4px 30px hsl(280 70% 50% / 0.2);
-    --card-shadow: 0 4px 24px hsl(270 50% 20% / 0.25);
-    
-    /* Dashboard specific */
-    --sidebar-bg: 0 0% 6%;
-    --calendar-cell-hover: 270 91% 65%;
+    --purple-glow: 0 8px 40px hsl(270 80% 60% / 0.4);
+    --rainbow-glow: 0 8px 50px hsl(270 80% 60% / 0.3), 0 4px 30px hsl(195 100% 50% / 0.2);
+    --card-shadow: 0 4px 24px hsl(0 0% 0% / 0.3);
   }
 }
 
