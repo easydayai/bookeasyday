@@ -270,13 +270,33 @@ const tools = [
     type: "function",
     function: {
       name: "update_calendar_theme",
-      description: "Update the user's booking page theme colors",
+      description: "Update the user's booking page theme colors. This updates the live booking page immediately.",
       parameters: {
         type: "object",
         properties: {
-          primary_color: { type: "string", description: "Primary color hex code" },
-          accent_color: { type: "string", description: "Accent color hex code" },
-          background_color: { type: "string", description: "Background color hex code" },
+          primary_color: { type: "string", description: "Primary color hex code (e.g. #6d28d9)" },
+          accent_color: { type: "string", description: "Accent color hex code (e.g. #22c55e)" },
+          background_color: { type: "string", description: "Background color hex code (e.g. #0b1220)" },
+          text_color: { type: "string", description: "Text color hex code (e.g. #e5e7eb)" },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_booking_page_theme",
+      description: "Update the live booking page theme with colors, fonts, and styling. Use this to change colors when user asks to change their booking page colors.",
+      parameters: {
+        type: "object",
+        properties: {
+          primary: { type: "string", description: "Primary/brand color hex (e.g. #6d28d9 for purple)" },
+          accent: { type: "string", description: "Accent color hex (e.g. #22c55e for green)" },
+          background: { type: "string", description: "Background color hex (e.g. #0b1220 for dark)" },
+          text: { type: "string", description: "Text color hex (e.g. #e5e7eb for light text)" },
+          radius: { type: "number", description: "Border radius in pixels (0-24)" },
+          font: { type: "string", enum: ["Inter", "System", "Poppins"], description: "Font family" },
         },
         required: [],
       },
@@ -641,6 +661,7 @@ async function executeTool(
       if (args.primary_color) updates.primary_color = args.primary_color;
       if (args.accent_color) updates.accent_color = args.accent_color;
       if (args.background_color) updates.background_color = args.background_color;
+      if (args.text_color) updates.text_color = args.text_color;
       
       const { data: updatedTheme, error: themeError } = await supabase
         .from("calendar_design_settings")
@@ -650,6 +671,76 @@ async function executeTool(
         .single();
       if (themeError) return { result: { error: themeError.message }, creditCost: 0 };
       return { result: { success: true, theme: updatedTheme }, creditCost: 1 };
+    
+    case "update_booking_page_theme": {
+      if (!userId) return { result: { error: "Not authenticated" }, creditCost: 0 };
+      
+      // Get existing config
+      const { data: existingPageConfig } = await supabase
+        .from("booking_page_config")
+        .select("config, published_config")
+        .eq("user_id", userId)
+        .single();
+      
+      // Start with existing config or default
+      // deno-lint-ignore no-explicit-any
+      const currentConfig = (existingPageConfig?.config as Record<string, any>) || {
+        theme: { primary: "#6d28d9", accent: "#22c55e", background: "#0b1220", text: "#e5e7eb", radius: 14, font: "Inter" },
+        cover: { style: "gradient", overlay: 0.35, imageUrl: null },
+        header: { showLogo: true, logoUrl: "", title: "Book an Appointment", tagline: "Book in 60 seconds", align: "left" },
+        layout: { maxWidth: 920, cardStyle: "glass", spacing: "comfortable" },
+        buttons: { style: "filled", shadow: true },
+      };
+      
+      // Update theme colors
+      const newTheme = { ...currentConfig.theme };
+      if (args.primary) newTheme.primary = args.primary;
+      if (args.accent) newTheme.accent = args.accent;
+      if (args.background) newTheme.background = args.background;
+      if (args.text) newTheme.text = args.text;
+      if (args.radius !== undefined) newTheme.radius = args.radius;
+      if (args.font) newTheme.font = args.font;
+      
+      const newConfig = { ...currentConfig, theme: newTheme };
+      
+      // Upsert config
+      let pageConfigResult;
+      if (existingPageConfig) {
+        pageConfigResult = await supabase
+          .from("booking_page_config")
+          .update({ 
+            config: newConfig,
+            published_config: newConfig, // Auto-publish
+            updated_at: new Date().toISOString()
+          })
+          .eq("user_id", userId)
+          .select()
+          .single();
+      } else {
+        pageConfigResult = await supabase
+          .from("booking_page_config")
+          .insert({ 
+            user_id: userId, 
+            config: newConfig,
+            published_config: newConfig
+          })
+          .select()
+          .single();
+      }
+      
+      if (pageConfigResult.error) {
+        return { result: { error: pageConfigResult.error.message }, creditCost: 0 };
+      }
+      
+      return { 
+        result: { 
+          success: true, 
+          message: "Your booking page colors have been updated!",
+          theme: newTheme
+        }, 
+        creditCost: 1 
+      };
+    }
     
     case "get_credits_balance":
       if (!userId) return { result: { error: "Not authenticated" }, creditCost: 0 };
