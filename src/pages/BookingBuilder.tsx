@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { DaisyProvider } from '@/contexts/DaisyContext';
 import { useBookingPageConfig } from '@/hooks/useBookingPageConfig';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -9,6 +10,7 @@ import { Loader2, Layers, SlidersHorizontal, X, ChevronLeft, Eye, Pencil } from 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Link } from 'react-router-dom';
+import { DaisyAssistant } from '@/components/DaisyAssistant';
 
 import { BuilderTopBar } from '@/components/booking-builder/BuilderTopBar';
 import { ComponentList } from '@/components/booking-builder/ComponentList';
@@ -107,6 +109,7 @@ export default function BookingBuilder() {
   // Mobile layout
   if (isMobile) {
     return (
+      <DaisyProvider>
       <div 
         className="flex flex-col bg-background overflow-hidden"
         style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
@@ -279,12 +282,16 @@ export default function BookingBuilder() {
             </div>
           </SheetContent>
         </Sheet>
+        
+        <DaisyAssistant />
       </div>
+      </DaisyProvider>
     );
   }
 
   // Desktop layout
   return (
+    <DaisyProvider>
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       <BuilderTopBar
         viewMode={viewMode}
@@ -319,6 +326,9 @@ export default function BookingBuilder() {
           onUpdateConfig={updateConfig}
         />
       </div>
+      
+      <DaisyAssistant />
     </div>
+    </DaisyProvider>
   );
 }

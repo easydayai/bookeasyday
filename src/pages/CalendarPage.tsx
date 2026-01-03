@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { DaisyProvider } from "@/contexts/DaisyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { DaisyAssistant } from "@/components/DaisyAssistant";
 import { 
   LayoutDashboard, 
   Calendar as CalendarIcon, 
@@ -324,6 +326,7 @@ export default function CalendarPage() {
   const isDark = theme === "dark";
 
   return (
+    <DaisyProvider>
     <div className={`min-h-[100dvh] ${isDark ? "bg-[#070A12] text-white" : "bg-gray-50 text-gray-900"}`}>
       {/* Mobile Header */}
       <MobileHeader
@@ -686,6 +689,9 @@ export default function CalendarPage() {
         formatTime={(iso) => formatTimeInTimezone(iso, userTimezone)}
         formatDate={(iso) => formatDateReadable(iso, userTimezone)}
       />
+      
+      <DaisyAssistant />
     </div>
+    </DaisyProvider>
   );
 }
