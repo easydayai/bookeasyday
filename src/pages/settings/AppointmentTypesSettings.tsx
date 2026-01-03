@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Edit2, Check, X } from "lucide-react";
+import { Loader2, Plus, Trash2, Edit2, DollarSign } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -33,6 +33,12 @@ interface AppointmentType {
   description: string | null;
   location_type: string;
   is_active: boolean;
+  price: number | null;
+  pricing_mode: string;
+  deposit_cents: number;
+  min_pay_cents: number;
+  suggested_pay_cents: number;
+  max_pay_cents: number | null;
 }
 
 const DURATIONS = [15, 30, 45, 60, 90, 120];
@@ -40,6 +46,13 @@ const LOCATION_TYPES = [
   { value: "phone", label: "Phone Call" },
   { value: "google_meet", label: "Google Meet" },
   { value: "in_person", label: "In Person" },
+];
+
+const PRICING_MODES = [
+  { value: "free", label: "Free", description: "No payment required" },
+  { value: "fixed", label: "Fixed Price", description: "Full payment at booking" },
+  { value: "deposit", label: "Deposit", description: "Collect deposit now, balance later" },
+  { value: "pay_what_you_want", label: "Pay What You Want", description: "Customer chooses amount" },
 ];
 
 export default function AppointmentTypesSettings() {
@@ -56,6 +69,12 @@ export default function AppointmentTypesSettings() {
     duration_minutes: 30,
     description: "",
     location_type: "phone",
+    price: 0,
+    pricing_mode: "free",
+    deposit_cents: 0,
+    min_pay_cents: 0,
+    suggested_pay_cents: 0,
+    max_pay_cents: null as number | null,
   });
 
   useEffect(() => {
@@ -100,6 +119,12 @@ export default function AppointmentTypesSettings() {
       duration_minutes: 30,
       description: "",
       location_type: "phone",
+      price: 0,
+      pricing_mode: "free",
+      deposit_cents: 0,
+      min_pay_cents: 0,
+      suggested_pay_cents: 0,
+      max_pay_cents: null,
     });
     setDialogOpen(true);
   };
@@ -111,6 +136,12 @@ export default function AppointmentTypesSettings() {
       duration_minutes: type.duration_minutes,
       description: type.description || "",
       location_type: type.location_type,
+      price: type.price || 0,
+      pricing_mode: type.pricing_mode || "free",
+      deposit_cents: type.deposit_cents || 0,
+      min_pay_cents: type.min_pay_cents || 0,
+      suggested_pay_cents: type.suggested_pay_cents || 0,
+      max_pay_cents: type.max_pay_cents,
     });
     setDialogOpen(true);
   };
@@ -121,28 +152,31 @@ export default function AppointmentTypesSettings() {
     setIsSaving(true);
 
     try {
+      const payload = {
+        name: formData.name,
+        duration_minutes: formData.duration_minutes,
+        description: formData.description || null,
+        location_type: formData.location_type,
+        price: formData.pricing_mode === "fixed" || formData.pricing_mode === "deposit" ? formData.price : null,
+        pricing_mode: formData.pricing_mode,
+        deposit_cents: formData.pricing_mode === "deposit" ? formData.deposit_cents : 0,
+        min_pay_cents: formData.pricing_mode === "pay_what_you_want" ? formData.min_pay_cents : 0,
+        suggested_pay_cents: formData.pricing_mode === "pay_what_you_want" ? formData.suggested_pay_cents : 0,
+        max_pay_cents: formData.pricing_mode === "pay_what_you_want" ? formData.max_pay_cents : null,
+      };
+
       if (editingType) {
-        // Update existing
         const { error } = await supabase
           .from("appointment_types")
-          .update({
-            name: formData.name,
-            duration_minutes: formData.duration_minutes,
-            description: formData.description || null,
-            location_type: formData.location_type,
-          })
+          .update(payload)
           .eq("id", editingType.id);
 
         if (error) throw error;
         toast({ title: "Updated", description: "Appointment type updated" });
       } else {
-        // Create new
         const { error } = await supabase.from("appointment_types").insert({
           user_id: user.id,
-          name: formData.name,
-          duration_minutes: formData.duration_minutes,
-          description: formData.description || null,
-          location_type: formData.location_type,
+          ...payload,
           is_active: true,
         });
 
@@ -196,6 +230,21 @@ export default function AppointmentTypesSettings() {
     }
   };
 
+  const formatPrice = (type: AppointmentType) => {
+    const mode = type.pricing_mode || "free";
+    if (mode === "free") return "Free";
+    if (mode === "fixed") return `$${(type.price || 0).toFixed(2)}`;
+    if (mode === "deposit") {
+      return `$${(type.deposit_cents / 100).toFixed(2)} deposit (Total: $${(type.price || 0).toFixed(2)})`;
+    }
+    if (mode === "pay_what_you_want") {
+      const min = type.min_pay_cents / 100;
+      const max = type.max_pay_cents ? type.max_pay_cents / 100 : null;
+      return max ? `$${min.toFixed(2)} - $${max.toFixed(2)}` : `$${min.toFixed(2)}+`;
+    }
+    return "—";
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -242,8 +291,15 @@ export default function AppointmentTypesSettings() {
                         <span className="text-xs bg-muted px-2 py-0.5 rounded">Inactive</span>
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {type.duration_minutes} min • {LOCATION_TYPES.find((l) => l.value === type.location_type)?.label}
+                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span>{type.duration_minutes} min</span>
+                      <span>•</span>
+                      <span>{LOCATION_TYPES.find((l) => l.value === type.location_type)?.label}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="h-3 w-3" />
+                        {formatPrice(type)}
+                      </span>
                     </div>
                     {type.description && (
                       <p className="text-sm text-muted-foreground mt-1">{type.description}</p>
@@ -281,7 +337,7 @@ export default function AppointmentTypesSettings() {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingType ? "Edit" : "Create"} Appointment Type</DialogTitle>
             <DialogDescription>
@@ -343,8 +399,123 @@ export default function AppointmentTypesSettings() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Brief description of this service"
-                rows={3}
+                rows={2}
               />
+            </div>
+
+            {/* Pricing Section */}
+            <div className="border-t pt-4 space-y-4">
+              <Label className="text-base font-semibold">Pricing</Label>
+              
+              <div className="space-y-2">
+                <Label>Pricing Mode</Label>
+                <Select
+                  value={formData.pricing_mode}
+                  onValueChange={(v) => setFormData({ ...formData, pricing_mode: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRICING_MODES.map((mode) => (
+                      <SelectItem key={mode.value} value={mode.value}>
+                        <div>
+                          <div className="font-medium">{mode.label}</div>
+                          <div className="text-xs text-muted-foreground">{mode.description}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Fixed Price */}
+              {formData.pricing_mode === "fixed" && (
+                <div className="space-y-2">
+                  <Label>Price ($)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
+
+              {/* Deposit */}
+              {formData.pricing_mode === "deposit" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Total Price ($)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Deposit Amount ($)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.deposit_cents / 100}
+                      onChange={(e) => setFormData({ ...formData, deposit_cents: Math.round((parseFloat(e.target.value) || 0) * 100) })}
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Pay What You Want */}
+              {formData.pricing_mode === "pay_what_you_want" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Minimum ($)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={formData.min_pay_cents / 100}
+                        onChange={(e) => setFormData({ ...formData, min_pay_cents: Math.round((parseFloat(e.target.value) || 0) * 100) })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Maximum ($ - optional)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={formData.max_pay_cents ? formData.max_pay_cents / 100 : ""}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          setFormData({ ...formData, max_pay_cents: val ? Math.round(val * 100) : null });
+                        }}
+                        placeholder="No limit"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Suggested Amount ($)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.suggested_pay_cents / 100}
+                      onChange={(e) => setFormData({ ...formData, suggested_pay_cents: Math.round((parseFloat(e.target.value) || 0) * 100) })}
+                      placeholder="0.00"
+                    />
+                    <p className="text-xs text-muted-foreground">Default amount shown to customers</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

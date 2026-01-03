@@ -47,3 +47,12 @@ verify_jwt = false
 
 [functions.stripe-connect-webhook]
 verify_jwt = false
+
+[functions.create-booking-checkout]
+verify_jwt = false
+
+[functions.booking-webhook]
+verify_jwt = false
+
+[functions.consume-credits]
+verify_jwt = false
