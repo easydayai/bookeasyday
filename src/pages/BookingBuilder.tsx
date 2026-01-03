@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookingPageConfig } from '@/hooks/useBookingPageConfig';
@@ -33,7 +33,7 @@ export default function BookingBuilder() {
     resetToDefaults,
   } = useBookingPageConfig();
 
-  const { setPageModel, pageModel, setSelectedNode, selectedNode } = useDaisy();
+  const { setPageModel, pageModel, setSelectedNode } = useDaisy();
 
   useViewportHeight();
   const isMobile = useIsMobile();
@@ -42,6 +42,10 @@ export default function BookingBuilder() {
   const [mobilePanel, setMobilePanel] = useState<'components' | 'inspector' | null>(null);
   const [mobileEditMode, setMobileEditMode] = useState(false);
   const [services, setServices] = useState<Array<{ id: string; name: string; duration_minutes: number; price: number | null; description: string | null }>>([]);
+  
+  // Ref to prevent sync loops between config and pageModel
+  const isSyncingFromPatch = useRef(false);
+  const lastPageModelRef = useRef<string | null>(null);
 
   // Fetch services for the pageModel
   useEffect(() => {
@@ -59,33 +63,41 @@ export default function BookingBuilder() {
     fetchServices();
   }, [user]);
 
-  // Sync config to pageModel for Daisy
+  // Sync config to pageModel for Daisy (only when NOT syncing from patches)
   useEffect(() => {
-    if (!config) return;
+    if (!config || isSyncingFromPatch.current) return;
     const model = bookingConfigToPageModel(config, services);
-    setPageModel(model);
+    const modelStr = JSON.stringify(model);
+    // Only update if different from last known model
+    if (modelStr !== lastPageModelRef.current) {
+      lastPageModelRef.current = modelStr;
+      setPageModel(model);
+    }
   }, [config, services, setPageModel]);
 
   // Sync pageModel changes back to config (when Daisy applies patches)
   useEffect(() => {
     if (!pageModel) return;
+    const modelStr = JSON.stringify(pageModel);
+    // Skip if this is just the initial sync from config
+    if (modelStr === lastPageModelRef.current) return;
+    
+    lastPageModelRef.current = modelStr;
+    isSyncingFromPatch.current = true;
+    
     const newConfig = pageModelToBookingConfig(pageModel);
-    // Only update if there are meaningful differences
-    if (JSON.stringify(newConfig) !== JSON.stringify({
-      theme: config.theme,
-      cover: config.cover,
-      header: config.header,
-      layout: config.layout,
-      buttons: config.buttons,
-    })) {
-      // Apply each section
-      Object.entries(newConfig).forEach(([section, value]) => {
-        Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
-          updateConfig(`${section}.${key}`, val);
-        });
+    // Apply each section
+    Object.entries(newConfig).forEach(([section, value]) => {
+      Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+        updateConfig(`${section}.${key}`, val);
       });
-    }
-  }, [pageModel]); // eslint-disable-line react-hooks/exhaustive-deps
+    });
+    
+    // Reset sync flag after a short delay to allow state to settle
+    setTimeout(() => {
+      isSyncingFromPatch.current = false;
+    }, 100);
+  }, [pageModel, updateConfig]);
 
   // Sync selected element to Daisy context
   useEffect(() => {
