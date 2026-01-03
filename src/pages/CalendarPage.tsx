@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Dialog, 
@@ -21,13 +22,14 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelRightClose,
-  X,
   Clock,
   User,
   Mail,
   Phone,
   FileText,
-  LogOut
+  LogOut,
+  Moon,
+  Sun
 } from "lucide-react";
 
 interface Booking {
@@ -108,6 +110,7 @@ const NAV_ITEMS = [
 export default function CalendarPage() {
   const navigate = useNavigate();
   const { user, profile, isLoading, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   
   // Layout toggles
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -298,25 +301,27 @@ export default function CalendarPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#070A12] flex items-center justify-center">
-        <div className="text-white/60">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     );
   }
 
+  const isDark = theme === "dark";
+
   return (
-    <div className="min-h-screen bg-[#070A12] text-white">
+    <div className={`min-h-screen ${isDark ? "bg-[#070A12] text-white" : "bg-gray-50 text-gray-900"}`}>
       <div className="flex min-h-screen">
         {/* Sidebar */}
         <aside
-          className={`border-r border-white/10 bg-[#0A0F1F] transition-all duration-200 ${
+          className={`border-r transition-all duration-200 ${
             sidebarCollapsed ? "w-[72px]" : "w-[240px]"
-          }`}
+          } ${isDark ? "border-white/10 bg-[#0A0F1F]" : "border-gray-200 bg-white"}`}
         >
           <div className="px-4 py-5">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-violet-600/20 flex items-center justify-center">
-                <CalendarIcon className="h-5 w-5 text-violet-400" />
+              <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isDark ? "bg-violet-600/20" : "bg-violet-100"}`}>
+                <CalendarIcon className="h-5 w-5 text-violet-500" />
               </div>
               {!sidebarCollapsed && (
                 <div className="font-semibold">Easy Day AI</div>
@@ -333,8 +338,8 @@ export default function CalendarPage() {
                   href={item.href}
                   className={`flex items-center gap-3 rounded-xl px-3 py-3 mt-1 transition-colors ${
                     isActive 
-                      ? "bg-white/10 text-white" 
-                      : "text-white/60 hover:bg-white/5 hover:text-white/80"
+                      ? isDark ? "bg-white/10 text-white" : "bg-violet-100 text-violet-700"
+                      : isDark ? "text-white/60 hover:bg-white/5 hover:text-white/80" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                 >
                   <Icon className="h-5 w-5" />
@@ -348,17 +353,25 @@ export default function CalendarPage() {
         {/* Main content */}
         <main className="flex-1 flex flex-col">
           {/* Top bar */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-[#070A12]">
+          <div className={`flex items-center justify-between px-6 py-5 border-b ${isDark ? "border-white/10 bg-[#070A12]" : "border-gray-200 bg-white"}`}>
             <div>
               <h1 className="text-lg font-semibold">Calendar</h1>
-              <p className="text-white/60 text-sm">Manage your appointments</p>
+              <p className={isDark ? "text-white/60 text-sm" : "text-gray-500 text-sm"}>Manage your appointments</p>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
+                size="icon"
+                onClick={toggleTheme}
+                className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
+              >
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => setSidebarCollapsed((v) => !v)}
-                className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
               >
                 <PanelLeftClose className="h-4 w-4 mr-2" />
                 {sidebarCollapsed ? "Show" : "Hide"}
@@ -367,16 +380,16 @@ export default function CalendarPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setPanelsCollapsed((v) => !v)}
-                className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
               >
                 <PanelRightClose className="h-4 w-4 mr-2" />
-                {panelsCollapsed ? "Panels" : "Panels"}
+                Panels
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleSignOut}
-                className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
@@ -392,14 +405,14 @@ export default function CalendarPage() {
               }`}
             >
               {/* Calendar card */}
-              <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <section className={`rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={prevMonth}
-                      className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                      className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -410,7 +423,7 @@ export default function CalendarPage() {
                       variant="outline"
                       size="sm"
                       onClick={nextMonth}
-                      className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                      className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -423,14 +436,14 @@ export default function CalendarPage() {
                     }}
                     variant="outline"
                     size="sm"
-                    className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                    className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
                   >
                     Today
                   </Button>
                 </div>
 
                 {/* Weekday labels */}
-                <div className="grid grid-cols-7 gap-2 text-xs text-white/60 mb-2">
+                <div className={`grid grid-cols-7 gap-2 text-xs mb-2 ${isDark ? "text-white/60" : "text-gray-500"}`}>
                   {Array.from({ length: 7 }).map((_, i) => (
                     <div key={i} className="px-2 py-1 text-center font-medium">
                       {dayLabel(i).toUpperCase()}
@@ -457,14 +470,14 @@ export default function CalendarPage() {
                         } ${
                           isSelected 
                             ? "border-violet-500 bg-violet-500/10" 
-                            : "border-white/10 bg-white/5 hover:bg-white/10"
+                            : isDark ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                         } ${
                           isToday && !isSelected ? "ring-1 ring-violet-400/50" : ""
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className={`text-sm font-semibold ${
-                            isToday ? "text-violet-400" : ""
+                            isToday ? "text-violet-500" : ""
                           }`}>
                             {d.getDate()}
                           </span>
@@ -481,13 +494,17 @@ export default function CalendarPage() {
                                 e.stopPropagation();
                                 handleBookingClick(booking);
                               }}
-                              className="truncate rounded-lg bg-violet-600/25 px-2 py-1 text-[11px] text-white/90 border border-violet-500/20 cursor-pointer hover:bg-violet-600/40 transition"
+                              className={`truncate rounded-lg px-2 py-1 text-[11px] border cursor-pointer transition ${
+                                isDark 
+                                  ? "bg-violet-600/25 text-white/90 border-violet-500/20 hover:bg-violet-600/40" 
+                                  : "bg-violet-100 text-violet-700 border-violet-200 hover:bg-violet-200"
+                              }`}
                             >
                               {booking.customer_name}
                             </div>
                           ))}
                           {activeBookings.length > 2 && (
-                            <div className="text-[11px] text-white/60">
+                            <div className={`text-[11px] ${isDark ? "text-white/60" : "text-gray-500"}`}>
                               +{activeBookings.length - 2} more
                             </div>
                           )}
@@ -498,7 +515,7 @@ export default function CalendarPage() {
                 </div>
 
                 {loadingBookings && (
-                  <div className="mt-4 text-center text-white/60 text-sm">
+                  <div className={`mt-4 text-center text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>
                     Loading bookings...
                   </div>
                 )}
@@ -508,13 +525,13 @@ export default function CalendarPage() {
               {!panelsCollapsed && (
                 <aside className="space-y-6">
                   {/* Upcoming Events for selected date */}
-                  <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <section className={`rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
                     <h3 className="text-lg font-semibold mb-3">
                       Appointments on {selectedDateISO}
                     </h3>
                     <div className="space-y-3">
                       {selectedBookings.length === 0 ? (
-                        <p className="text-white/60 text-sm">
+                        <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>
                           No appointments on this date.
                         </p>
                       ) : (
@@ -528,26 +545,26 @@ export default function CalendarPage() {
                             <button
                               key={booking.id}
                               onClick={() => handleBookingClick(booking)}
-                              className={`w-full text-left rounded-xl border border-white/10 bg-white/5 px-4 py-3 hover:bg-white/10 transition ${
+                              className={`w-full text-left rounded-xl border px-4 py-3 transition ${
                                 isCanceled ? "opacity-50" : ""
-                              }`}
+                              } ${isDark ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}
                             >
                               <div className="flex items-center justify-between mb-1">
                                 <span className="font-semibold">{booking.customer_name}</span>
                                 <span className={`text-xs px-2 py-0.5 rounded-full ${
                                   isCanceled 
-                                    ? "bg-red-500/20 text-red-400" 
-                                    : "bg-green-500/20 text-green-400"
+                                    ? "bg-red-500/20 text-red-500" 
+                                    : "bg-green-500/20 text-green-600"
                                 }`}>
                                   {booking.status}
                                 </span>
                               </div>
                               {appointmentType && (
-                                <p className="text-xs text-white/60 mb-1">
+                                <p className={`text-xs mb-1 ${isDark ? "text-white/60" : "text-gray-500"}`}>
                                   {appointmentType.name}
                                 </p>
                               )}
-                              <p className="text-sm text-white/80">
+                              <p className={`text-sm ${isDark ? "text-white/80" : "text-gray-700"}`}>
                                 {formatTimeInTimezone(booking.start_time, userTimezone)} – {formatTimeInTimezone(booking.end_time, userTimezone)}
                               </p>
                             </button>
@@ -558,9 +575,9 @@ export default function CalendarPage() {
                   </section>
 
                   {/* Tasks placeholder */}
-                  <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <section className={`rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
                     <h3 className="text-lg font-semibold mb-3">Tasks</h3>
-                    <div className="space-y-2 text-sm text-white/80">
+                    <div className={`space-y-2 text-sm ${isDark ? "text-white/80" : "text-gray-700"}`}>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="accent-violet-500" defaultChecked />
                         <span>Follow up with client</span>
@@ -581,21 +598,21 @@ export default function CalendarPage() {
 
             {/* Bottom overview */}
             {!panelsCollapsed && (
-              <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+              <section className={`mt-6 rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
                 <h3 className="text-lg font-semibold mb-4">Monthly Overview</h3>
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-white/60 text-sm">Total Bookings</p>
+                  <div className={`rounded-xl border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
+                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Total Bookings</p>
                     <p className="text-2xl font-semibold">{bookings.length}</p>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-white/60 text-sm">Active</p>
+                  <div className={`rounded-xl border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
+                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Active</p>
                     <p className="text-2xl font-semibold">
                       {bookings.filter(b => b.status === "booked").length}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-white/60 text-sm">Canceled</p>
+                  <div className={`rounded-xl border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
+                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Canceled</p>
                     <p className="text-2xl font-semibold">
                       {bookings.filter(b => b.status === "canceled").length}
                     </p>
@@ -609,10 +626,10 @@ export default function CalendarPage() {
 
       {/* Booking Details Modal */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="bg-[#0A0F1F] border-white/10 text-white max-w-lg">
+        <DialogContent className={`max-w-lg ${isDark ? "bg-[#0A0F1F] border-white/10 text-white" : "bg-white border-gray-200 text-gray-900"}`}>
           <DialogHeader>
             <DialogTitle className="text-xl">Booking Details</DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className={isDark ? "text-white/60" : "text-gray-500"}>
               View and manage this appointment
             </DialogDescription>
           </DialogHeader>
@@ -622,42 +639,42 @@ export default function CalendarPage() {
               {/* Customer Info */}
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <User className="h-5 w-5 text-white/60" />
+                  <User className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
                   <div>
-                    <p className="text-sm text-white/60">Customer</p>
+                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Customer</p>
                     <p className="font-medium">{selectedBooking.customer_name}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-white/60" />
+                  <Mail className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
                   <div>
-                    <p className="text-sm text-white/60">Email</p>
+                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Email</p>
                     <p className="font-medium">{selectedBooking.customer_email}</p>
                   </div>
                 </div>
                 
                 {selectedBooking.customer_phone && (
                   <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-white/60" />
+                    <Phone className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
                     <div>
-                      <p className="text-sm text-white/60">Phone</p>
+                      <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Phone</p>
                       <p className="font-medium">{selectedBooking.customer_phone}</p>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="border-t border-white/10 pt-4 space-y-3">
+              <div className={`border-t pt-4 space-y-3 ${isDark ? "border-white/10" : "border-gray-200"}`}>
                 {/* Appointment Type */}
                 {selectedBooking.appointment_type_id && appointmentTypes.get(selectedBooking.appointment_type_id) && (
                   <div className="flex items-center gap-3">
-                    <CalendarIcon className="h-5 w-5 text-white/60" />
+                    <CalendarIcon className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
                     <div>
-                      <p className="text-sm text-white/60">Appointment Type</p>
+                      <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Appointment Type</p>
                       <p className="font-medium">
                         {appointmentTypes.get(selectedBooking.appointment_type_id)?.name}
-                        <span className="text-white/60 ml-2">
+                        <span className={`ml-2 ${isDark ? "text-white/60" : "text-gray-500"}`}>
                           ({appointmentTypes.get(selectedBooking.appointment_type_id)?.duration_minutes} min)
                         </span>
                       </p>
@@ -667,9 +684,9 @@ export default function CalendarPage() {
 
                 {/* Time */}
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-white/60" />
+                  <Clock className={`h-5 w-5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
                   <div>
-                    <p className="text-sm text-white/60">Time</p>
+                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Time</p>
                     <p className="font-medium">
                       {getDateInTimezone(selectedBooking.start_time, userTimezone)} at{" "}
                       {formatTimeInTimezone(selectedBooking.start_time, userTimezone)} – {formatTimeInTimezone(selectedBooking.end_time, userTimezone)}
@@ -683,7 +700,7 @@ export default function CalendarPage() {
                     selectedBooking.status === "canceled" ? "bg-red-500" : "bg-green-500"
                   }`} />
                   <div>
-                    <p className="text-sm text-white/60">Status</p>
+                    <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Status</p>
                     <p className="font-medium capitalize">{selectedBooking.status}</p>
                   </div>
                 </div>
@@ -691,11 +708,11 @@ export default function CalendarPage() {
 
               {/* Notes */}
               {selectedBooking.notes && (
-                <div className="border-t border-white/10 pt-4">
+                <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-gray-200"}`}>
                   <div className="flex items-start gap-3">
-                    <FileText className="h-5 w-5 text-white/60 mt-0.5" />
+                    <FileText className={`h-5 w-5 mt-0.5 ${isDark ? "text-white/60" : "text-gray-400"}`} />
                     <div>
-                      <p className="text-sm text-white/60">Notes</p>
+                      <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>Notes</p>
                       <p className="font-medium">{selectedBooking.notes}</p>
                     </div>
                   </div>
@@ -703,7 +720,7 @@ export default function CalendarPage() {
               )}
 
               {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t border-white/10">
+              <div className={`flex gap-3 pt-4 border-t ${isDark ? "border-white/10" : "border-gray-200"}`}>
                 {selectedBooking.status !== "canceled" && (
                   <Button
                     variant="destructive"
@@ -717,7 +734,7 @@ export default function CalendarPage() {
                 <Button
                   variant="outline"
                   onClick={() => setDetailsOpen(false)}
-                  className="flex-1 border-white/10 text-white hover:bg-white/10"
+                  className={`flex-1 ${isDark ? "border-white/10 text-white hover:bg-white/10" : "border-gray-200 text-gray-700 hover:bg-gray-100"}`}
                 >
                   Close
                 </Button>
