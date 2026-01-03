@@ -17,6 +17,7 @@ import {
   User,
   ExternalLink,
   Zap,
+  Palette,
 } from "lucide-react";
 import LogoInsignia from "@/components/LogoInsignia";
 
@@ -271,8 +272,29 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        {/* Customize Booking Page CTA */}
+        <Card className="mt-6 sm:mt-8 border-primary/30 bg-gradient-to-r from-primary/10 to-transparent">
+          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4 sm:py-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/20">
+                <Palette className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Customize Your Booking Page</h3>
+                <p className="text-sm text-muted-foreground">Design your public booking page with our visual editor</p>
+              </div>
+            </div>
+            <Button asChild className="w-full sm:w-auto">
+              <Link to="/booking-builder">
+                <Palette className="h-4 w-4 mr-2" />
+                Open Builder
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
-        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-6 sm:mt-8">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 mt-6 sm:mt-8">
           <Button variant="outline" className="h-auto py-4 justify-start min-h-[56px]" asChild>
             <Link to="/settings/profile" className="flex items-center gap-3">
               <User className="h-5 w-5 text-primary flex-shrink-0" />
@@ -306,6 +328,15 @@ export default function Dashboard() {
               <div className="text-left">
                 <div className="font-medium">Calendar</div>
                 <div className="text-xs text-muted-foreground">View & manage</div>
+              </div>
+            </Link>
+          </Button>
+          <Button variant="outline" className="h-auto py-4 justify-start min-h-[56px]" asChild>
+            <Link to="/booking-builder" className="flex items-center gap-3">
+              <Palette className="h-5 w-5 text-primary flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-medium">Page Builder</div>
+                <div className="text-xs text-muted-foreground">Customize design</div>
               </div>
             </Link>
           </Button>
