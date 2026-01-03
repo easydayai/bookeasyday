@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookingPageConfig } from '@/hooks/useBookingPageConfig';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Loader2, Layers, SlidersHorizontal, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 import { BuilderTopBar } from '@/components/booking-builder/BuilderTopBar';
 import { ComponentList } from '@/components/booking-builder/ComponentList';
@@ -25,8 +28,17 @@ export default function BookingBuilder() {
     resetToDefaults,
   } = useBookingPageConfig();
 
+  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [mobilePanel, setMobilePanel] = useState<'components' | 'inspector' | null>(null);
+
+  // Auto-open inspector when element is selected on mobile
+  useEffect(() => {
+    if (isMobile && selectedElement) {
+      setMobilePanel('inspector');
+    }
+  }, [selectedElement, isMobile]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -112,6 +124,78 @@ export default function BookingBuilder() {
           />
         </div>
       </div>
+
+      {/* Mobile floating action buttons */}
+      <div className="lg:hidden fixed bottom-6 left-4 right-4 flex justify-center gap-3 z-50">
+        <Button
+          size="lg"
+          variant="secondary"
+          className="h-14 px-6 shadow-lg rounded-full"
+          onClick={() => setMobilePanel('components')}
+        >
+          <Layers className="h-5 w-5 mr-2" />
+          Components
+        </Button>
+        <Button
+          size="lg"
+          variant={selectedElement ? 'default' : 'secondary'}
+          className="h-14 px-6 shadow-lg rounded-full"
+          onClick={() => setMobilePanel('inspector')}
+        >
+          <SlidersHorizontal className="h-5 w-5 mr-2" />
+          Edit
+        </Button>
+      </div>
+
+      {/* Mobile Components Sheet */}
+      <Sheet open={mobilePanel === 'components'} onOpenChange={(open) => !open && setMobilePanel(null)}>
+        <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0">
+          <SheetHeader className="p-4 border-b border-border">
+            <div className="flex items-center justify-between">
+              <SheetTitle>Components</SheetTitle>
+              <Button variant="ghost" size="icon" onClick={() => setMobilePanel(null)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </SheetHeader>
+          <div className="h-full overflow-auto pb-20">
+            <ComponentList
+              selectedElement={selectedElement}
+              onSelectElement={(id) => {
+                setSelectedElement(id);
+                setMobilePanel('inspector');
+              }}
+              isMobile
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Mobile Inspector Sheet */}
+      <Sheet open={mobilePanel === 'inspector'} onOpenChange={(open) => !open && setMobilePanel(null)}>
+        <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0">
+          <SheetHeader className="p-4 border-b border-border">
+            <div className="flex items-center justify-between">
+              <SheetTitle>
+                {selectedElement ? (
+                  selectedElement.charAt(0).toUpperCase() + selectedElement.slice(1).replace('-', ' ')
+                ) : 'Select an element'}
+              </SheetTitle>
+              <Button variant="ghost" size="icon" onClick={() => setMobilePanel(null)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </SheetHeader>
+          <div className="h-full overflow-auto pb-20">
+            <InspectorPanel
+              selectedElement={selectedElement}
+              config={config}
+              onUpdateConfig={updateConfig}
+              isMobile
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
