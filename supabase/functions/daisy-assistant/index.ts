@@ -6,26 +6,43 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Route mapping for navigation
+const ROUTE_MAP: Record<string, { path: string; label: string; requiresAuth: boolean }> = {
+  dashboard: { path: "/dashboard", label: "Dashboard", requiresAuth: true },
+  calendar: { path: "/calendar", label: "Calendar", requiresAuth: true },
+  profile: { path: "/settings/profile", label: "Profile Settings", requiresAuth: true },
+  availability: { path: "/settings/availability", label: "Availability Settings", requiresAuth: true },
+  appointment_types: { path: "/settings/appointment-types", label: "Appointment Types", requiresAuth: true },
+  bookings: { path: "/dashboard/appointments", label: "Bookings", requiresAuth: true },
+  booking_builder: { path: "/booking-builder", label: "Booking Page Builder", requiresAuth: true },
+  pricing: { path: "/pricing", label: "Pricing", requiresAuth: false },
+  home: { path: "/", label: "Home", requiresAuth: false },
+  solutions: { path: "/solutions", label: "Solutions", requiresAuth: false },
+  demo: { path: "/demo", label: "Book a Demo", requiresAuth: false },
+  contact: { path: "/contact", label: "Contact", requiresAuth: false },
+};
+
 // Tool definitions for OpenAI function calling
 const tools = [
   {
     type: "function",
     function: {
       name: "navigate_internal",
-      description: "Navigate the user to an internal page in the app. Use this to guide users to specific features.",
+      description: "Navigate the user to an internal page. Use destination_key for standard routes. ALWAYS use this when user asks to 'go to', 'take me to', 'open', or 'show me' a page. Respond with a short confirmation like 'Got it — taking you there now!' before navigating.",
       parameters: {
         type: "object",
         properties: {
-          path: {
+          destination_key: {
             type: "string",
-            description: "The internal route path (e.g., /pricing, /settings/availability, /book/slug)",
+            enum: ["dashboard", "calendar", "profile", "availability", "appointment_types", "bookings", "booking_builder", "pricing", "home", "solutions", "demo", "contact", "public_booking"],
+            description: "The destination key for navigation. Use 'public_booking' for the user's booking page.",
           },
-          label: {
+          custom_path: {
             type: "string",
-            description: "The button label to show the user",
+            description: "Only use if destination_key doesn't match. Direct path like '/book/username'",
           },
         },
-        required: ["path", "label"],
+        required: ["destination_key"],
       },
     },
   },
@@ -163,16 +180,92 @@ async function executeTool(
   console.log(`Executing tool: ${toolName}`, args);
   
   switch (toolName) {
-    case "navigate_internal":
+    case "navigate_internal": {
+      const destKey = args.destination_key as string;
+      const route = ROUTE_MAP[destKey];
+      
+      // Handle public_booking specially - needs user slug
+      if (destKey === "public_booking") {
+        // Get user slug from profile
+        if (!userId) {
+          return { 
+            result: { 
+              action: "navigate", 
+              path: "/login", 
+              label: "Log in first",
+              destination_key: "login",
+              autoNavigate: false,
+              message: "You need to log in to view your booking page."
+            }, 
+            creditCost: 0 
+          };
+        }
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("slug")
+          .eq("id", userId)
+          .single();
+        
+        const slug = profile?.slug || userId;
+        return { 
+          result: { 
+            action: "navigate", 
+            path: `/book/${slug}`, 
+            label: "Your Booking Page",
+            destination_key: destKey,
+            autoNavigate: true,
+            message: `Got it — taking you to your booking page now!`
+          }, 
+          creditCost: 0 
+        };
+      }
+      
+      if (route) {
+        // Check auth requirements
+        if (route.requiresAuth && !userId) {
+          return { 
+            result: { 
+              action: "navigate", 
+              path: "/login", 
+              label: "Log in first",
+              destination_key: "login",
+              autoNavigate: true,
+              message: `You need to log in to access ${route.label}. Let me take you to the login page.`
+            }, 
+            creditCost: 0 
+          };
+        }
+        
+        // If logged in and requesting home, redirect to dashboard
+        const finalPath = (destKey === "home" && userId) ? "/dashboard" : route.path;
+        const finalLabel = (destKey === "home" && userId) ? "Dashboard" : route.label;
+        
+        return { 
+          result: { 
+            action: "navigate", 
+            path: finalPath, 
+            label: finalLabel,
+            destination_key: destKey,
+            autoNavigate: true,
+            message: `Got it — taking you to ${finalLabel} now!`
+          }, 
+          creditCost: 0 
+        };
+      }
+      
+      // Fallback to custom path
+      const customPath = args.custom_path as string || "/dashboard";
       return { 
         result: { 
           action: "navigate", 
-          path: args.path, 
-          label: args.label,
-          message: `I can take you to ${args.label}. Click the button below!`
+          path: customPath, 
+          label: args.label || "Page",
+          autoNavigate: true,
+          message: `Got it — navigating now!`
         }, 
         creditCost: 0 
       };
+    }
     
     case "get_user_profile":
       if (!userId) return { result: { error: "Not authenticated" }, creditCost: 0 };
@@ -433,7 +526,7 @@ YOUR KNOWLEDGE:
 ${knowledgeContext}
 
 CURRENT CONTEXT:
-- User is browsing the public website
+- User is browsing the public website (not logged in)
 - Current page: ${currentPage || "/"}
 
 YOUR GOALS:
@@ -441,11 +534,18 @@ YOUR GOALS:
 2. Help visitors understand how AI automation benefits service businesses
 3. Guide interested visitors to book a call or see pricing
 
-NAVIGATION: You can suggest these pages:
-- /pricing - View pricing plans
-- /demo - Book a demo call
-- /contact - Contact us
-- /solutions - See our solutions
+NAVIGATION - CRITICAL:
+When the user says things like "take me to", "go to", "show me", "open", or asks about a page:
+- ALWAYS use the navigate_internal tool immediately
+- Say something brief like "Got it — taking you there now!" then call the tool
+- Available destinations: pricing, demo, contact, solutions, home
+
+Use these destination_key values:
+- "pricing" → Pricing page
+- "demo" → Book a demo
+- "contact" → Contact us
+- "solutions" → Solutions page
+- "home" → Homepage
 
 If you don't have information about something, say so honestly and offer to connect them with support.`;
 
@@ -460,32 +560,41 @@ PERSONALITY:
 USER CONTEXT:
 - Name: ${userProfile?.full_name || "User"}
 - Business: ${userProfile?.business_name || "Not set"}
-- Booking link: /book/${userProfile?.slug || ""}
+- Booking link slug: ${userProfile?.slug || "not set"}
 - Current page: ${currentPage || "/dashboard"}
 
 YOUR CAPABILITIES:
-You can help the user:
-1. Create and manage appointment types
-2. Set up their availability schedule
-3. View upcoming bookings
-4. Customize their booking page design (colors, fonts)
-5. Configure reminder settings
-6. Navigate to different parts of the app
+1. Navigate the user to any page in the app automatically
+2. Create and manage appointment types
+3. Set up their availability schedule
+4. View upcoming bookings
+5. Customize their booking page design
+6. Configure reminder settings
 
-NAVIGATION PAGES:
-- /dashboard - Main dashboard
-- /settings/profile - Edit profile
-- /settings/availability - Set availability
-- /settings/appointment-types - Manage appointment types
-- /booking-builder - Customize booking page
-- /calendar - View calendar
-- /pricing - View/change plans
+NAVIGATION - CRITICAL (USE navigate_internal TOOL):
+When the user says "take me to", "go to", "show me", "open", or any navigation request:
+- ALWAYS use the navigate_internal tool immediately
+- Say something brief like "Got it — taking you there now!" then call the tool
+- Do NOT just provide a button - navigate them automatically
 
-IMPORTANT RULES:
-1. For actions that modify data, ALWAYS use the appropriate tool
-2. Before any action that costs credits, tell the user: "This will cost 1 credit. Would you like me to proceed?"
+Use these destination_key values:
+- "dashboard" → Main dashboard
+- "calendar" → Calendar view
+- "profile" → Profile settings
+- "availability" → Availability settings
+- "appointment_types" → Appointment types
+- "bookings" → Bookings list
+- "booking_builder" → Booking page customizer
+- "pricing" → Pricing/plans
+- "public_booking" → User's public booking page
+
+AFTER NAVIGATING:
+Explain what they're seeing on the new page and offer 1-3 next action suggestions.
+
+DATA MODIFICATION RULES:
+1. For actions that modify data, use the appropriate tool
+2. Before any action that costs credits: "This will cost 1 credit. Would you like me to proceed?"
 3. Never claim you did something unless the tool confirms success
-4. Use navigate_internal to guide users to pages
 
 YOUR KNOWLEDGE:
 ${knowledgeContext}
@@ -590,11 +699,18 @@ Be helpful, guide the user step-by-step, and stay with them as they navigate the
           path: (tr.result as any).path,
           // deno-lint-ignore no-explicit-any
           label: (tr.result as any).label,
+          // deno-lint-ignore no-explicit-any
+          destination_key: (tr.result as any).destination_key,
         }));
+
+      // Check if we should auto-navigate
+      // deno-lint-ignore no-explicit-any
+      const shouldAutoNavigate = toolResults.some(tr => tr.result && typeof tr.result === "object" && (tr.result as any).autoNavigate === true);
 
       return new Response(JSON.stringify({
         content: finalContent,
         actions,
+        autoNavigate: shouldAutoNavigate,
         creditsCharged: totalCreditCost,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

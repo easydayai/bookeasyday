@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { DaisyProvider } from "@/contexts/DaisyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -152,6 +153,7 @@ export default function Dashboard() {
   const isPaidPlan = subscription?.plan_key && subscription.plan_key !== "free";
 
   return (
+    <DaisyProvider>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
@@ -392,5 +394,6 @@ export default function Dashboard() {
       {/* Daisy Assistant */}
       <DaisyAssistant />
     </div>
+    </DaisyProvider>
   );
 }
