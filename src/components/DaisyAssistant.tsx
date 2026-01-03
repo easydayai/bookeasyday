@@ -73,10 +73,11 @@ const PAGE_GUIDANCE: Record<string, { message: string; actions: QuickAction[] }>
     ],
   },
   "/booking-builder": {
-    message: "Customize your public booking page here! Change colors, add your logo, and more.",
+    message: "I can generate your booking page automatically! Just tell me about your business and what you need 😊",
     actions: [
-      { label: "Preview page", message: "How do I preview my booking page?" },
-      { label: "Change colors", message: "Help me pick a color theme" },
+      { label: "Generate my page", message: "Create a booking page for my business" },
+      { label: "Quick dark theme", message: "I want a simple black booking page for 30-minute jobs" },
+      { label: "Preview current", message: "Take me to my booking page" },
     ],
   },
   "/settings/profile": {
@@ -87,6 +88,14 @@ const PAGE_GUIDANCE: Record<string, { message: string; actions: QuickAction[] }>
     ],
   },
 };
+
+// Quick actions specifically for the booking builder page
+const bookingBuilderQuickActions: QuickAction[] = [
+  { label: "🔧 Locksmith / Emergency", message: "I'm a locksmith, I need emergency bookings, dark theme, text confirmations" },
+  { label: "💇 Salon / Spa", message: "I run a salon, I need scheduled appointments, warm inviting theme" },
+  { label: "⚖️ Professional Services", message: "I'm a consultant, I need professional clean look for consultations" },
+  { label: "🧹 Home Services", message: "I do home cleaning, I need simple functional booking page" },
+];
 
 export function DaisyAssistant() {
   const [input, setInput] = useState("");
@@ -159,13 +168,19 @@ export function DaisyAssistant() {
   // Add welcome message when first opened
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      const welcomeMessage = isAuthenticated
-        ? `Hey there! 👋 I'm Daisy, your AI assistant. I can help you navigate the app, manage your calendar, and set up appointments. Just tell me where you want to go or what you need help with!`
-        : `Hi! I'm Daisy, the Easy Day AI assistant 😊 I'm here to answer your questions and help you explore. Where would you like to go?`;
+      let welcomeMessage: string;
+      
+      if (location.pathname === "/booking-builder" && isAuthenticated) {
+        welcomeMessage = `Hey! 👋 I'm Daisy, and I can generate your booking page automatically!\n\nJust tell me about your business in plain English. For example:\n\n"I'm a locksmith, I want emergency bookings, black page, text confirmations"\n\nI'll pick the right layout, apply the right theme, and set everything up. No menus, no sliders — just tell me what you need! 😊`;
+      } else if (isAuthenticated) {
+        welcomeMessage = `Hey there! 👋 I'm Daisy, your AI assistant. I can help you navigate the app, manage your calendar, and set up appointments. Just tell me where you want to go or what you need help with!`;
+      } else {
+        welcomeMessage = `Hi! I'm Daisy, the Easy Day AI assistant 😊 I'm here to answer your questions and help you explore. Where would you like to go?`;
+      }
 
       addMessage({ role: "assistant", content: welcomeMessage });
     }
-  }, [isOpen, isAuthenticated, messages.length, addMessage]);
+  }, [isOpen, isAuthenticated, messages.length, addMessage, location.pathname]);
 
   // Guide mode: provide page-specific help on route change
   useEffect(() => {
@@ -301,7 +316,10 @@ export function DaisyAssistant() {
     sendMessage(action.message);
   };
 
-  const quickActions = isAuthenticated ? authQuickActions : publicQuickActions;
+  // Use booking builder specific quick actions when on that page
+  const quickActions = location.pathname === "/booking-builder" 
+    ? bookingBuilderQuickActions 
+    : (isAuthenticated ? authQuickActions : publicQuickActions);
 
   // Minimized bubble
   if (mode === "minimized") {
