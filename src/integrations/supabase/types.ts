@@ -194,6 +194,30 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_page_config: {
+        Row: {
+          config: Json
+          created_at: string
+          published_config: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          published_config?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          published_config?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           appointment_type_id: string | null
