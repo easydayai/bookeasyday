@@ -143,6 +143,21 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "search_knowledge",
+      description: "Search the company knowledge base for information. Use this when the user asks general questions about Easy Day AI, how things work, pricing, features, etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "The search query or topic to find information about" },
+          category: { type: "string", enum: ["general", "pricing", "features", "support", "technical"], description: "Optional category filter" },
+        },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "extract_booking_intent",
       description: "Extract user's booking page requirements from natural language. Use this when user describes what kind of booking page they want. Example: 'I'm a locksmith, I want emergency bookings, black page, text confirmations' → extract businessType=locksmith, bookingType=emergency, theme=dark, confirmation=sms",
       parameters: {
@@ -255,6 +270,39 @@ const tools = [
           limit: { type: "number", description: "Maximum number of bookings to return" },
         },
         required: [],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "cancel_booking",
+      description: "Cancel a specific booking. Ask user to confirm cancellation before proceeding.",
+      parameters: {
+        type: "object",
+        properties: {
+          booking_id: { type: "string", description: "The ID of the booking to cancel" },
+          notify_customer: { type: "boolean", description: "Whether to notify the customer about the cancellation" },
+          reason: { type: "string", description: "Optional reason for cancellation" },
+        },
+        required: ["booking_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "reschedule_booking",
+      description: "Reschedule a booking to a new date/time. Ask user to confirm new time before proceeding.",
+      parameters: {
+        type: "object",
+        properties: {
+          booking_id: { type: "string", description: "The ID of the booking to reschedule" },
+          new_start_time: { type: "string", description: "New start time in ISO format (e.g., 2024-01-15T10:00:00Z)" },
+          new_end_time: { type: "string", description: "New end time in ISO format" },
+          notify_customer: { type: "boolean", description: "Whether to notify the customer about the change" },
+        },
+        required: ["booking_id", "new_start_time", "new_end_time"],
       },
     },
   },
@@ -644,6 +692,187 @@ async function executeTool(
         .order("start_time")
         .limit(limit);
       return { result: bookings || [], creditCost: 0 };
+    
+    case "cancel_booking": {
+      if (!userId) return { result: { error: "Not authenticated" }, creditCost: 0 };
+      const bookingId = args.booking_id as string;
+      
+      // First verify the booking belongs to this user
+      const { data: existingBooking, error: fetchError } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("id", bookingId)
+        .eq("user_id", userId)
+        .single();
+      
+      if (fetchError || !existingBooking) {
+        return { result: { error: "Booking not found or you don't have permission to cancel it" }, creditCost: 0 };
+      }
+      
+      // Update booking status to cancelled
+      const { error: cancelError } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled" })
+        .eq("id", bookingId)
+        .eq("user_id", userId);
+      
+      if (cancelError) {
+        return { result: { error: cancelError.message }, creditCost: 0 };
+      }
+      
+      // Queue notification if requested
+      if (args.notify_customer && existingBooking.customer_email) {
+        await supabase
+          .from("notification_queue")
+          .insert({
+            user_id: userId,
+            booking_id: bookingId,
+            notification_type: "email",
+            recipient_email: existingBooking.customer_email,
+            subject: "Your appointment has been cancelled",
+            message: `Hi ${existingBooking.customer_name}, your appointment has been cancelled.${args.reason ? ` Reason: ${args.reason}` : ""} Please contact us to reschedule.`,
+            scheduled_for: new Date().toISOString(),
+            status: "pending",
+          });
+      }
+      
+      return { 
+        result: { 
+          success: true, 
+          message: `Booking with ${existingBooking.customer_name} has been cancelled.`,
+          notificationSent: !!args.notify_customer
+        }, 
+        creditCost: 0 
+      };
+    }
+    
+    case "reschedule_booking": {
+      if (!userId) return { result: { error: "Not authenticated" }, creditCost: 0 };
+      const rescheduleBookingId = args.booking_id as string;
+      const newStartTime = args.new_start_time as string;
+      const newEndTime = args.new_end_time as string;
+      
+      // Verify booking belongs to user
+      const { data: existingRescheduleBooking, error: rescheduleFetchError } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("id", rescheduleBookingId)
+        .eq("user_id", userId)
+        .single();
+      
+      if (rescheduleFetchError || !existingRescheduleBooking) {
+        return { result: { error: "Booking not found or you don't have permission to reschedule it" }, creditCost: 0 };
+      }
+      
+      // Update booking times
+      const { error: rescheduleError } = await supabase
+        .from("bookings")
+        .update({ 
+          start_time: newStartTime,
+          end_time: newEndTime,
+          status: "rescheduled"
+        })
+        .eq("id", rescheduleBookingId)
+        .eq("user_id", userId);
+      
+      if (rescheduleError) {
+        return { result: { error: rescheduleError.message }, creditCost: 0 };
+      }
+      
+      // Queue notification if requested
+      if (args.notify_customer && existingRescheduleBooking.customer_email) {
+        const formattedDate = new Date(newStartTime).toLocaleString('en-US', { 
+          weekday: 'long', 
+          month: 'long', 
+          day: 'numeric', 
+          hour: 'numeric', 
+          minute: '2-digit' 
+        });
+        
+        await supabase
+          .from("notification_queue")
+          .insert({
+            user_id: userId,
+            booking_id: rescheduleBookingId,
+            notification_type: "email",
+            recipient_email: existingRescheduleBooking.customer_email,
+            subject: "Your appointment has been rescheduled",
+            message: `Hi ${existingRescheduleBooking.customer_name}, your appointment has been rescheduled to ${formattedDate}. Please contact us if this doesn't work for you.`,
+            scheduled_for: new Date().toISOString(),
+            status: "pending",
+          });
+      }
+      
+      return { 
+        result: { 
+          success: true, 
+          message: `Booking with ${existingRescheduleBooking.customer_name} has been rescheduled.`,
+          newTime: newStartTime,
+          notificationSent: !!args.notify_customer
+        }, 
+        creditCost: 0 
+      };
+    }
+    
+    case "search_knowledge": {
+      const query = (args.query as string || "").toLowerCase();
+      const category = args.category as string;
+      
+      // Build query
+      let knowledgeQuery = supabase
+        .from("company_knowledge")
+        .select("topic, content, category")
+        .eq("is_active", true);
+      
+      if (category) {
+        knowledgeQuery = knowledgeQuery.eq("category", category);
+      }
+      
+      const { data: knowledgeResults } = await knowledgeQuery;
+      
+      if (!knowledgeResults || knowledgeResults.length === 0) {
+        return { result: { found: false, message: "No relevant knowledge found" }, creditCost: 0 };
+      }
+      
+      // Simple relevance scoring - find entries that match the query
+      const scoredResults = knowledgeResults.map((k: { topic: string; content: string; category: string }) => {
+        const topicLower = k.topic.toLowerCase();
+        const contentLower = k.content.toLowerCase();
+        let score = 0;
+        
+        // Check if query terms appear in topic or content
+        const queryTerms = query.split(" ").filter((t: string) => t.length > 2);
+        for (const term of queryTerms) {
+          if (topicLower.includes(term)) score += 3;
+          if (contentLower.includes(term)) score += 1;
+        }
+        
+        return { ...k, score };
+      }).filter((k: { score: number }) => k.score > 0)
+        .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
+        .slice(0, 3);
+      
+      if (scoredResults.length === 0) {
+        // Return all knowledge if no specific matches
+        return { 
+          result: { 
+            found: true, 
+            entries: knowledgeResults.slice(0, 5),
+            message: "Here's some general information that might help"
+          }, 
+          creditCost: 0 
+        };
+      }
+      
+      return { 
+        result: { 
+          found: true, 
+          entries: scoredResults,
+          message: `Found ${scoredResults.length} relevant entries`
+        }, 
+        creditCost: 0 
+      };
+    }
     
     case "get_calendar_theme":
       if (!userId) return { result: { error: "Not authenticated" }, creditCost: 0 };
