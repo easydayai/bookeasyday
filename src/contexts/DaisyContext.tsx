@@ -22,6 +22,15 @@ export type DaisyMessage = {
   timestamp: number;
 };
 
+// Working configuration for multi-step conversations
+export type WorkingConfig = {
+  businessType?: string;
+  bookingType?: "emergency" | "scheduled" | "flexible";
+  theme?: "dark" | "light" | "warm" | "neutral";
+  duration?: number;
+  presetId?: string;
+};
+
 type DaisyState = {
   mode: DaisyMode;
   setMode: (mode: DaisyMode) => void;
@@ -32,6 +41,9 @@ type DaisyState = {
   setGuideMode: (enabled: boolean) => void;
   pendingNavigation: string | null;
   setPendingNavigation: (path: string | null) => void;
+  workingConfig: WorkingConfig;
+  updateWorkingConfig: (updates: Partial<WorkingConfig>) => void;
+  clearWorkingConfig: () => void;
 };
 
 const DaisyContext = createContext<DaisyState | null>(null);
@@ -41,6 +53,7 @@ export function DaisyProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<DaisyMessage[]>([]);
   const [isGuideMode, setGuideMode] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [workingConfig, setWorkingConfig] = useState<WorkingConfig>({});
 
   const addMessage = useCallback((message: Omit<DaisyMessage, "id" | "timestamp">) => {
     setMessages(prev => [
@@ -57,6 +70,14 @@ export function DaisyProvider({ children }: { children: React.ReactNode }) {
     setMessages([]);
   }, []);
 
+  const updateWorkingConfig = useCallback((updates: Partial<WorkingConfig>) => {
+    setWorkingConfig(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  const clearWorkingConfig = useCallback(() => {
+    setWorkingConfig({});
+  }, []);
+
   const value = useMemo(
     () => ({
       mode,
@@ -68,8 +89,11 @@ export function DaisyProvider({ children }: { children: React.ReactNode }) {
       setGuideMode,
       pendingNavigation,
       setPendingNavigation,
+      workingConfig,
+      updateWorkingConfig,
+      clearWorkingConfig,
     }),
-    [mode, messages, addMessage, clearMessages, isGuideMode, pendingNavigation]
+    [mode, messages, addMessage, clearMessages, isGuideMode, pendingNavigation, workingConfig, updateWorkingConfig, clearWorkingConfig]
   );
 
   return <DaisyContext.Provider value={value}>{children}</DaisyContext.Provider>;

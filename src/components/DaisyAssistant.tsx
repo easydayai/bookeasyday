@@ -17,9 +17,12 @@ import {
   Loader2,
   ArrowLeft,
   Compass,
+  Mic,
+  MicOff,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDaisy, DAISY_ROUTES, getRouteFromKey } from "@/contexts/DaisyContext";
+import { useDaisy, getRouteFromKey } from "@/contexts/DaisyContext";
+import { useSpeechToText } from "@/hooks/use-speech-to-text";
 import { cn } from "@/lib/utils";
 
 type QuickAction = {
@@ -115,7 +118,11 @@ export function DaisyAssistant() {
     setGuideMode,
     pendingNavigation,
     setPendingNavigation,
+    workingConfig,
+    updateWorkingConfig,
   } = useDaisy();
+
+  const { isListening, isSupported, transcript, startListening, stopListening } = useSpeechToText();
 
   const isAuthenticated = !!user;
   const isOpen = mode !== "minimized";
@@ -320,6 +327,23 @@ export function DaisyAssistant() {
     sendMessage(action.message);
   };
 
+  const handleVoiceInput = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening(
+        (text) => {
+          setInput(text);
+          // Auto-submit after getting final result
+          setTimeout(() => sendMessage(text), 300);
+        },
+        () => {
+          // onEnd callback
+        }
+      );
+    }
+  };
+
   // Use booking builder specific quick actions when on that page
   const quickActions = location.pathname === "/booking-builder" 
     ? bookingBuilderQuickActions 
@@ -485,13 +509,24 @@ export function DaisyAssistant() {
           <div className="max-w-3xl mx-auto flex gap-3">
             <Input
               ref={inputRef}
-              value={input}
+              value={isListening ? transcript || "Listening..." : input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Ask Daisy to navigate, help, or explain..."
+              placeholder={isListening ? "Listening..." : "Ask Daisy to navigate, help, or explain..."}
               className="flex-1"
-              disabled={isLoading}
+              disabled={isLoading || isListening}
             />
-            <Button type="submit" disabled={isLoading || !input.trim()}>
+            {isSupported && (
+              <Button 
+                type="button" 
+                variant={isListening ? "destructive" : "outline"}
+                onClick={handleVoiceInput}
+                disabled={isLoading}
+                className={cn(isListening && "animate-pulse")}
+              >
+                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </Button>
+            )}
+            <Button type="submit" disabled={isLoading || !input.trim() || isListening}>
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
             </Button>
           </div>
@@ -643,13 +678,25 @@ export function DaisyAssistant() {
         <div className="flex gap-2">
           <Input
             ref={inputRef}
-            value={input}
+            value={isListening ? transcript || "Listening..." : input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Ask Daisy anything..."
+            placeholder={isListening ? "Listening..." : "Ask Daisy anything..."}
             className="flex-1 bg-background"
-            disabled={isLoading}
+            disabled={isLoading || isListening}
           />
-          <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+          {isSupported && (
+            <Button 
+              type="button" 
+              variant={isListening ? "destructive" : "outline"}
+              size="icon"
+              onClick={handleVoiceInput}
+              disabled={isLoading}
+              className={cn(isListening && "animate-pulse")}
+            >
+              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            </Button>
+          )}
+          <Button type="submit" size="icon" disabled={isLoading || !input.trim() || isListening}>
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </div>
