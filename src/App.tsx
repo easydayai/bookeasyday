@@ -34,6 +34,7 @@ import AvailabilitySettings from "./pages/settings/AvailabilitySettings";
 import AppointmentTypesSettings from "./pages/settings/AppointmentTypesSettings";
 import CalendarDesignSettings from "./pages/settings/CalendarDesignSettings";
 import AppointmentsPage from "./pages/dashboard/AppointmentsPage";
+import CalendarPage from "./pages/CalendarPage";
 
 // Public booking
 import BookingPage from "./pages/BookingPage";
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="/settings/appointment-types" element={<AppointmentTypesSettings />} />
               <Route path="/settings/calendar-design" element={<CalendarDesignSettings />} />
               <Route path="/dashboard/appointments" element={<AppointmentsPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
 
               {/* Public booking */}
               <Route path="/book/:slug" element={<BookingPage />} />
