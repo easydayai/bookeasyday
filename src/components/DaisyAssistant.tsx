@@ -194,9 +194,9 @@ export function DaisyAssistant() {
         addMessage({
           role: "assistant",
           content: guidance.message,
-          actions: guidance.actions.map(a => ({
-            type: "navigate" as const,
-            path: "",
+          actions: guidance.actions.map((a) => ({
+            type: "message" as const,
+            message: a.message,
             label: a.label,
           })),
         });
@@ -414,7 +414,13 @@ export function DaisyAssistant() {
                             key={actionIdx}
                             variant="outline"
                             size="sm"
-                            onClick={() => handleNavigate(action.path || action.destination_key || "")}
+                            onClick={() => {
+                              if (action.type === "message") {
+                                sendMessage(action.message);
+                                return;
+                              }
+                              handleNavigate(action.path || action.destination_key || "");
+                            }}
                           >
                             {action.label}
                             <ChevronRight className="w-4 h-4 ml-1" />
@@ -562,13 +568,19 @@ export function DaisyAssistant() {
                 {message.actions && message.actions.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {message.actions.map((action, actionIdx) => (
-                      <Button
-                        key={actionIdx}
-                        variant="outline"
-                        size="sm"
-                        className="text-xs h-8"
-                        onClick={() => handleNavigate(action.path || action.destination_key || "")}
-                      >
+                       <Button
+                         key={actionIdx}
+                         variant="outline"
+                         size="sm"
+                         className="text-xs h-8"
+                         onClick={() => {
+                           if (action.type === "message") {
+                             sendMessage(action.message);
+                             return;
+                           }
+                           handleNavigate(action.path || action.destination_key || "");
+                         }}
+                       >
                         {action.label}
                         <ChevronRight className="w-3 h-3 ml-1" />
                       </Button>

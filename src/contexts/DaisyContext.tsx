@@ -2,13 +2,18 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 
 export type DaisyMode = "minimized" | "docked" | "fullscreen";
 
-export type DaisyAction = {
-  type: "navigate";
-  path: string;
-  label: string;
-  destination_key?: string;
-};
-
+export type DaisyAction =
+  | {
+      type: "navigate";
+      path: string;
+      label: string;
+      destination_key?: string;
+    }
+  | {
+      type: "message";
+      label: string;
+      message: string;
+    };
 export type DaisyMessage = {
   id: string;
   role: "user" | "assistant";

@@ -4,8 +4,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import LogoInsignia from "@/components/LogoInsignia";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { DaisyAssistant } from "@/components/DaisyAssistant";
-import { DaisyProvider } from "@/contexts/DaisyContext";
 import { User, Clock, Calendar, ArrowLeft, Palette } from "lucide-react";
 
 interface SettingsLayoutProps {
@@ -23,9 +21,7 @@ const navItems = [
 
 export function SettingsLayout({ children, title, description }: SettingsLayoutProps) {
   const location = useLocation();
-
   return (
-    <DaisyProvider>
       <div className="min-h-screen bg-background">
         {/* Header */}
         <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
@@ -85,10 +81,6 @@ export function SettingsLayout({ children, title, description }: SettingsLayoutP
             </main>
           </div>
         </div>
-        
-        {/* Daisy Assistant */}
-        <DaisyAssistant />
       </div>
-    </DaisyProvider>
-  );
+    );
 }
