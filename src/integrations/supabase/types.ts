@@ -322,6 +322,36 @@ export type Database = {
         }
         Relationships: []
       }
+      company_knowledge: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          topic: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          topic: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          topic?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       credits_balance: {
         Row: {
           balance_credits: number
@@ -372,6 +402,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      notification_queue: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          message: string
+          notification_type: string
+          recipient_email: string | null
+          recipient_phone: string | null
+          scheduled_for: string
+          sent_at: string | null
+          status: string | null
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message: string
+          notification_type: string
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message?: string
+          notification_type?: string
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_queue_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
@@ -459,6 +545,42 @@ export type Database = {
           slug?: string | null
           timezone?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reminder_rules: {
+        Row: {
+          created_at: string | null
+          email_enabled: boolean | null
+          email_hours_before: number | null
+          second_reminder_enabled: boolean | null
+          second_reminder_hours_before: number | null
+          sms_enabled: boolean | null
+          sms_hours_before: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_enabled?: boolean | null
+          email_hours_before?: number | null
+          second_reminder_enabled?: boolean | null
+          second_reminder_hours_before?: number | null
+          sms_enabled?: boolean | null
+          sms_hours_before?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_enabled?: boolean | null
+          email_hours_before?: number | null
+          second_reminder_enabled?: boolean | null
+          second_reminder_hours_before?: number | null
+          sms_enabled?: boolean | null
+          sms_hours_before?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { DaisyAssistant } from "@/components/DaisyAssistant";
 import {
   Loader2,
   Copy,
@@ -387,6 +388,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </main>
+      
+      {/* Daisy Assistant */}
+      <DaisyAssistant />
     </div>
   );
 }
