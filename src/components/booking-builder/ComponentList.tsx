@@ -14,6 +14,7 @@ import {
 interface ComponentListProps {
   selectedElement: string | null;
   onSelectElement: (elementId: string) => void;
+  isMobile?: boolean;
 }
 
 const components = [
@@ -33,15 +34,17 @@ const presets = [
   { id: 'forest-green', label: 'Forest Green', colors: ['#22c55e', '#14532d'] },
 ];
 
-export function ComponentList({ selectedElement, onSelectElement }: ComponentListProps) {
+export function ComponentList({ selectedElement, onSelectElement, isMobile }: ComponentListProps) {
   return (
-    <div className="w-64 border-r border-border bg-background flex flex-col">
+    <div className={isMobile ? "flex flex-col" : "w-64 border-r border-border bg-background flex flex-col"}>
+      {!isMobile && (
       <div className="p-4 border-b border-border">
         <h2 className="font-semibold text-sm flex items-center gap-2">
           <Settings className="h-4 w-4" />
           Components
         </h2>
       </div>
+      )}
       
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-1">

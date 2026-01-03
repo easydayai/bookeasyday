@@ -11,12 +11,16 @@ interface InspectorPanelProps {
   selectedElement: string | null;
   config: BookingPageConfig;
   onUpdateConfig: (path: string, value: unknown) => void;
+  isMobile?: boolean;
 }
 
-export function InspectorPanel({ selectedElement, config, onUpdateConfig }: InspectorPanelProps) {
+export function InspectorPanel({ selectedElement, config, onUpdateConfig, isMobile }: InspectorPanelProps) {
   if (!selectedElement) {
     return (
-      <div className="w-72 border-l border-border bg-background flex items-center justify-center">
+      <div className={isMobile 
+        ? "flex items-center justify-center p-8" 
+        : "w-72 border-l border-border bg-background flex items-center justify-center"
+      }>
         <p className="text-sm text-muted-foreground text-center px-4">
           Click an element in the preview or select a component from the left panel
         </p>
@@ -390,10 +394,12 @@ export function InspectorPanel({ selectedElement, config, onUpdateConfig }: Insp
   };
 
   return (
-    <div className="w-72 border-l border-border bg-background flex flex-col">
-      <div className="p-4 border-b border-border">
-        <h2 className="font-semibold text-sm">{getTitle()}</h2>
-      </div>
+    <div className={isMobile ? "flex flex-col" : "w-72 border-l border-border bg-background flex flex-col"}>
+      {!isMobile && (
+        <div className="p-4 border-b border-border">
+          <h2 className="font-semibold text-sm">{getTitle()}</h2>
+        </div>
+      )}
       <ScrollArea className="flex-1 p-4">
         {getControls()}
       </ScrollArea>
