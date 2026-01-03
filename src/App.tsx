@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { DaisyProvider } from "@/contexts/DaisyContext";
+import { DaisyAssistant } from "@/components/DaisyAssistant";
 import { Layout } from "@/components/Layout";
 import { AuthGuard } from "@/components/AuthGuard";
 import EasyDayHome from "./pages/EasyDayHome";
@@ -49,54 +51,58 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ThemeProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              {/* Home page - CRITICAL: Redirect authenticated users to /dashboard */}
-              <Route 
-                path="/" 
-                element={
-                  <AuthGuard redirectAuthenticatedTo="/dashboard">
-                    <Layout><EasyDayHome /></Layout>
-                  </AuthGuard>
-                } 
-              />
-              
-              {/* Other public pages */}
-              <Route path="/solutions" element={<Layout><Solutions /></Layout>} />
-              <Route path="/demo" element={<Layout><Demo /></Layout>} />
-              <Route path="/contact" element={<Layout><EasyDayContact /></Layout>} />
-              <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
-              <Route path="/talk-to-daisy" element={<Layout><TalkToDaisy /></Layout>} />
-              <Route path="/affiliate" element={<Layout><Affiliate /></Layout>} />
-              <Route path="/affiliate-legal" element={<Layout><AffiliateLegal /></Layout>} />
-              <Route path="/policies" element={<Layout><Policies /></Layout>} />
-              <Route path="/manage-booking/:eventId" element={<Layout><ManageBooking /></Layout>} />
+            <DaisyProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                {/* Home page - CRITICAL: Redirect authenticated users to /dashboard */}
+                <Route 
+                  path="/" 
+                  element={
+                    <AuthGuard redirectAuthenticatedTo="/dashboard">
+                      <Layout><EasyDayHome /></Layout>
+                    </AuthGuard>
+                  } 
+                />
+                
+                {/* Other public pages */}
+                <Route path="/solutions" element={<Layout><Solutions /></Layout>} />
+                <Route path="/demo" element={<Layout><Demo /></Layout>} />
+                <Route path="/contact" element={<Layout><EasyDayContact /></Layout>} />
+                <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+                <Route path="/talk-to-daisy" element={<Layout><TalkToDaisy /></Layout>} />
+                <Route path="/affiliate" element={<Layout><Affiliate /></Layout>} />
+                <Route path="/affiliate-legal" element={<Layout><AffiliateLegal /></Layout>} />
+                <Route path="/policies" element={<Layout><Policies /></Layout>} />
+                <Route path="/manage-booking/:eventId" element={<Layout><ManageBooking /></Layout>} />
 
-              {/* Auth pages (no layout) */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/subscribe" element={<Subscribe />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/upgrade-success" element={<UpgradeSuccess />} />
+                {/* Auth pages (no layout) */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/subscribe" element={<Subscribe />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/upgrade-success" element={<UpgradeSuccess />} />
 
-              {/* Dashboard pages (no layout - custom header) */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/settings/profile" element={<ProfileSettings />} />
-              <Route path="/settings/availability" element={<AvailabilitySettings />} />
-              <Route path="/settings/appointment-types" element={<AppointmentTypesSettings />} />
-              <Route path="/settings/calendar-design" element={<CalendarDesignSettings />} />
-              <Route path="/dashboard/appointments" element={<AppointmentsPage />} />
-              <Route path="/calendar" element={<CalendarPage />} />
-              <Route path="/booking-builder" element={<BookingBuilder />} />
+                {/* Dashboard pages (no layout - custom header) */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/settings/profile" element={<ProfileSettings />} />
+                <Route path="/settings/availability" element={<AvailabilitySettings />} />
+                <Route path="/settings/appointment-types" element={<AppointmentTypesSettings />} />
+                <Route path="/settings/calendar-design" element={<CalendarDesignSettings />} />
+                <Route path="/dashboard/appointments" element={<AppointmentsPage />} />
+                <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/booking-builder" element={<BookingBuilder />} />
 
-              {/* Public booking */}
-              <Route path="/book/:slug" element={<BookingPage />} />
-              <Route path="/book/:slug/success" element={<BookingSuccess />} />
+                {/* Public booking */}
+                <Route path="/book/:slug" element={<BookingPage />} />
+                <Route path="/book/:slug/success" element={<BookingSuccess />} />
 
-              <Route path="*" element={<Layout><NotFound /></Layout>} />
-            </Routes>
+                <Route path="*" element={<Layout><NotFound /></Layout>} />
+              </Routes>
+
+              <DaisyAssistant />
+            </DaisyProvider>
           </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>
