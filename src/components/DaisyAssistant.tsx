@@ -182,28 +182,32 @@ export function DaisyAssistant() {
     }
   }, [isOpen, isAuthenticated, messages.length, addMessage, location.pathname]);
 
+  // Track last guided path to prevent duplicate guidance
+  const lastGuidedPathRef = useRef<string | null>(null);
+
   // Guide mode: provide page-specific help on route change
   useEffect(() => {
     if (isGuideMode && isOpen && isAuthenticated) {
       const guidance = PAGE_GUIDANCE[location.pathname];
-      if (guidance) {
-        // Only add guidance if last message isn't already guidance for this page
-        const lastMessage = messages[messages.length - 1];
-        if (!lastMessage || !lastMessage.content.includes(guidance.message.substring(0, 30))) {
-          addMessage({
-            role: "assistant",
-            content: guidance.message,
-            actions: guidance.actions.map(a => ({
-              type: "navigate" as const,
-              path: "",
-              label: a.label,
-            })),
-          });
-        }
+      if (guidance && lastGuidedPathRef.current !== location.pathname) {
+        lastGuidedPathRef.current = location.pathname;
+        addMessage({
+          role: "assistant",
+          content: guidance.message,
+          actions: guidance.actions.map(a => ({
+            type: "navigate" as const,
+            path: "",
+            label: a.label,
+          })),
+        });
       }
     }
-  }, [location.pathname, isGuideMode, isOpen, isAuthenticated]);
-
+    
+    // Reset tracking when guide mode is turned off
+    if (!isGuideMode) {
+      lastGuidedPathRef.current = null;
+    }
+  }, [location.pathname, isGuideMode, isOpen, isAuthenticated, addMessage]);
   const handleNavigate = useCallback(
     (path: string) => {
       // Handle destination_key or direct path
