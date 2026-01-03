@@ -127,8 +127,8 @@ export default function BookingPage() {
   if (!profile) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
-        <h1 className="text-2xl font-bold mb-4">Provider not found</h1>
-        <Button asChild>
+        <h1 className="text-xl sm:text-2xl font-bold mb-4">Provider not found</h1>
+        <Button asChild className="min-h-[44px]">
           <Link to="/">Go Home</Link>
         </Button>
       </div>
@@ -137,18 +137,18 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border py-4">
-        <div className="container mx-auto px-4 flex items-center gap-2">
-          <LogoInsignia className="h-8 w-8" />
-          <span className="font-semibold">{profile.business_name || profile.full_name}</span>
+      <header className="border-b border-border py-3 sm:py-4">
+        <div className="container mx-auto px-4 sm:px-6 flex items-center gap-2">
+          <LogoInsignia className="h-7 w-7 sm:h-8 sm:w-8" />
+          <span className="font-semibold text-sm sm:text-base truncate">{profile.business_name || profile.full_name}</span>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-2xl">
         {!selectedType ? (
           <div>
-            <h1 className="text-2xl font-bold mb-2">Book an Appointment</h1>
-            <p className="text-muted-foreground mb-6">Select a service to get started</p>
+            <h1 className="text-xl sm:text-2xl font-bold mb-2">Book an Appointment</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6">Select a service to get started</p>
 
             {types.length === 0 ? (
               <Card>
@@ -165,14 +165,14 @@ export default function BookingPage() {
                     onClick={() => setSelectedType(type)}
                   >
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="min-w-0">
                           <h3 className="font-medium">{type.name}</h3>
                           {type.description && (
-                            <p className="text-sm text-muted-foreground">{type.description}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{type.description}</p>
                           )}
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground flex-shrink-0">
                           <span className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
                             {type.duration_minutes} min
@@ -191,21 +191,21 @@ export default function BookingPage() {
           </div>
         ) : (
           <div>
-            <Button variant="ghost" className="mb-4" onClick={() => setSelectedType(null)}>
+            <Button variant="ghost" className="mb-4 min-h-[44px] -ml-2" onClick={() => setSelectedType(null)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to services
             </Button>
 
             <Card>
-              <CardHeader>
-                <CardTitle>{selectedType.name}</CardTitle>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg sm:text-xl">{selectedType.name}</CardTitle>
                 <CardDescription>
                   {selectedType.duration_minutes} min • {selectedType.location_type === "phone" ? "Phone Call" : selectedType.location_type === "google_meet" ? "Video Call" : "In Person"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="date">Date</Label>
                       <Input
@@ -215,6 +215,7 @@ export default function BookingPage() {
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                         min={new Date().toISOString().split("T")[0]}
                         required
+                        className="min-h-[44px]"
                       />
                     </div>
                     <div className="space-y-2">
@@ -225,6 +226,7 @@ export default function BookingPage() {
                         value={formData.time}
                         onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                         required
+                        className="min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -235,6 +237,7 @@ export default function BookingPage() {
                       value={formData.customer_name}
                       onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -245,6 +248,7 @@ export default function BookingPage() {
                       value={formData.customer_email}
                       onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -254,6 +258,7 @@ export default function BookingPage() {
                       type="tel"
                       value={formData.customer_phone}
                       onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
+                      className="min-h-[44px]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -263,9 +268,10 @@ export default function BookingPage() {
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       rows={3}
+                      className="min-h-[88px]"
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  <Button type="submit" className="w-full min-h-[48px] text-base" disabled={isSubmitting}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Calendar className="mr-2 h-4 w-4" />
                     Book Appointment

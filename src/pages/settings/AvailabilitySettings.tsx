@@ -199,12 +199,12 @@ export default function AvailabilitySettings() {
           ) : (
             <div className="space-y-3">
               {rules.map((rule) => (
-                <div key={rule.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
+                <div key={rule.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 rounded-lg bg-secondary/50">
                   <Select
                     value={rule.day_of_week.toString()}
                     onValueChange={(v) => updateRule(rule.id, "day_of_week", parseInt(v))}
                   >
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-full sm:w-32 min-h-[44px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -216,59 +216,61 @@ export default function AvailabilitySettings() {
                     </SelectContent>
                   </Select>
 
-                  <Select
-                    value={rule.start_time}
-                    onValueChange={(v) => updateRule(rule.id, "start_time", v)}
-                  >
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TIMES.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-2 flex-1">
+                    <Select
+                      value={rule.start_time}
+                      onValueChange={(v) => updateRule(rule.id, "start_time", v)}
+                    >
+                      <SelectTrigger className="flex-1 sm:w-24 min-h-[44px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIMES.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-                  <span className="text-muted-foreground">to</span>
+                    <span className="text-muted-foreground text-sm">to</span>
 
-                  <Select
-                    value={rule.end_time}
-                    onValueChange={(v) => updateRule(rule.id, "end_time", v)}
-                  >
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TIMES.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={rule.end_time}
+                      onValueChange={(v) => updateRule(rule.id, "end_time", v)}
+                    >
+                      <SelectTrigger className="flex-1 sm:w-24 min-h-[44px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIMES.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeRule(rule.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeRule(rule.id)}
+                      className="text-destructive hover:text-destructive min-h-[44px] min-w-[44px]"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="flex items-center gap-3 pt-4 border-t border-border">
-            <Button variant="outline" onClick={addRule}>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4 border-t border-border">
+            <Button variant="outline" onClick={addRule} className="min-h-[44px]">
               <Plus className="h-4 w-4 mr-2" />
               Add Hours
             </Button>
-            <Button onClick={saveRules} disabled={isSaving}>
+            <Button onClick={saveRules} disabled={isSaving} className="min-h-[44px]">
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Changes
             </Button>

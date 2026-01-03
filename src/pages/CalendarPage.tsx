@@ -312,9 +312,9 @@ export default function CalendarPage() {
   return (
     <div className={`min-h-screen ${isDark ? "bg-[#070A12] text-white" : "bg-gray-50 text-gray-900"}`}>
       <div className="flex min-h-screen">
-        {/* Sidebar */}
+        {/* Sidebar - hidden on mobile */}
         <aside
-          className={`border-r transition-all duration-200 ${
+          className={`hidden md:block border-r transition-all duration-200 ${
             sidebarCollapsed ? "w-[72px]" : "w-[240px]"
           } ${isDark ? "border-white/10 bg-[#0A0F1F]" : "border-gray-200 bg-white"}`}
         >
@@ -351,19 +351,26 @@ export default function CalendarPage() {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col min-w-0">
           {/* Top bar */}
-          <div className={`flex items-center justify-between px-6 py-5 border-b ${isDark ? "border-white/10 bg-[#070A12]" : "border-gray-200 bg-white"}`}>
-            <div>
-              <h1 className="text-lg font-semibold">Calendar</h1>
-              <p className={isDark ? "text-white/60 text-sm" : "text-gray-500 text-sm"}>Manage your appointments</p>
+          <div className={`flex items-center justify-between px-4 sm:px-6 py-3 sm:py-5 border-b ${isDark ? "border-white/10 bg-[#070A12]" : "border-gray-200 bg-white"}`}>
+            <div className="flex items-center gap-3">
+              {/* Mobile logo */}
+              <div className={`md:hidden h-8 w-8 rounded-xl flex items-center justify-center ${isDark ? "bg-violet-600/20" : "bg-violet-100"}`}>
+                <CalendarIcon className="h-4 w-4 text-violet-500" />
+              </div>
+              <div>
+                <h1 className="text-base sm:text-lg font-semibold">Calendar</h1>
+                <p className={`hidden sm:block ${isDark ? "text-white/60 text-sm" : "text-gray-500 text-sm"}`}>Manage your appointments</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            {/* Desktop actions */}
+            <div className="hidden sm:flex items-center gap-2">
               <Button
                 variant="outline"
                 size="icon"
                 onClick={toggleTheme}
-                className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
+                className={`min-h-[44px] min-w-[44px] ${isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
               >
                 {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
@@ -371,7 +378,7 @@ export default function CalendarPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setSidebarCollapsed((v) => !v)}
-                className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
+                className={`hidden lg:flex ${isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
               >
                 <PanelLeftClose className="h-4 w-4 mr-2" />
                 {sidebarCollapsed ? "Show" : "Hide"}
@@ -380,7 +387,7 @@ export default function CalendarPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setPanelsCollapsed((v) => !v)}
-                className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
+                className={`hidden xl:flex ${isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
               >
                 <PanelRightClose className="h-4 w-4 mr-2" />
                 Panels
@@ -395,35 +402,54 @@ export default function CalendarPage() {
                 Sign Out
               </Button>
             </div>
+            {/* Mobile actions */}
+            <div className="flex sm:hidden items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="min-h-[44px] min-w-[44px]"
+              >
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSignOut}
+                className="min-h-[44px] min-w-[44px]"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Body grid */}
-          <div className="flex-1 p-6 overflow-auto">
+          <div className="flex-1 p-3 sm:p-6 overflow-auto">
             <div
-              className={`grid gap-6 ${
-                panelsCollapsed ? "grid-cols-1" : "grid-cols-1 xl:grid-cols-[1fr_360px]"
+              className={`flex flex-col xl:grid gap-4 sm:gap-6 ${
+                panelsCollapsed ? "" : "xl:grid-cols-[1fr_360px]"
               }`}
             >
               {/* Calendar card */}
-              <section className={`rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
+              <section className={`rounded-2xl border p-3 sm:p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
+                <div className="flex items-center justify-between mb-4 gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       onClick={prevMonth}
-                      className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
+                      className={`min-h-[44px] min-w-[44px] flex-shrink-0 ${isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <h2 className="text-xl font-semibold min-w-[180px] text-center">
+                    <h2 className="text-base sm:text-xl font-semibold text-center flex-1 truncate">
                       {monthTitle}
                     </h2>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       onClick={nextMonth}
-                      className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
+                      className={`min-h-[44px] min-w-[44px] flex-shrink-0 ${isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -436,23 +462,24 @@ export default function CalendarPage() {
                     }}
                     variant="outline"
                     size="sm"
-                    className={isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}
+                    className={`min-h-[44px] flex-shrink-0 ${isDark ? "border-white/10 bg-white/5 text-white hover:bg-white/10" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
                   >
                     Today
                   </Button>
                 </div>
 
                 {/* Weekday labels */}
-                <div className={`grid grid-cols-7 gap-2 text-xs mb-2 ${isDark ? "text-white/60" : "text-gray-500"}`}>
+                <div className={`grid grid-cols-7 gap-1 sm:gap-2 text-[10px] sm:text-xs mb-2 ${isDark ? "text-white/60" : "text-gray-500"}`}>
                   {Array.from({ length: 7 }).map((_, i) => (
-                    <div key={i} className="px-2 py-1 text-center font-medium">
-                      {dayLabel(i).toUpperCase()}
+                    <div key={i} className="py-1 text-center font-medium">
+                      <span className="hidden sm:inline">{dayLabel(i).toUpperCase()}</span>
+                      <span className="sm:hidden">{dayLabel(i).charAt(0)}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Calendar grid */}
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-7 gap-1 sm:gap-2">
                   {cells.map((d) => {
                     const iso = toISODate(d);
                     const inMonth = d.getMonth() === cursorMonth;
@@ -465,7 +492,7 @@ export default function CalendarPage() {
                       <button
                         key={iso}
                         onClick={() => handleDateClick(iso)}
-                        className={`min-h-[92px] rounded-xl border p-2 text-left transition cursor-pointer ${
+                        className={`min-h-[44px] sm:min-h-[92px] rounded-lg sm:rounded-xl border p-1 sm:p-2 text-left transition cursor-pointer ${
                           !inMonth ? "opacity-40" : ""
                         } ${
                           isSelected 
@@ -476,17 +503,18 @@ export default function CalendarPage() {
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className={`text-sm font-semibold ${
+                          <span className={`text-xs sm:text-sm font-semibold ${
                             isToday ? "text-violet-500" : ""
                           }`}>
                             {d.getDate()}
                           </span>
                           {activeBookings.length > 0 && (
-                            <span className="h-2 w-2 rounded-full bg-violet-500" />
+                            <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-violet-500" />
                           )}
                         </div>
                         
-                        <div className="mt-2 space-y-1">
+                        {/* Hide event chips on mobile, just show dot */}
+                        <div className="hidden sm:block mt-2 space-y-1">
                           {activeBookings.slice(0, 2).map((booking) => (
                             <div
                               key={booking.id}
@@ -521,84 +549,82 @@ export default function CalendarPage() {
                 )}
               </section>
 
-              {/* Right panels */}
-              {!panelsCollapsed && (
-                <aside className="space-y-6">
-                  {/* Upcoming Events for selected date */}
-                  <section className={`rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
-                    <h3 className="text-lg font-semibold mb-3">
-                      Appointments on {selectedDateISO}
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedBookings.length === 0 ? (
-                        <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>
-                          No appointments on this date.
-                        </p>
-                      ) : (
-                        selectedBookings.map((booking) => {
-                          const appointmentType = booking.appointment_type_id 
-                            ? appointmentTypes.get(booking.appointment_type_id)
-                            : null;
-                          const isCanceled = booking.status === "canceled";
-                          
-                          return (
-                            <button
-                              key={booking.id}
-                              onClick={() => handleBookingClick(booking)}
-                              className={`w-full text-left rounded-xl border px-4 py-3 transition ${
-                                isCanceled ? "opacity-50" : ""
-                              } ${isDark ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}
-                            >
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="font-semibold">{booking.customer_name}</span>
-                                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                  isCanceled 
-                                    ? "bg-red-500/20 text-red-500" 
-                                    : "bg-green-500/20 text-green-600"
-                                }`}>
-                                  {booking.status}
-                                </span>
-                              </div>
-                              {appointmentType && (
-                                <p className={`text-xs mb-1 ${isDark ? "text-white/60" : "text-gray-500"}`}>
-                                  {appointmentType.name}
-                                </p>
-                              )}
-                              <p className={`text-sm ${isDark ? "text-white/80" : "text-gray-700"}`}>
-                                {formatTimeInTimezone(booking.start_time, userTimezone)} – {formatTimeInTimezone(booking.end_time, userTimezone)}
+              {/* Right panels - always show on mobile as appointments list */}
+              <aside className={`space-y-4 sm:space-y-6 ${panelsCollapsed ? "hidden xl:block" : ""}`}>
+                {/* Upcoming Events for selected date */}
+                <section className={`rounded-2xl border p-4 sm:p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
+                  <h3 className="text-base sm:text-lg font-semibold mb-3">
+                    Appointments on {selectedDateISO}
+                  </h3>
+                  <div className="space-y-2 sm:space-y-3">
+                    {selectedBookings.length === 0 ? (
+                      <p className={`text-sm ${isDark ? "text-white/60" : "text-gray-500"}`}>
+                        No appointments on this date.
+                      </p>
+                    ) : (
+                      selectedBookings.map((booking) => {
+                        const appointmentType = booking.appointment_type_id 
+                          ? appointmentTypes.get(booking.appointment_type_id)
+                          : null;
+                        const isCanceled = booking.status === "canceled";
+                        
+                        return (
+                          <button
+                            key={booking.id}
+                            onClick={() => handleBookingClick(booking)}
+                            className={`w-full text-left rounded-xl border px-3 sm:px-4 py-3 transition min-h-[56px] ${
+                              isCanceled ? "opacity-50" : ""
+                            } ${isDark ? "border-white/10 bg-white/5 hover:bg-white/10" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-semibold truncate mr-2">{booking.customer_name}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                isCanceled 
+                                  ? "bg-red-500/20 text-red-500" 
+                                  : "bg-green-500/20 text-green-600"
+                              }`}>
+                                {booking.status}
+                              </span>
+                            </div>
+                            {appointmentType && (
+                              <p className={`text-xs mb-1 ${isDark ? "text-white/60" : "text-gray-500"}`}>
+                                {appointmentType.name}
                               </p>
-                            </button>
-                          );
-                        })
-                      )}
-                    </div>
-                  </section>
+                            )}
+                            <p className={`text-sm ${isDark ? "text-white/80" : "text-gray-700"}`}>
+                              {formatTimeInTimezone(booking.start_time, userTimezone)} – {formatTimeInTimezone(booking.end_time, userTimezone)}
+                            </p>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </section>
 
-                  {/* Tasks placeholder */}
-                  <section className={`rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
-                    <h3 className="text-lg font-semibold mb-3">Tasks</h3>
-                    <div className={`space-y-2 text-sm ${isDark ? "text-white/80" : "text-gray-700"}`}>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="accent-violet-500" defaultChecked />
-                        <span>Follow up with client</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="accent-violet-500" />
-                        <span>Update availability</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="accent-violet-500" />
-                        <span>Review bookings</span>
-                      </label>
-                    </div>
-                  </section>
-                </aside>
-              )}
+                {/* Tasks placeholder - hide on mobile */}
+                <section className={`hidden sm:block rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
+                  <h3 className="text-lg font-semibold mb-3">Tasks</h3>
+                  <div className={`space-y-2 text-sm ${isDark ? "text-white/80" : "text-gray-700"}`}>
+                    <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
+                      <input type="checkbox" className="accent-violet-500 h-5 w-5" defaultChecked />
+                      <span>Follow up with client</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
+                      <input type="checkbox" className="accent-violet-500 h-5 w-5" />
+                      <span>Update availability</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
+                      <input type="checkbox" className="accent-violet-500 h-5 w-5" />
+                      <span>Review bookings</span>
+                    </label>
+                  </div>
+                </section>
+              </aside>
             </div>
 
-            {/* Bottom overview */}
+            {/* Bottom overview - hide on mobile */}
             {!panelsCollapsed && (
-              <section className={`mt-6 rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
+              <section className={`hidden sm:block mt-6 rounded-2xl border p-5 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"}`}>
                 <h3 className="text-lg font-semibold mb-4">Monthly Overview</h3>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className={`rounded-xl border p-4 ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
@@ -626,9 +652,9 @@ export default function CalendarPage() {
 
       {/* Booking Details Modal */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className={`max-w-lg ${isDark ? "bg-[#0A0F1F] border-white/10 text-white" : "bg-white border-gray-200 text-gray-900"}`}>
+        <DialogContent className={`w-full max-w-lg sm:max-w-lg h-[90vh] sm:h-auto overflow-y-auto ${isDark ? "bg-[#0A0F1F] border-white/10 text-white" : "bg-white border-gray-200 text-gray-900"}`}>
           <DialogHeader>
-            <DialogTitle className="text-xl">Booking Details</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">Booking Details</DialogTitle>
             <DialogDescription className={isDark ? "text-white/60" : "text-gray-500"}>
               View and manage this appointment
             </DialogDescription>

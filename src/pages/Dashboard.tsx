@@ -153,12 +153,13 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <LogoInsignia className="h-8 w-8" />
-            <span className="text-xl font-bold">Easy Day AI</span>
+            <LogoInsignia className="h-7 w-7 sm:h-8 sm:w-8" />
+            <span className="text-lg sm:text-xl font-bold">Easy Day AI</span>
           </Link>
-          <div className="flex items-center gap-2">
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-2">
             <ThemeToggle />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/settings/profile">
@@ -170,16 +171,28 @@ export default function Dashboard() {
               Sign Out
             </Button>
           </div>
+          {/* Mobile nav */}
+          <div className="flex sm:hidden items-center gap-1">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/settings/profile">
+                <Settings className="h-5 w-5" />
+              </Link>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <ExternalLink className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Welcome back{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}!</h1>
-          <p className="text-muted-foreground">Here's an overview of your Easy Day AI account.</p>
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold">Welcome back{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}!</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Here's an overview of your Easy Day AI account.</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {/* Credits Card */}
           <Card className="border-border/50 shadow-card">
             <CardHeader className="pb-2">
@@ -189,7 +202,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{credits}</div>
+              <div className="text-3xl sm:text-4xl font-bold">{credits}</div>
               <p className="text-sm text-muted-foreground mt-1">
                 {isPaidPlan ? "Refills monthly with your subscription" : "Upgrade for more credits"}
               </p>
@@ -205,7 +218,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${planInfo.color}`}>{planInfo.name}</div>
+              <div className={`text-xl sm:text-2xl font-bold ${planInfo.color}`}>{planInfo.name}</div>
               {isPaidPlan ? (
                 <Button 
                   variant="link" 
@@ -225,7 +238,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Booking Link Card */}
-          <Card className="border-border/50 shadow-card">
+          <Card className="border-border/50 shadow-card sm:col-span-2 lg:col-span-1">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
@@ -235,12 +248,13 @@ export default function Dashboard() {
             <CardContent>
               {profile?.slug ? (
                 <>
-                  <div className="flex items-center gap-2">
-                    <code className="text-sm bg-muted px-2 py-1 rounded truncate flex-1">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <code className="text-sm bg-muted px-2 py-2 sm:py-1 rounded truncate flex-1 text-center sm:text-left">
                       /book/{profile.slug}
                     </code>
-                    <Button variant="outline" size="icon" onClick={copyBookingLink}>
-                      <Copy className="h-4 w-4" />
+                    <Button variant="outline" onClick={copyBookingLink} className="w-full sm:w-auto min-h-[44px]">
+                      <Copy className="h-4 w-4 mr-2 sm:mr-0" />
+                      <span className="sm:hidden">Copy Link</span>
                     </Button>
                   </div>
                   <Button variant="link" className="h-auto p-0 text-sm mt-2" asChild>
@@ -258,37 +272,37 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-4 mt-8">
-          <Button variant="outline" className="h-auto py-4 justify-start" asChild>
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-6 sm:mt-8">
+          <Button variant="outline" className="h-auto py-4 justify-start min-h-[56px]" asChild>
             <Link to="/settings/profile" className="flex items-center gap-3">
-              <User className="h-5 w-5 text-primary" />
+              <User className="h-5 w-5 text-primary flex-shrink-0" />
               <div className="text-left">
                 <div className="font-medium">Edit Profile</div>
                 <div className="text-xs text-muted-foreground">Name, business info</div>
               </div>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 justify-start" asChild>
+          <Button variant="outline" className="h-auto py-4 justify-start min-h-[56px]" asChild>
             <Link to="/settings/availability" className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-primary" />
+              <Clock className="h-5 w-5 text-primary flex-shrink-0" />
               <div className="text-left">
                 <div className="font-medium">Set Availability</div>
                 <div className="text-xs text-muted-foreground">Working hours</div>
               </div>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 justify-start" asChild>
+          <Button variant="outline" className="h-auto py-4 justify-start min-h-[56px]" asChild>
             <Link to="/settings/appointment-types" className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-primary" />
+              <Calendar className="h-5 w-5 text-primary flex-shrink-0" />
               <div className="text-left">
                 <div className="font-medium">Appointment Types</div>
                 <div className="text-xs text-muted-foreground">Services you offer</div>
               </div>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4 justify-start" asChild>
+          <Button variant="outline" className="h-auto py-4 justify-start min-h-[56px]" asChild>
             <Link to="/calendar" className="flex items-center gap-3">
-              <CalendarIcon className="h-5 w-5 text-primary" />
+              <CalendarIcon className="h-5 w-5 text-primary flex-shrink-0" />
               <div className="text-left">
                 <div className="font-medium">Calendar</div>
                 <div className="text-xs text-muted-foreground">View & manage</div>
@@ -298,9 +312,9 @@ export default function Dashboard() {
         </div>
 
         {/* Upcoming Bookings */}
-        <Card className="mt-8 border-border/50 shadow-card">
-          <CardHeader>
-            <CardTitle>Upcoming Appointments</CardTitle>
+        <Card className="mt-6 sm:mt-8 border-border/50 shadow-card">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl">Upcoming Appointments</CardTitle>
             <CardDescription>Your next scheduled bookings</CardDescription>
           </CardHeader>
           <CardContent>
@@ -315,16 +329,16 @@ export default function Dashboard() {
                 <p className="text-sm">Share your booking link to get started</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {upcomingBookings.map((booking) => (
-                  <div key={booking.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
-                    <div>
-                      <div className="font-medium">{booking.customer_name}</div>
-                      <div className="text-sm text-muted-foreground">
+                  <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/50 gap-2 sm:gap-4">
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{booking.customer_name}</div>
+                      <div className="text-sm text-muted-foreground truncate">
                         {booking.appointment_types?.name || "Appointment"} • {booking.customer_email}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right flex-shrink-0">
                       <div className="font-medium">
                         {new Date(booking.start_time).toLocaleDateString()}
                       </div>
@@ -334,7 +348,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full" asChild>
+                <Button variant="outline" className="w-full min-h-[44px]" asChild>
                   <Link to="/calendar">View All Appointments</Link>
                 </Button>
               </div>
