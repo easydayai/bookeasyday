@@ -19,11 +19,13 @@ import {
   Compass,
   Mic,
   MicOff,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDaisy, getRouteFromKey } from "@/contexts/DaisyContext";
 import { useSpeechToText } from "@/hooks/use-speech-to-text";
 import { cn } from "@/lib/utils";
+import type { PatchOperation } from "@/lib/json-patch";
 
 type QuickAction = {
   label: string;
@@ -120,12 +122,16 @@ export function DaisyAssistant() {
     setPendingNavigation,
     workingConfig,
     updateWorkingConfig,
+    pageModel,
+    applyPagePatches,
+    selectedNode,
   } = useDaisy();
 
   const { isListening, isSupported, transcript, startListening, stopListening } = useSpeechToText();
 
   const isAuthenticated = !!user;
   const isOpen = mode !== "minimized";
+  const isPatchMode = location.pathname === "/booking-builder" && pageModel !== null;
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -251,6 +257,23 @@ export function DaisyAssistant() {
     setIsLoading(true);
 
     try {
+      // Build request body based on mode
+      const requestBody: Record<string, unknown> = {
+        messages: [...messages, { role: "user", content: messageText.trim() }].map(m => ({
+          role: m.role,
+          content: m.content,
+        })),
+        isAuthenticated,
+        currentPage: location.pathname,
+      };
+
+      // Add patch mode data if on booking builder with pageModel
+      if (isPatchMode) {
+        requestBody.mode = "patchEditor";
+        requestBody.pageModel = pageModel;
+        requestBody.selectedNode = selectedNode;
+      }
+
       const resp = await fetch(DAISY_URL, {
         method: "POST",
         headers: {
@@ -259,14 +282,7 @@ export function DaisyAssistant() {
             Authorization: `Bearer ${session.access_token}`,
           }),
         },
-        body: JSON.stringify({
-          messages: [...messages, { role: "user", content: messageText.trim() }].map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
-          isAuthenticated,
-          currentPage: location.pathname,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!resp.ok) {
@@ -284,6 +300,22 @@ export function DaisyAssistant() {
       }
 
       const data = await resp.json();
+
+      // Handle patch mode response
+      if (data.mode === "patchEditor" && data.patches) {
+        const patches = data.patches as PatchOperation[];
+        if (patches.length > 0) {
+          const success = applyPagePatches(patches);
+          if (!success) {
+            console.error("Failed to apply patches:", patches);
+          }
+        }
+        addMessage({
+          role: "assistant",
+          content: data.assistantText || "Done!",
+        });
+        return;
+      }
 
       // Check for auto-navigation
       if (data.actions && data.actions.length > 0) {

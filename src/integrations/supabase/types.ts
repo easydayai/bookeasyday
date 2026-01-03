@@ -140,6 +140,7 @@ export type Database = {
           is_active: boolean | null
           location_type: string | null
           name: string
+          price: number | null
           user_id: string
         }
         Insert: {
@@ -150,6 +151,7 @@ export type Database = {
           is_active?: boolean | null
           location_type?: string | null
           name: string
+          price?: number | null
           user_id: string
         }
         Update: {
@@ -160,6 +162,7 @@ export type Database = {
           is_active?: boolean | null
           location_type?: string | null
           name?: string
+          price?: number | null
           user_id?: string
         }
         Relationships: []

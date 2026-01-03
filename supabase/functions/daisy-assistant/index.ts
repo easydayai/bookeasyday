@@ -1066,13 +1066,209 @@ async function chargeCredits(
   return true;
 }
 
+// JSON Patch editor mode system prompt
+const PATCH_EDITOR_SYSTEM_PROMPT = `You are Daisy, the live booking-page editor inside Easy Day AI.
+
+You control a booking page represented as a JSON object called pageModel.
+
+The UI will update instantly when you return JSON Patch operations (RFC 6902).
+
+GOAL:
+- Make changes requested by the user in plain English.
+- Apply edits live using minimal JSON Patch operations.
+- Ask at most ONE short question if required info is missing.
+- Never require a page refresh; every change must be expressed as patches.
+
+INPUTS YOU RECEIVE EACH TURN:
+- userMessage: what the user said
+- pageModel: current page JSON
+- selectedNode: optional object describing what the user has selected in the preview (e.g. a service card)
+
+OUTPUT FORMAT (MUST FOLLOW EXACTLY):
+Return valid JSON with two keys:
+1) "assistantText": a short friendly sentence describing what you changed or what you need.
+2) "patches": an array of JSON Patch ops. If asking a question, patches should be [].
+
+PATCH RULES:
+- Use only: add, remove, replace, move, copy, test
+- Use JSON Pointer paths like /services/0/price or /brand/accent
+- Make the smallest changes possible (edit individual fields, not whole objects)
+- If the user refers to "this" or "that", use selectedNode to target the correct item.
+- If a path does not exist, add it before replacing.
+- Do not invent business details or policies; ask if necessary.
+
+PAGE MODEL STRUCTURE:
+{
+  "brand": { "primary": "#hex", "accent": "#hex", "background": "#hex", "text": "#hex", "radius": number, "font": string },
+  "hero": { "headline": string, "tagline": string, "align": "left"|"center"|"right" },
+  "cover": { "style": "none"|"gradient"|"image", "imageUrl": string|null, "overlay": number },
+  "layout": { "maxWidth": number, "cardStyle": "flat"|"glass"|"shadow", "spacing": "compact"|"comfortable"|"spacious" },
+  "buttons": { "style": "filled"|"outline", "shadow": boolean },
+  "logo": { "show": boolean, "url": string },
+  "services": [{ "id": string, "name": string, "durationMin": number, "price": number|null, "description": string }]
+}
+
+EXAMPLES:
+
+User: "Make it purple and change the headline."
+Output:
+{
+  "assistantText": "Done — I updated your accent color and headline.",
+  "patches": [
+    {"op":"replace","path":"/brand/accent","value":"#7C3AED"},
+    {"op":"replace","path":"/hero/headline","value":"Book in seconds"}
+  ]
+}
+
+User: "Add a new service for Rekeying, 45 minutes, $120."
+Output:
+{
+  "assistantText": "Added a Rekeying service. Want that to require payment upfront?",
+  "patches": [
+    {"op":"add","path":"/services/-","value":{
+      "id":"svc_rekeying",
+      "name":"Rekeying",
+      "durationMin":45,
+      "price":120,
+      "description":""
+    }}
+  ]
+}
+
+User: "Change the price of this to $99" (with selectedNode pointing to services[0])
+Output:
+{
+  "assistantText": "Updated the price to $99.",
+  "patches": [
+    {"op":"replace","path":"/services/0/price","value":99}
+  ]
+}
+
+User: "Make it darker"
+Output:
+{
+  "assistantText": "Darkened the background. How's that look?",
+  "patches": [
+    {"op":"replace","path":"/brand/background","value":"#0a0a0a"},
+    {"op":"replace","path":"/brand/text","value":"#fafafa"}
+  ]
+}
+
+Remember: Always respond with valid JSON containing "assistantText" and "patches" keys only.`;
+
+// Handle JSON Patch editor mode
+async function handlePatchEditorMode(
+  messages: Array<{ role: string; content: string }>,
+  // deno-lint-ignore no-explicit-any
+  pageModel: any,
+  // deno-lint-ignore no-explicit-any
+  selectedNode: any,
+  userId: string | null,
+  // deno-lint-ignore no-explicit-any
+  userProfile: Record<string, any> | null,
+  apiKey: string,
+  // deno-lint-ignore no-explicit-any
+  supabase: any
+): Promise<Response> {
+  const lastUserMessage = messages.filter(m => m.role === "user").pop()?.content || "";
+  
+  // Build context for the model
+  const contextMessage = `Current pageModel:
+${JSON.stringify(pageModel, null, 2)}
+
+${selectedNode ? `Selected element: ${JSON.stringify(selectedNode)}` : "No element selected."}
+
+User says: "${lastUserMessage}"`;
+
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: PATCH_EDITOR_SYSTEM_PROMPT },
+          ...messages.slice(0, -1), // Previous messages for context
+          { role: "user", content: contextMessage },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI gateway error in patch mode:", response.status, errorText);
+      return new Response(JSON.stringify({ 
+        assistantText: "Oops! Something went wrong. Try again?",
+        patches: [],
+        error: "AI gateway error"
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    
+    // Parse the JSON response
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      console.error("Failed to parse AI response as JSON:", content);
+      return new Response(JSON.stringify({
+        assistantText: content || "I understood your request but had trouble formatting the response.",
+        patches: [],
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate response structure
+    const assistantText = parsed.assistantText || "Done!";
+    const patches = Array.isArray(parsed.patches) ? parsed.patches : [];
+
+    // If patches include service changes and user is authenticated, sync to database
+    if (patches.length > 0 && userId) {
+      const servicePatches = patches.filter((p: { path: string }) => p.path.startsWith("/services"));
+      if (servicePatches.length > 0) {
+        console.log("Service patches detected, will sync on save:", servicePatches);
+        // Note: Actual DB sync happens when user saves/publishes
+      }
+    }
+
+    return new Response(JSON.stringify({
+      assistantText,
+      patches,
+      mode: "patchEditor",
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+  } catch (error) {
+    console.error("Patch editor error:", error);
+    return new Response(JSON.stringify({
+      assistantText: "Something went wrong. Please try again!",
+      patches: [],
+      error: error instanceof Error ? error.message : "Unknown error",
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, isAuthenticated, currentPage } = await req.json();
+    const { messages, isAuthenticated, currentPage, mode, pageModel, selectedNode } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -1118,6 +1314,19 @@ serve(async (req) => {
     const knowledgeContext = knowledge?.map((k: { topic: string; content: string }) => 
       `[${k.topic.toUpperCase()}]: ${k.content}`
     ).join("\n\n") || "No company knowledge configured yet.";
+
+    // Check if this is JSON Patch editor mode
+    if (mode === "patchEditor" && pageModel) {
+      return await handlePatchEditorMode(
+        messages, 
+        pageModel, 
+        selectedNode, 
+        userId, 
+        userProfile, 
+        LOVABLE_API_KEY, 
+        adminSupabase
+      );
+    }
 
     // Build system prompt based on mode
     const publicPrompt = `You are Daisy, the friendly AI assistant for Easy Day AI. You're warm, upbeat, confident, and genuinely helpful.

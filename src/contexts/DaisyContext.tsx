@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import { PageModel } from "@/types/pageModel";
+import { PatchOperation, applyPatches, validatePatches } from "@/lib/json-patch";
 
 export type DaisyMode = "minimized" | "docked" | "fullscreen";
 
@@ -14,6 +16,7 @@ export type DaisyAction =
       label: string;
       message: string;
     };
+
 export type DaisyMessage = {
   id: string;
   role: "user" | "assistant";
@@ -31,6 +34,13 @@ export type WorkingConfig = {
   presetId?: string;
 };
 
+// Selected element in the booking builder preview
+export type SelectedNode = {
+  type: 'service' | 'brand' | 'hero' | 'cover' | 'layout' | 'buttons' | 'logo';
+  id?: string;
+  index?: number;
+};
+
 type DaisyState = {
   mode: DaisyMode;
   setMode: (mode: DaisyMode) => void;
@@ -44,6 +54,12 @@ type DaisyState = {
   workingConfig: WorkingConfig;
   updateWorkingConfig: (updates: Partial<WorkingConfig>) => void;
   clearWorkingConfig: () => void;
+  // Page Model for JSON Patch editing
+  pageModel: PageModel | null;
+  setPageModel: (model: PageModel | null) => void;
+  applyPagePatches: (patches: PatchOperation[]) => boolean;
+  selectedNode: SelectedNode | null;
+  setSelectedNode: (node: SelectedNode | null) => void;
 };
 
 const DaisyContext = createContext<DaisyState | null>(null);
@@ -54,6 +70,8 @@ export function DaisyProvider({ children }: { children: React.ReactNode }) {
   const [isGuideMode, setGuideMode] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [workingConfig, setWorkingConfig] = useState<WorkingConfig>({});
+  const [pageModel, setPageModel] = useState<PageModel | null>(null);
+  const [selectedNode, setSelectedNode] = useState<SelectedNode | null>(null);
 
   const addMessage = useCallback((message: Omit<DaisyMessage, "id" | "timestamp">) => {
     setMessages(prev => [
@@ -78,6 +96,22 @@ export function DaisyProvider({ children }: { children: React.ReactNode }) {
     setWorkingConfig({});
   }, []);
 
+  const applyPagePatches = useCallback((patches: PatchOperation[]): boolean => {
+    if (!pageModel) return false;
+    if (!validatePatches(patches)) {
+      console.error("Invalid patches:", patches);
+      return false;
+    }
+    try {
+      const newModel = applyPatches(pageModel, patches);
+      setPageModel(newModel);
+      return true;
+    } catch (error) {
+      console.error("Failed to apply patches:", error);
+      return false;
+    }
+  }, [pageModel]);
+
   const value = useMemo(
     () => ({
       mode,
@@ -92,8 +126,13 @@ export function DaisyProvider({ children }: { children: React.ReactNode }) {
       workingConfig,
       updateWorkingConfig,
       clearWorkingConfig,
+      pageModel,
+      setPageModel,
+      applyPagePatches,
+      selectedNode,
+      setSelectedNode,
     }),
-    [mode, messages, addMessage, clearMessages, isGuideMode, pendingNavigation, workingConfig, updateWorkingConfig, clearWorkingConfig]
+    [mode, messages, addMessage, clearMessages, isGuideMode, pendingNavigation, workingConfig, updateWorkingConfig, clearWorkingConfig, pageModel, applyPagePatches, selectedNode]
   );
 
   return <DaisyContext.Provider value={value}>{children}</DaisyContext.Provider>;
