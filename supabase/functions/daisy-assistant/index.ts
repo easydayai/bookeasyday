@@ -22,6 +22,100 @@ const ROUTE_MAP: Record<string, { path: string; label: string; requiresAuth: boo
   contact: { path: "/contact", label: "Contact", requiresAuth: false },
 };
 
+// Booking presets for Daisy to apply
+const BOOKING_PRESETS: Record<string, {
+  name: string;
+  businessTypes: string[];
+  bookingType: "emergency" | "scheduled" | "flexible";
+  config: {
+    theme: { primary: string; accent: string; background: string; text: string; radius: number; font: string };
+    cover: { style: string; overlay: number };
+    header: { showLogo: boolean; title: string; tagline: string; align: string };
+    layout: { maxWidth: number; cardStyle: string; spacing: string };
+    buttons: { style: string; shadow: boolean };
+  };
+  appointmentDefaults: { duration: number; locationType: string; bufferMinutes: number };
+}> = {
+  emergency_dark: {
+    name: "Emergency Dark",
+    businessTypes: ["locksmith", "plumber", "electrician", "hvac", "towing"],
+    bookingType: "emergency",
+    config: {
+      theme: { primary: "#ef4444", accent: "#22c55e", background: "#0a0a0a", text: "#fafafa", radius: 8, font: "Inter" },
+      cover: { style: "gradient", overlay: 0.4 },
+      header: { showLogo: true, title: "24/7 Emergency Service", tagline: "Fast response • Professional service", align: "center" },
+      layout: { maxWidth: 600, cardStyle: "flat", spacing: "compact" },
+      buttons: { style: "filled", shadow: false },
+    },
+    appointmentDefaults: { duration: 30, locationType: "phone", bufferMinutes: 0 },
+  },
+  professional_light: {
+    name: "Professional Light",
+    businessTypes: ["legal", "consultant", "medical", "doctor", "lawyer"],
+    bookingType: "scheduled",
+    config: {
+      theme: { primary: "#1e40af", accent: "#0ea5e9", background: "#ffffff", text: "#1f2937", radius: 12, font: "Inter" },
+      cover: { style: "none", overlay: 0 },
+      header: { showLogo: true, title: "Schedule a Consultation", tagline: "Professional expertise, personalized service", align: "left" },
+      layout: { maxWidth: 800, cardStyle: "shadow", spacing: "comfortable" },
+      buttons: { style: "filled", shadow: true },
+    },
+    appointmentDefaults: { duration: 60, locationType: "video", bufferMinutes: 15 },
+  },
+  beauty_warm: {
+    name: "Beauty Warm",
+    businessTypes: ["salon", "spa", "fitness", "hair", "massage", "wellness"],
+    bookingType: "scheduled",
+    config: {
+      theme: { primary: "#be185d", accent: "#f59e0b", background: "#fef7f0", text: "#292524", radius: 20, font: "Inter" },
+      cover: { style: "gradient", overlay: 0.2 },
+      header: { showLogo: true, title: "Book Your Appointment", tagline: "Relax, rejuvenate, refresh", align: "center" },
+      layout: { maxWidth: 700, cardStyle: "glass", spacing: "spacious" },
+      buttons: { style: "filled", shadow: true },
+    },
+    appointmentDefaults: { duration: 60, locationType: "in_person", bufferMinutes: 10 },
+  },
+  service_simple: {
+    name: "Simple Service",
+    businessTypes: ["cleaning", "handyman", "repair", "maintenance"],
+    bookingType: "scheduled",
+    config: {
+      theme: { primary: "#059669", accent: "#3b82f6", background: "#f8fafc", text: "#334155", radius: 10, font: "Inter" },
+      cover: { style: "none", overlay: 0 },
+      header: { showLogo: true, title: "Book a Service", tagline: "Quick and easy scheduling", align: "left" },
+      layout: { maxWidth: 650, cardStyle: "shadow", spacing: "comfortable" },
+      buttons: { style: "filled", shadow: false },
+    },
+    appointmentDefaults: { duration: 120, locationType: "in_person", bufferMinutes: 30 },
+  },
+  creative_modern: {
+    name: "Creative Modern",
+    businessTypes: ["photographer", "tutor", "coach", "creative"],
+    bookingType: "scheduled",
+    config: {
+      theme: { primary: "#8b5cf6", accent: "#ec4899", background: "#18181b", text: "#f4f4f5", radius: 16, font: "Inter" },
+      cover: { style: "gradient", overlay: 0.3 },
+      header: { showLogo: true, title: "Book a Session", tagline: "Let's create something amazing", align: "center" },
+      layout: { maxWidth: 750, cardStyle: "glass", spacing: "comfortable" },
+      buttons: { style: "outline", shadow: false },
+    },
+    appointmentDefaults: { duration: 90, locationType: "in_person", bufferMinutes: 15 },
+  },
+  default_neutral: {
+    name: "Default Neutral",
+    businessTypes: [],
+    bookingType: "flexible",
+    config: {
+      theme: { primary: "#6d28d9", accent: "#22c55e", background: "#0b1220", text: "#e5e7eb", radius: 14, font: "Inter" },
+      cover: { style: "gradient", overlay: 0.35 },
+      header: { showLogo: true, title: "Book an Appointment", tagline: "Book in 60 seconds", align: "left" },
+      layout: { maxWidth: 920, cardStyle: "glass", spacing: "comfortable" },
+      buttons: { style: "filled", shadow: true },
+    },
+    appointmentDefaults: { duration: 30, locationType: "phone", bufferMinutes: 10 },
+  },
+};
+
 // Tool definitions for OpenAI function calling
 const tools = [
   {
@@ -43,6 +137,53 @@ const tools = [
           },
         },
         required: ["destination_key"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "extract_booking_intent",
+      description: "Extract user's booking page requirements from natural language. Use this when user describes what kind of booking page they want. Example: 'I'm a locksmith, I want emergency bookings, black page, text confirmations' → extract businessType=locksmith, bookingType=emergency, theme=dark, confirmation=sms",
+      parameters: {
+        type: "object",
+        properties: {
+          businessType: { type: "string", description: "Type of business (locksmith, salon, plumber, lawyer, etc.)" },
+          bookingType: { type: "string", enum: ["emergency", "scheduled", "flexible"], description: "Emergency = 24/7 urgent, Scheduled = appointment-based, Flexible = either" },
+          theme: { type: "string", enum: ["dark", "light", "warm", "neutral"], description: "Visual theme preference" },
+          duration: { type: "number", description: "Typical appointment duration in minutes" },
+          payment: { type: "boolean", description: "Whether they take upfront payment" },
+          confirmation: { type: "string", enum: ["email", "sms", "both"], description: "How to confirm bookings" },
+          afterHours: { type: "boolean", description: "Whether they offer after-hours service" },
+          customTitle: { type: "string", description: "Custom title if they specified one" },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_booking_page",
+      description: "Generate a booking page based on extracted intent. Daisy selects the best preset, applies customizations, and saves to the user's config. Use AFTER extract_booking_intent to actually create the page.",
+      parameters: {
+        type: "object",
+        properties: {
+          presetId: { type: "string", enum: ["emergency_dark", "professional_light", "beauty_warm", "service_simple", "creative_modern", "default_neutral"], description: "The preset to use as base" },
+          customizations: {
+            type: "object",
+            description: "Optional customizations to apply on top of preset",
+            properties: {
+              title: { type: "string" },
+              tagline: { type: "string" },
+              primaryColor: { type: "string" },
+              duration: { type: "number" },
+            },
+          },
+          appointmentName: { type: "string", description: "Name for the appointment type to create" },
+          appointmentDuration: { type: "number", description: "Duration in minutes" },
+        },
+        required: ["presetId"],
       },
     },
   },
@@ -264,6 +405,151 @@ async function executeTool(
           message: `Got it — navigating now!`
         }, 
         creditCost: 0 
+      };
+    }
+    
+    case "extract_booking_intent": {
+      // This tool just returns the extracted intent for the AI to use
+      // It doesn't need to do anything - the AI extracts from user message
+      console.log("Extracted intent:", args);
+      
+      // Find best matching preset
+      let bestPreset = "default_neutral";
+      const businessType = (args.businessType as string || "").toLowerCase();
+      
+      for (const [presetId, preset] of Object.entries(BOOKING_PRESETS)) {
+        if (preset.businessTypes.some(t => businessType.includes(t) || t.includes(businessType))) {
+          bestPreset = presetId;
+          break;
+        }
+      }
+      
+      // If theme is dark and emergency, use emergency_dark
+      if (args.theme === "dark" && args.bookingType === "emergency") {
+        bestPreset = "emergency_dark";
+      } else if (args.theme === "light" && args.bookingType === "scheduled") {
+        if (["legal", "consultant", "medical", "doctor", "lawyer"].some(t => businessType.includes(t))) {
+          bestPreset = "professional_light";
+        }
+      }
+      
+      // Generate smart follow-up questions
+      const questions: string[] = [];
+      if (!args.duration) questions.push("How long is a typical job?");
+      if (args.payment === undefined || args.payment === null) questions.push("Do you charge upfront or after?");
+      if (!args.confirmation) questions.push("Want automatic text confirmations?");
+      
+      return { 
+        result: { 
+          extractedIntent: args, 
+          suggestedPreset: bestPreset,
+          presetName: BOOKING_PRESETS[bestPreset]?.name,
+          questions: questions.slice(0, 3),
+          readyToGenerate: questions.length === 0
+        }, 
+        creditCost: 0 
+      };
+    }
+    
+    case "generate_booking_page": {
+      if (!userId) return { result: { error: "Not authenticated" }, creditCost: 0 };
+      
+      const presetId = args.presetId as string || "default_neutral";
+      const preset = BOOKING_PRESETS[presetId] || BOOKING_PRESETS.default_neutral;
+      const customizations = (args.customizations || {}) as { title?: string; tagline?: string; primaryColor?: string; duration?: number };
+      
+      // Build final config from preset + customizations
+      const themeConfig = { ...preset.config.theme };
+      if (customizations.primaryColor) {
+        themeConfig.primary = customizations.primaryColor;
+      }
+      
+      const headerConfig = { ...preset.config.header, logoUrl: "" };
+      if (customizations.title) {
+        headerConfig.title = customizations.title;
+      }
+      if (customizations.tagline) {
+        headerConfig.tagline = customizations.tagline;
+      }
+      
+      const finalConfig = {
+        theme: themeConfig,
+        cover: {
+          ...preset.config.cover,
+          imageUrl: null,
+        },
+        header: headerConfig,
+        layout: preset.config.layout,
+        buttons: preset.config.buttons,
+      };
+      
+      // Upsert the booking page config
+      const { data: existingConfig } = await supabase
+        .from("booking_page_config")
+        .select("user_id")
+        .eq("user_id", userId)
+        .single();
+      
+      let configResult;
+      if (existingConfig) {
+        configResult = await supabase
+          .from("booking_page_config")
+          .update({ 
+            config: finalConfig,
+            published_config: finalConfig, // Auto-publish
+            updated_at: new Date().toISOString()
+          })
+          .eq("user_id", userId)
+          .select()
+          .single();
+      } else {
+        configResult = await supabase
+          .from("booking_page_config")
+          .insert({ 
+            user_id: userId, 
+            config: finalConfig,
+            published_config: finalConfig
+          })
+          .select()
+          .single();
+      }
+      
+      if (configResult.error) {
+        return { result: { error: configResult.error.message }, creditCost: 0 };
+      }
+      
+      // Create appointment type if specified
+      let appointmentResult = null;
+      const appointmentName = args.appointmentName as string;
+      const appointmentDuration = args.appointmentDuration as number || customizations.duration as number || preset.appointmentDefaults.duration;
+      
+      if (appointmentName) {
+        const { data: newAppt, error: apptError } = await supabase
+          .from("appointment_types")
+          .insert({
+            user_id: userId,
+            name: appointmentName,
+            duration_minutes: appointmentDuration,
+            location_type: preset.appointmentDefaults.locationType,
+            is_active: true,
+          })
+          .select()
+          .single();
+        
+        if (!apptError) {
+          appointmentResult = newAppt;
+        }
+      }
+      
+      return { 
+        result: { 
+          success: true, 
+          presetUsed: preset.name,
+          config: finalConfig,
+          appointmentCreated: appointmentResult,
+          message: `Your ${preset.name} booking page is ready!`
+        }, 
+        creditCost: 1 // Charge for page generation
       };
     }
     
@@ -563,43 +849,65 @@ USER CONTEXT:
 - Booking link slug: ${userProfile?.slug || "not set"}
 - Current page: ${currentPage || "/dashboard"}
 
-YOUR CAPABILITIES:
-1. Navigate the user to any page in the app automatically
-2. Create and manage appointment types
-3. Set up their availability schedule
-4. View upcoming bookings
-5. Customize their booking page design
-6. Configure reminder settings
+=== BOOKING PAGE INTERPRETER (YOUR SUPERPOWER) ===
 
-NAVIGATION - CRITICAL (USE navigate_internal TOOL):
-When the user says "take me to", "go to", "show me", "open", or any navigation request:
-- ALWAYS use the navigate_internal tool immediately
-- Say something brief like "Got it — taking you there now!" then call the tool
-- Do NOT just provide a button - navigate them automatically
+You are NOT a designer. You are a booking page INTERPRETER.
 
-Use these destination_key values:
-- "dashboard" → Main dashboard
-- "calendar" → Calendar view
-- "profile" → Profile settings
-- "availability" → Availability settings
-- "appointment_types" → Appointment types
-- "bookings" → Bookings list
-- "booking_builder" → Booking page customizer
-- "pricing" → Pricing/plans
-- "public_booking" → User's public booking page
+When a user describes what they want (in plain English), you:
+1. Use extract_booking_intent to understand what they need
+2. Select the right preset automatically
+3. Ask ONLY smart questions for missing critical info (max 3 questions)
+4. Use generate_booking_page to create their page instantly
 
-AFTER NAVIGATING:
-Explain what they're seeing on the new page and offer 1-3 next action suggestions.
+EXAMPLE USER INPUT:
+"I'm a mobile locksmith, I want emergency bookings, black page, text confirmations."
 
-DATA MODIFICATION RULES:
-1. For actions that modify data, use the appropriate tool
-2. Before any action that costs credits: "This will cost 1 credit. Would you like me to proceed?"
-3. Never claim you did something unless the tool confirms success
+YOU EXTRACT:
+- businessType: "locksmith"
+- bookingType: "emergency"  
+- theme: "dark"
+- confirmation: "sms"
+
+THEN: Select "emergency_dark" preset and generate the page.
+
+SMART QUESTIONS (only ask what's truly missing):
+✅ "How long is a typical job?" (if duration not specified)
+✅ "Do you charge upfront or after?" (if payment not specified)
+✅ "Want automatic text confirmations?" (if confirmation not specified)
+
+❌ NEVER ask: "Pick a font", "Choose a layout", "Select a color"
+
+If user says "whatever you recommend" → use smart defaults and move on.
+
+AVAILABLE PRESETS:
+- emergency_dark: 24/7 emergency services (locksmith, plumber, electrician, hvac, towing)
+- professional_light: Professional consultations (legal, medical, consultant)
+- beauty_warm: Beauty & wellness (salon, spa, fitness)
+- service_simple: Home services (cleaning, handyman)
+- creative_modern: Creative professionals (photographer, tutor, coach)
+- default_neutral: Generic fallback
+
+=== NAVIGATION (USE navigate_internal TOOL) ===
+When the user says "take me to", "go to", "show me", "open":
+- ALWAYS use navigate_internal tool immediately
+- Say "Got it — taking you there now!" then call the tool
+
+Destination keys: dashboard, calendar, profile, availability, appointment_types, bookings, booking_builder, pricing, public_booking
+
+=== OTHER CAPABILITIES ===
+- Create and manage appointment types
+- Set up availability schedules
+- View upcoming bookings
+- Configure reminder settings
+
+=== CREDIT RULES ===
+- Before any action that costs credits: "This will cost 1 credit. Want me to proceed?"
+- Never claim success unless tool confirms it
 
 YOUR KNOWLEDGE:
 ${knowledgeContext}
 
-Be helpful, guide the user step-by-step, and stay with them as they navigate the app!`;
+Be helpful, efficient, and remember: interpret, don't design!`;
 
     const systemPrompt = isAuthenticated ? authPrompt : publicPrompt;
 
