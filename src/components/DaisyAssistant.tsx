@@ -107,6 +107,12 @@ export function DaisyAssistant() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Draggable state for docked panel
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const { user, session } = useAuth();
   const location = useLocation();
@@ -132,6 +138,52 @@ export function DaisyAssistant() {
   const isAuthenticated = !!user;
   const isOpen = mode !== "minimized";
   const isPatchMode = location.pathname === "/booking-builder" && pageModel !== null;
+
+  // Reset position when switching to docked mode
+  useEffect(() => {
+    if (mode === "docked") {
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [mode]);
+
+  // Drag handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button, input, a')) return;
+    e.preventDefault();
+    setIsDragging(true);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startPosX: position.x,
+      startPosY: position.y,
+    };
+  }, [position]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragRef.current) return;
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
+      setPosition({
+        x: dragRef.current.startPosX + dx,
+        y: dragRef.current.startPosY + dy,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      dragRef.current = null;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -567,18 +619,34 @@ export function DaisyAssistant() {
     );
   }
 
-  // Docked mode (default panel)
+  // Docked mode (default panel) - now draggable
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[600px] max-h-[calc(100vh-100px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
+    <div 
+      ref={panelRef}
+      className={cn(
+        "fixed z-50 w-[380px] max-w-[calc(100vw-48px)] h-[600px] max-h-[calc(100vh-100px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden",
+        isDragging && "cursor-grabbing select-none"
+      )}
+      style={{
+        bottom: `calc(24px - ${position.y}px)`,
+        right: `calc(24px - ${position.x}px)`,
+      }}
+    >
+      {/* Header - draggable handle */}
+      <div 
+        className={cn(
+          "flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50",
+          !isDragging && "cursor-grab"
+        )}
+        onMouseDown={handleMouseDown}
+      >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
             <Bot className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
             <h3 className="font-semibold text-sm">Daisy</h3>
-            <p className="text-xs text-muted-foreground">AI Assistant</p>
+            <p className="text-xs text-muted-foreground">AI Assistant • Drag to move</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
